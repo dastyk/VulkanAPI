@@ -267,13 +267,11 @@ int main(int argc, char *argv[])
 	DebugUtils::DebugConsole::Command_Structure def =
 	{
 		nullptr,
-		[](void* userData, int argc, char** argv) {printf("test");},
+		[](void* userData, int argc, char** argv) {printf("Command not found: %s\n\n", argv[0]);},
 		[](void* userData, int argc, char** argv) {}
 	};
 
 	DebugUtils::ConsoleThread::Init(&def);
-
-	DebugUtils::ConsoleThread::AddCommand("test", &def);
 
 	DebugUtils::ConsoleThread::ShowConsole();
 
