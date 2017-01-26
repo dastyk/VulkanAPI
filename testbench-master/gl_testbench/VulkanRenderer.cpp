@@ -113,12 +113,61 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		nullptr// ppEnabledExtNames
 	};
 
-	// Create the instance
+	/******** Create the instance***********/
 	VkResult result = vkCreateInstance(&vkInstCreateInfo, nullptr, &_vkInstance);
 
 	if (result != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create instance.");
 	}
+
+
+	_vkPhysicalDevices = EnumeratePhysicalDevices();
+
+	if (_vkPhysicalDevices.size() <= 0) {
+		throw std::runtime_error("No physical devices found.");
+	}
+
+
+
+
+	/******** Create the device***********/
+	VkPhysicalDeviceFeatures supportedFeatures;
+	VkPhysicalDeviceFeatures requiredFeatures = {};
+
+	vkGetPhysicalDeviceFeatures(_vkPhysicalDevices[0],
+		&supportedFeatures);
+
+	requiredFeatures.multiDrawIndirect = supportedFeatures.multiDrawIndirect;
+
+	const VkDeviceQueueCreateInfo deviceQueueCreateInfo =
+	{
+		VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,     // sType
+		nullptr,                                        // pNext
+		0,                                              // flags
+		0,                                              // queueFamilyIndex
+		1,                                              // queueCount
+		nullptr                                         // pQueuePriorities
+	};
+	const VkDeviceCreateInfo deviceCreateInfo =
+	{
+		VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,           // sType
+		nullptr,                                        // pNext
+
+		0,                                              // flags
+		1,                                              // queueCreateInfoCount
+
+		&deviceQueueCreateInfo,                         // pQueueCreateInfos
+		0,                                              // enabledLayerCount
+		nullptr,                                        // ppEnabledLayerNames
+		0,                                              // enabledExtensionCount
+		nullptr,                                        // ppEnabledExtensionNames
+		&requiredFeatures                               // pEnabledFeatures
+	};
+
+	result = vkCreateDevice(_vkPhysicalDevices[0],
+		&deviceCreateInfo,
+		nullptr,
+		&_vkDevice);
 
 
 
@@ -130,6 +179,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 int VulkanRenderer::shutdown()
 {
+	vkDestroyDevice(_vkDevice, nullptr);
 	vkDestroyInstance(_vkInstance, nullptr);
 	SDL_Quit();
 	return 0;
@@ -215,6 +265,7 @@ void printMem(VkPhysicalDeviceMemoryProperties prop)
 		printf("------------------------------------\n\n");
 	}
 }
+
 void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 {
 
@@ -356,7 +407,23 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 			}
 		}
 	}
-	
+	else if (arg == "devFeat")
+	{
+		/*char* arg;
+		auto& pd = me->EnumeratePhysicalDevices();
+		if (DebugUtils::GetArg("-d", &arg, argc, argv))
+		{
+			
+			int d = std::stoi(arg);
+			if (pd.size() <= d) {
+				printf("Invalid index.");
+				return;
+			}
+
+			auto& feat = me->GetPhysicalDeviceFeatures(pd[d]);
+
+		}*/
+	}
 
 }
 
@@ -403,6 +470,29 @@ VkPhysicalDeviceMemoryProperties VulkanRenderer::GetPhysicalDeviceMemoryProperti
 	vkGetPhysicalDeviceMemoryProperties(phydev, &prop);
 
 	return prop;
+}
+
+VkPhysicalDeviceFeatures VulkanRenderer::GetPhysicalDeviceFeatures(VkPhysicalDevice phydev)
+{
+	VkPhysicalDeviceFeatures feat;
+
+	vkGetPhysicalDeviceFeatures(phydev, &feat);
+
+	return feat;
+}
+
+std::vector<VkPhysicalDeviceFeatures> VulkanRenderer::EnumeratePhysicalDeviceFeatures()
+{
+	std::vector<VkPhysicalDeviceFeatures> features;
+
+	auto& phydevs = EnumeratePhysicalDevices();
+
+	for (auto& pd : phydevs)
+	{
+		features.push_back(GetPhysicalDeviceFeatures(pd));
+	}
+
+	return features;
 }
 
 std::vector<VkQueueFamilyProperties> VulkanRenderer::EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev)

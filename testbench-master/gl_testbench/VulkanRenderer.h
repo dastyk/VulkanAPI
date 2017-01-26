@@ -45,6 +45,9 @@ private:
 	VkPhysicalDeviceProperties GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice);
 	VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties(VkPhysicalDevice phydev);
 
+	VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures(VkPhysicalDevice phydev);
+	std::vector<VkPhysicalDeviceFeatures> EnumeratePhysicalDeviceFeatures();
+
 	std::vector<VkQueueFamilyProperties> EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev);
 	std::vector<std::vector<VkQueueFamilyProperties>> EnumeratePhysicalDeviceQueueFamilyProperties();
 
@@ -54,8 +57,8 @@ private:
 	
 
 	VkInstance _vkInstance;
-
-
+	std::vector<VkPhysicalDevice> _vkPhysicalDevices;
+	VkDevice _vkDevice;
 
 	std::vector<Mesh*> drawList;
 
