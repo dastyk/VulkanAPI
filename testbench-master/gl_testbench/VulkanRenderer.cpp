@@ -63,6 +63,49 @@ std::string VulkanRenderer::getShaderExtension()
 
 int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 {
+	const std::vector<const char*> validationLayers = {
+		"VK_LAYER_LUNARG_core_validation"
+	};
+
+	VkApplicationInfo vkAppInfo = 
+	{
+	VK_STRUCTURE_TYPE_APPLICATION_INFO,	// sType;
+	nullptr,// pNext;
+	"Vulkan Renderer",// Application name
+	VK_MAKE_VERSION(1,0,0),// applicationVersion;
+	"Frengine",// pEngineName;
+	VK_MAKE_VERSION(1,0,0),// engineVersion;
+	VK_API_VERSION_1_0// apiVersion;
+	};
+	VkInstanceCreateInfo vkInstCreateInfo = 
+	{
+		VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,//sType
+		nullptr,//pNext
+		0,//flags	
+		&vkAppInfo,//pApplicationInfo
+		validationLayers.size(),//enabledLayerCount
+		validationLayers.data(),//ppEnabledLayerNames
+		0,// enabledExtCount
+		nullptr// ppEnabledExtNames
+	};
+
+	VkResult result = vkCreateInstance(&vkInstCreateInfo, nullptr, _vkInstance);
+
+	if (result != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create instance.");
+	}
+
+
+	DebugUtils::DebugConsole::Command_Structure =
+	{
+		this,
+		nullptr,
+		nullptr
+	};
+
+	DebugUtils::ConsoleThread::AddCommand("Enumerate", )
+
+
 	return 0;
 }
 

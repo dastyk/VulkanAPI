@@ -71,23 +71,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\include;..\CommandConsole\Include;D:\francholi\source\gl_testbench\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\CommandConsole\lib\;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(VULKAN_SDK)\Include;..\include;..\CommandConsole\Include;D:\francholi\source\gl_testbench\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\Bin32;..\CommandConsole\lib\;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\include;..\CommandConsole\Include;..\GLEW\include;..\SDL\include;$(IncludePath);..\;</IncludePath>
-    <LibraryPath>..\CommandConsole\lib\Debug\x64;..\GLEW\lib\Release\x64;..\SDL\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VULKAN_SDK)\Include;..\include;..\CommandConsole\Include;..\GLEW\include;..\SDL\include;$(IncludePath);..\;</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\Bin;..\CommandConsole\lib\Debug\x64;..\GLEW\lib\Release\x64;..\SDL\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\include;..\CommandConsole\Include;D:\francholi\source\gl_testbench\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\CommandConsole\lib\;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(VULKAN_SDK)\Include;..\include;..\CommandConsole\Include;D:\francholi\source\gl_testbench\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\Bin32;..\CommandConsole\lib\;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\include;..\CommandConsole\Include;..\GLEW\include;..\SDL\include;$(IncludePath);..\;</IncludePath>
-    <LibraryPath>..\CommandConsole\lib\Release\x64;..\GLEW\lib\Release\x64;..\SDL\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VULKAN_SDK)\Include;..\include;..\CommandConsole\Include;..\GLEW\include;..\SDL\include;$(IncludePath);..\;</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\Bin;..\CommandConsole\lib\Release\x64;..\GLEW\lib\Release\x64;..\SDL\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

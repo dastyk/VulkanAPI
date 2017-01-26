@@ -1,8 +1,10 @@
 #pragma once
 #include "Renderer.h"
 #include <SDL.h>
+#include <vulkan\vulkan.h>
+#include <ConsoleThread.h>
 
-
+#pragma comment(lib,"vulkan-1.lib")
 #pragma comment(lib,"SDL2.lib")
 #pragma comment(lib,"SDL2main.lib")
 
@@ -37,9 +39,11 @@ public:
 	void present();
 
 private:
-	SDL_Window* window;
-	SDL_GLContext context;
+	VkInstance* _vkInstance;
 
+private:
+	SDL_Window* window;
+	
 	std::vector<Mesh*> drawList;
 
 	bool globalWireframeMode = false;
