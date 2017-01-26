@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "Texture2D.h"
 #include <math.h>
+#include <ConsoleThread.h>
 
 using namespace std;
 Renderer* renderer;
@@ -262,11 +263,29 @@ void shutdown() {
 
 int main(int argc, char *argv[])
 {
+
+	DebugUtils::DebugConsole::Command_Structure def =
+	{
+		nullptr,
+		[](void* userData, int argc, char** argv) {printf("test");},
+		[](void* userData, int argc, char** argv) {}
+	};
+
+	DebugUtils::ConsoleThread::Init(&def);
+
+	DebugUtils::ConsoleThread::AddCommand("test", &def);
+
+	DebugUtils::ConsoleThread::ShowConsole();
+
+
 	renderer = Renderer::makeRenderer(Renderer::BACKEND::GL45);
 	renderer->initialize();
 	renderer->setClearColor(0.5, 0.1, 0.1, 1.0);
 	initialiseTestbench();
 	run();
 	shutdown();
+
+	DebugUtils::ConsoleThread::Shutdown();
+
 	return 0;
 };
