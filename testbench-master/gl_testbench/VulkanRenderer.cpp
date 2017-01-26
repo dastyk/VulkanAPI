@@ -63,6 +63,18 @@ std::string VulkanRenderer::getShaderExtension()
 
 int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 {
+	// Create command for enumerating stuff
+	DebugUtils::DebugConsole::Command_Structure enumerateCommand =
+	{
+		this,
+		&Enumerate,
+		&EnumerateHelp,
+		"enum",
+		"Prints various info about the hardware and vulkan."
+	};
+
+	DebugUtils::ConsoleThread::AddCommand(&enumerateCommand);
+
 
 	// Create the window
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -108,15 +120,6 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		throw std::runtime_error("Failed to create instance.");
 	}
 
-	// Create command for enumerating stuff
-	DebugUtils::DebugConsole::Command_Structure enumerateCommand =
-	{
-		this,
-		&Enumerate,
-		&EnumerateHelp
-	};
-
-	DebugUtils::ConsoleThread::AddCommand("enum", &enumerateCommand);
 
 
 
@@ -127,6 +130,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 int VulkanRenderer::shutdown()
 {
+	vkDestroyInstance(_vkInstance, nullptr);
 	SDL_Quit();
 	return 0;
 }
@@ -293,7 +297,6 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 			}
 
 			printf("\tMemory Heap Count: %zd\n", prop.memoryHeapCount);
-
 			
 		}
 		else

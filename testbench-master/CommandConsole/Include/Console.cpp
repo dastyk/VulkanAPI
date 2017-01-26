@@ -22,6 +22,24 @@ namespace DebugUtils
 			throw std::exception("Invalid command help function pointer.");
 #endif
 		_commands[0] = *defaultCommandFunctions;
+		
+		Command_Structure commandsCmd = 
+		{
+			this,
+			[](void* userData, int argc, char** argv) {
+			for (auto& c : static_cast<DebugConsole*>(userData)->_commands)
+			{
+				printf("%s - %s\n", c.second.name, c.second.description);
+			}
+		},
+			[](void* userData, int argc, char** argv) {printf("%s", argv[0]); },
+			"commands",
+			"Lists all available commands\n"
+		};
+
+		AddCommand(&commandsCmd);
+
+
 		return void();
 	}
 	const void DebugConsole::Shutdown()
@@ -29,10 +47,10 @@ namespace DebugUtils
 		return void();
 	}
 	/*Hash the identifier and add the command*/
-	const void DebugConsole::AddCommand(const char* identifier, const Command_Structure * command)
+	const void DebugConsole::AddCommand(const Command_Structure * command)
 	{
 
-		uint32_t hash = std::hash<std::string>{}(identifier);
+		uint32_t hash = std::hash<std::string>{}(command->name);
 
 #ifdef _DEBUG
 		if (command->commandFunction == nullptr)
@@ -78,21 +96,19 @@ namespace DebugUtils
 		{
 			uint32_t hash = std::hash<std::string>{}(argv[0]);
 
-			auto& find = _commands.find(hash);
+			auto find = _commands.find(hash);
 			if (find != _commands.end()) {
-				for (int i = 1; i < argc; i++) {
-					if (argv[i][0] == '-') {
-						if (argv[i][1] == 'h') {
-							find->second.commandHelpFunction(find->second.userData, argc, argv);
-							return;
-						}
-					}
+
+				if (GetArg("-h", nullptr, argc, argv)) {
+					argv[0] = find->second.description;
+					find->second.commandHelpFunction(find->second.userData, argc, argv);
+					return;
 				}
 				find->second.commandFunction(find->second.userData, argc, argv);
 			}
 			else
 			{
-				_commands[0].commandFunction(find->second.userData, argc, argv);
+				_commands[0].commandFunction(argv[0], argc, argv);
 			}
 		}
 
@@ -131,6 +147,23 @@ namespace DebugUtils
 			
 		}
 
+	}
+
+	bool GetArg(char* arg, char** data, int argc, char** argv)
+	{
+		bool found = false;
+
+		for (int i = 0; i < argc; i++)
+		{
+			if (std::string(arg) == std::string(argv[i]))
+			{	
+				if(data)
+					*data = argv[i + 1];
+				found = true;
+				break;
+			}
+		}
+		return found;
 	}
 
 }

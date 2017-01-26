@@ -268,7 +268,9 @@ int main(int argc, char *argv[])
 	{
 		nullptr,
 		[](void* userData, int argc, char** argv) {printf("Command not found: %s\n\n", argv[0]);},
-		[](void* userData, int argc, char** argv) {}
+		[](void* userData, int argc, char** argv) {},
+		"",
+		""
 	};
 
 	DebugUtils::ConsoleThread::Init(&def);
@@ -285,10 +287,12 @@ int main(int argc, char *argv[])
 		user_event.user.data2 = NULL;
 		SDL_PushEvent(&user_event);
 	},
-		[](void* userData, int argc, char** argv) {}
+		[](void* userData, int argc, char** argv) {},
+		"exit",
+		"Terminates the program."
 	};
 
-	DebugUtils::ConsoleThread::AddCommand("exit", &exitCommand);
+	DebugUtils::ConsoleThread::AddCommand(&exitCommand);
 	renderer = Renderer::makeRenderer(Renderer::BACKEND::VULKAN);
 	renderer->initialize();
 	renderer->setClearColor(0.5, 0.1, 0.1, 1.0);

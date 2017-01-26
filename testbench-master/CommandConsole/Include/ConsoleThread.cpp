@@ -15,9 +15,11 @@ namespace DebugUtils
 		{
 			&_running,
 			[](void* userData, int argc, char** argv) {*static_cast<bool*>(userData) = false; },
-			nullptr
+			nullptr,
+			"hide",
+			"Hides the console window."
 		};
-		_console.AddCommand("hide", &hideConsole);
+		_console.AddCommand(&hideConsole);
 	}
 
 
@@ -74,9 +76,9 @@ namespace DebugUtils
 		SetThreadPriority(_instance->_thread.native_handle(), THREAD_MODE_BACKGROUND_BEGIN);
 	}
 
-	const void ConsoleThread::AddCommand(const char* identifier, const DebugConsole::Command_Structure * command)
+	const void ConsoleThread::AddCommand(const DebugConsole::Command_Structure * command)
 	{
-		_instance->_console.AddCommand(identifier, command);
+		_instance->_console.AddCommand(command);
 		return void();
 	}
 

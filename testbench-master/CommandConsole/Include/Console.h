@@ -7,6 +7,8 @@
 
 namespace DebugUtils
 {
+	bool GetArg(char* arg, char** data, int argc, char** argv);
+
 #define MAX_ARGUMENTS 20
 
 	/* Typedef of the command function pointer*/
@@ -19,6 +21,8 @@ namespace DebugUtils
 			void* userData;
 			DebugConsole_Command_Function_Pointer commandFunction;
 			DebugConsole_Command_Function_Pointer commandHelpFunction;
+			char* name;
+			char* description;
 		};
 	private:
 		/* Stores all the commands*/
@@ -34,9 +38,9 @@ namespace DebugUtils
 		/* Shutdown the DebugConsole*/
 		const void Shutdown();
 		/* Add a new command to the DebugConsole
-		* First parameter is the identifier, second parameter is the function to call.
+		* parameter is the command structure of the command to call.
 		*/
-		const void AddCommand(const char* identifier, const Command_Structure* command);
+		const void AddCommand(const Command_Structure* command);
 		/* Add a new command to the DebugConsole
 		* First parameter is the identifier, second parameter is the function to call.
 		* Pre-hashed identifier.

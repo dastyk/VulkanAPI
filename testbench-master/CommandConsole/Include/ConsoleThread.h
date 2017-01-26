@@ -28,7 +28,7 @@ namespace DebugUtils
 		/* Add a new command to the DebugConsole
 		* First parameter is the identifier, second parameter is the function to call.
 		*/
-		static const void AddCommand(const char* identifier, const DebugConsole::Command_Structure* command);
+		static const void AddCommand(const DebugConsole::Command_Structure* command);
 		/* Add a new command to the DebugConsole
 		* First parameter is the identifier, second parameter is the function to call.
 		* Pre-hashed identifier.
