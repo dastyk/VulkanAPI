@@ -48,6 +48,7 @@ private:
 	std::vector<VkQueueFamilyProperties> EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev);
 	std::vector<std::vector<VkQueueFamilyProperties>> EnumeratePhysicalDeviceQueueFamilyProperties();
 
+
 private:
 	SDL_Window* window;
 	

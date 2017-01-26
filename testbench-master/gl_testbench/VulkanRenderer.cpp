@@ -252,7 +252,55 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 		}
 		
 	}
+	else if (arg == "memProp")
+	{
+		auto& pd = me->EnumeratePhysicalDevices();
+		if (argc > 2)
+		{
 
+			int i = std::stoi(argv[2]);
+			if (pd.size() <= i)
+			{
+				printf("Invalid index\n");
+				return;
+			}
+
+			auto& prop = me->GetPhysicalDeviceMemoryProperties(pd[i]);
+			auto& devprop = me->GetPhysicalDeviceProperties(pd[i]);
+
+			printf("%s: \n", devprop.deviceName);
+
+			printf("\tMemory Type Count: %zd\n", prop.memoryTypeCount);
+			for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+			{
+				auto& memType = prop.memoryTypes[i];
+				printf("\t\tHeap Index: %zd\n", memType.heapIndex);
+				printf("\t\tPropertyFlags: \n");
+				if (memType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+					printf("\t\t\tVK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT\n");
+
+				if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+					printf("\t\t\tVK_MEMORY_PROPERTY_HOST_VISIBLE_BIT\n");
+
+				if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+					printf("\t\t\tVK_MEMORY_PROPERTY_HOST_COHERENT_BIT\n");
+
+				if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
+					printf("\t\t\tVK_MEMORY_PROPERTY_HOST_CACHED_BIT\n");
+
+				if (memType.propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)
+					printf("\t\t\tVK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT\n");
+			}
+
+			printf("\tMemory Heap Count: %zd\n", prop.memoryHeapCount);
+
+			
+		}
+		else
+		{
+
+		}
+	}
 	
 
 }
