@@ -39,11 +39,18 @@ public:
 	void present();
 
 private:
-	VkInstance* _vkInstance;
+	static void Enumerate(void* userData, int argc, char** argv);
 
+	std::vector<VkPhysicalDevice> EnumeratePhysicalDevices();
+	VkPhysicalDeviceProperties GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice);
 private:
 	SDL_Window* window;
 	
+
+	VkInstance _vkInstance;
+
+
+
 	std::vector<Mesh*> drawList;
 
 	bool globalWireframeMode = false;
@@ -55,5 +62,6 @@ private:
 	//	{ CLEAR_BUFFER_FLAGS::DEPTH, GL_DEPTH_BUFFER_BIT },
 	//	{ CLEAR_BUFFER_FLAGS::STENCIL, GL_STENCIL_BUFFER_BIT }
 	//};
+
 };
 

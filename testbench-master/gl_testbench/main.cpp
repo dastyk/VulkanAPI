@@ -48,8 +48,8 @@ void run() {
 			if (windowEvent.type == SDL_QUIT) break;
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_ESCAPE) break;
 		}
-		updateScene();
-		renderScene();
+		//updateScene();
+		//renderScene();
 	}
 }
 
@@ -273,11 +273,18 @@ int main(int argc, char *argv[])
 
 	DebugUtils::ConsoleThread::Init(&def);
 
+	DebugUtils::DebugConsole::Command_Structure exitCommand =
+	{
+		nullptr,
+		[](void* userData, int argc, char** argv) {PostQuitMessage(0);},
+		[](void* userData, int argc, char** argv) {}
+	};
 
-	renderer = Renderer::makeRenderer(Renderer::BACKEND::GL45);
+	DebugUtils::ConsoleThread::AddCommand("exit", &exitCommand);
+	renderer = Renderer::makeRenderer(Renderer::BACKEND::VULKAN);
 	renderer->initialize();
 	renderer->setClearColor(0.5, 0.1, 0.1, 1.0);
-	initialiseTestbench();
+	//initialiseTestbench();
 
 
 	DebugUtils::ConsoleThread::ShowConsole();
