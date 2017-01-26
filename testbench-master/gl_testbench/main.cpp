@@ -276,7 +276,15 @@ int main(int argc, char *argv[])
 	DebugUtils::DebugConsole::Command_Structure exitCommand =
 	{
 		nullptr,
-		[](void* userData, int argc, char** argv) {PostQuitMessage(0);},
+		[](void* userData, int argc, char** argv) {
+		SDL_Event user_event;
+
+		user_event.type = SDL_QUIT;
+		user_event.user.code = 0;
+		user_event.user.data1 = NULL;
+		user_event.user.data2 = NULL;
+		SDL_PushEvent(&user_event);
+	},
 		[](void* userData, int argc, char** argv) {}
 	};
 
