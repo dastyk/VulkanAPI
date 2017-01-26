@@ -162,7 +162,59 @@ void VulkanRenderer::frame()
 void VulkanRenderer::present()
 {
 }
+void printFam(VkQueueFamilyProperties fam)
+{
+	printf("\tQueue Flags: \n");
+	if (fam.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		printf("\t\t VK_QUEUE_GRAPHICS_BIT\n");
+	if (fam.queueFlags & VK_QUEUE_COMPUTE_BIT)
+		printf("\t\t VK_QUEUE_COMPUTE_BIT\n");
+	if (fam.queueFlags & VK_QUEUE_TRANSFER_BIT)
+		printf("\t\t VK_QUEUE_TRANSFER_BIT\n");
+	if (fam.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT)
+		printf("\t\t VK_QUEUE_SPARSE_BINDING_BIT\n");
 
+	printf("\tQueue Count: %d\n", fam.queueCount);
+}
+
+void printMem(VkPhysicalDeviceMemoryProperties prop)
+{
+
+
+	printf("\tMemory Type Count: %zd\n", prop.memoryTypeCount);
+	for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+	{
+		auto& memType = prop.memoryTypes[i];
+		printf("\t\tHeap Index: %zd\n", memType.heapIndex);
+		printf("\t\tPropertyFlags: \n");
+		if (memType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+			printf("\t\t\tVK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT\n");
+
+		if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+			printf("\t\t\tVK_MEMORY_PROPERTY_HOST_VISIBLE_BIT\n");
+
+		if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+			printf("\t\t\tVK_MEMORY_PROPERTY_HOST_COHERENT_BIT\n");
+
+		if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
+			printf("\t\t\tVK_MEMORY_PROPERTY_HOST_CACHED_BIT\n");
+
+		if (memType.propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)
+			printf("\t\t\tVK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT\n");
+		printf("------------------------------------\n\n");
+	}
+
+	printf("\tMemory Heap Count: %zd\n", prop.memoryHeapCount);
+	for (uint32_t i = 0; i < prop.memoryHeapCount; i++)
+	{
+		auto& memHeap = prop.memoryHeaps[i];
+		printf("\t\tHeap Size: %zd\n", memHeap.size);
+		printf("\t\tPropertyFlags: \n");
+		if (memHeap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+			printf("\t\t\VK_MEMORY_HEAP_DEVICE_LOCAL_BIT\n");
+		printf("------------------------------------\n\n");
+	}
+}
 void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 {
 
@@ -196,61 +248,77 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 	else if (arg == "queueFam")
 	{
 		auto& pd = me->EnumeratePhysicalDevices();
-		if (argc > 2)
+		char* arg;
+		if (DebugUtils::GetArg("-d", &arg, argc, argv))
 		{
 			
-			int i = std::stoi(argv[2]);
-			if (pd.size() <= i)
+			int d = std::stoi(arg);
+			if (pd.size() <= d)
 			{
 				printf("Invalid index\n");
 				return;
 			}
 			
-			auto& families = me->EnumeratePhysicalDeviceQueueFamilyProperties(pd[i]);
-			printf("%zd families found\n", families.size());
-			for (auto& fam : families)
+			
+			
+			auto& families = me->EnumeratePhysicalDeviceQueueFamilyProperties(pd[d]);
+			if (DebugUtils::GetArg("-i", &arg, argc, argv))
 			{
-				printf("\tQueue Flags: \n");
-				if (fam.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-					printf("\t\t VK_QUEUE_GRAPHICS_BIT\n");
-				if (fam.queueFlags & VK_QUEUE_COMPUTE_BIT)
-					printf("\t\t VK_QUEUE_COMPUTE_BIT\n");
-				if (fam.queueFlags & VK_QUEUE_TRANSFER_BIT)
-					printf("\t\t VK_QUEUE_TRANSFER_BIT\n");
-				if (fam.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT)
-					printf("\t\t VK_QUEUE_SPARSE_BINDING_BIT\n");
+				int i = std::stoi(arg);
+				if (families.size() <= i)
+				{
+					printf("Invalid index\n");
+					return;
+				}
+				printFam(families[i]);
 
-				printf("\tQueue Count: %d\n", fam.queueCount);
-
-				printf("***********************************\n\n");
 			}
+			else
+			{
+				
+				printf("%zd families found\n", families.size());
+				for (auto& fam : families)
+				{
+					printFam(fam);
+
+					printf("***********************************\n\n");
+				}
+
+			}
+
 
 			
 		}
 		else
 		{
 			auto& pdfamprop = me->EnumeratePhysicalDeviceQueueFamilyProperties();
-			for (int i = 0; i < pdfamprop.size(); i++)
+			for (int d = 0; d < pdfamprop.size(); d++)
 			{
-				auto& prop = me->GetPhysicalDeviceProperties(pd[i]);
+				auto& prop = me->GetPhysicalDeviceProperties(pd[d]);
 
 				printf("%s: \n", prop.deviceName);
-				printf("%zd families found\n", pdfamprop[i].size());
-				for (auto& fam : pdfamprop[i])
+				if (DebugUtils::GetArg("-i", &arg, argc, argv))
 				{
-					printf("\t\tQueue Flags: \n");
-					if (fam.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-						printf("\t\t\t VK_QUEUE_GRAPHICS_BIT\n");
-					if (fam.queueFlags & VK_QUEUE_COMPUTE_BIT)
-						printf("\t\t\t VK_QUEUE_COMPUTE_BIT\n");
-					if (fam.queueFlags & VK_QUEUE_TRANSFER_BIT)
-						printf("\t\t\t VK_QUEUE_TRANSFER_BIT\n");
-					if (fam.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT)
-						printf("\t\t\t VK_QUEUE_SPARSE_BINDING_BIT\n");
+					int i = std::stoi(arg);
+					if (pdfamprop[d].size() <= i)
+					{
+						printf("Invalid index\n");
+						return;
+					}
+					printFam(pdfamprop[d][i]);
 
-					printf("\t\tQueue Count: %d\n", fam.queueCount);
+				}
+				else
+				{
 
-					printf("***********************************\n\n");
+					printf("%zd families found\n", pdfamprop[d].size());
+					for (auto& fam : pdfamprop[d])
+					{
+						printFam(fam);
+
+						printf("***********************************\n\n");
+					}
+
 				}
 			}
 		}
@@ -259,49 +327,33 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 	else if (arg == "memProp")
 	{
 		auto& pd = me->EnumeratePhysicalDevices();
-		if (argc > 2)
+		char* arg;
+		if (DebugUtils::GetArg("-d", &arg, argc, argv))
 		{
 
-			int i = std::stoi(argv[2]);
-			if (pd.size() <= i)
+			int d = std::stoi(arg);
+			if (pd.size() <= d)
 			{
 				printf("Invalid index\n");
 				return;
 			}
 
-			auto& prop = me->GetPhysicalDeviceMemoryProperties(pd[i]);
-			auto& devprop = me->GetPhysicalDeviceProperties(pd[i]);
+			auto& prop = me->GetPhysicalDeviceMemoryProperties(pd[d]);
 
-			printf("%s: \n", devprop.deviceName);
+			printMem(prop);
 
-			printf("\tMemory Type Count: %zd\n", prop.memoryTypeCount);
-			for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
-			{
-				auto& memType = prop.memoryTypes[i];
-				printf("\t\tHeap Index: %zd\n", memType.heapIndex);
-				printf("\t\tPropertyFlags: \n");
-				if (memType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-					printf("\t\t\tVK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT\n");
-
-				if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-					printf("\t\t\tVK_MEMORY_PROPERTY_HOST_VISIBLE_BIT\n");
-
-				if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
-					printf("\t\t\tVK_MEMORY_PROPERTY_HOST_COHERENT_BIT\n");
-
-				if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
-					printf("\t\t\tVK_MEMORY_PROPERTY_HOST_CACHED_BIT\n");
-
-				if (memType.propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)
-					printf("\t\t\tVK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT\n");
-			}
-
-			printf("\tMemory Heap Count: %zd\n", prop.memoryHeapCount);
-			
 		}
 		else
 		{
+			for (auto& d : pd)
+			{
+				auto& devInfo = me->GetPhysicalDeviceProperties(d);
+				printf("%s\n", devInfo.deviceName);
+				
+				auto& prop = me->GetPhysicalDeviceMemoryProperties(d);
 
+				printMem(prop);
+			}
 		}
 	}
 	
@@ -313,7 +365,8 @@ void VulkanRenderer::EnumerateHelp(void * userData, int argc, char ** argv)
 	printf("Enumerates vulkan info, first arg is what to enumerate.\n");
 	printf("Thing to enumerate: \n");
 	printf("\t phyDev\n");
-	printf("\t queueFam\n");
+	printf("\t queueFam (-d physicalDeviceIndex, -i familyIndex)\n");
+	printf("\t memProp (-d physicalDeviceIndex)\n ");
 }
 
 std::vector<VkPhysicalDevice> VulkanRenderer::EnumeratePhysicalDevices()
