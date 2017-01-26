@@ -40,9 +40,14 @@ public:
 
 private:
 	static void Enumerate(void* userData, int argc, char** argv);
-
+	static void EnumerateHelp(void* userData, int argc, char** argv);
 	std::vector<VkPhysicalDevice> EnumeratePhysicalDevices();
 	VkPhysicalDeviceProperties GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice);
+	VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties(VkPhysicalDevice phydev);
+
+	std::vector<VkQueueFamilyProperties> EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev);
+	std::vector<std::vector<VkQueueFamilyProperties>> EnumeratePhysicalDeviceQueueFamilyProperties();
+
 private:
 	SDL_Window* window;
 	
