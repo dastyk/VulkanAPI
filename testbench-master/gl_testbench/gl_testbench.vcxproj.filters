@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\GL">
+      <UniqueIdentifier>{d04de1fb-e3fc-4647-9363-7cb7ba6b8477}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GL">
+      <UniqueIdentifier>{1fb02d93-65df-46d0-8bd1-9e83b69a11aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -39,9 +45,6 @@
     <ClCompile Include="Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Texture2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,37 +54,19 @@
     <ClCompile Include="DrawInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MaterialGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Technique.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Pass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TransformGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceBinding.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ResourceBindingGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderStateGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MeshGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VertexBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VertexBufferGL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
@@ -90,17 +75,38 @@
     <ClCompile Include="ConstantBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConstantBufferGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture2DGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Sampler2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ConstantBufferGL.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialGL.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshGL.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLRenderer.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderStateGL.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceBindingGL.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
     <ClCompile Include="Sampler2DGL.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture2DGL.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformGL.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBufferGL.cpp">
+      <Filter>Source Files\GL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -125,9 +131,6 @@
     <ClInclude Include="Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Texture2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -137,31 +140,16 @@
     <ClInclude Include="DrawInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Technique.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Pass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TransformGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceBinding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceBindingGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderStateGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RenderState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IA.h">
@@ -170,19 +158,10 @@
     <ClInclude Include="VertexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VertexBufferGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConstantBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstantBufferGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture2DGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\stb_image.h">
@@ -191,8 +170,35 @@
     <ClInclude Include="Sampler2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MaterialGL.h">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshGL.h">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLRenderer.h">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStateGL.h">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceBindingGL.h">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
     <ClInclude Include="Sampler2DGL.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture2DGL.h">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformGL.h">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBufferGL.h">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBufferGL.h">
+      <Filter>Header Files\GL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
