@@ -76,7 +76,30 @@ public:
 		VkDeviceSize      							offset						= VK_WHOLE_SIZE,
 		const void*        							pNext						= nullptr)const;
 	
+	VkBufferCreateInfo MakeBufferCreateInfo(
+		VkDeviceSize								size,
+		VkBufferUsageFlags     						usage,
+		VkBufferCreateFlags    						flags						= 0,
+		VkSharingMode          						sharingMode					= VK_SHARING_MODE_EXCLUSIVE,
+		uint32_t               						queueFamilyIndexCount		= 0,
+		const uint32_t*        						pQueueFamilyIndices			= nullptr,
+		const void*            						pNext						= nullptr)const;
 
+	VkImageCreateInfo MakeImageCreateInfo(
+		VkFormat									format,
+		VkExtent3D               					extent,
+		VkImageUsageFlags        					usage,
+		VkImageLayout            					initialLayout				 = VK_IMAGE_LAYOUT_UNDEFINED,
+		VkSampleCountFlagBits    					samples						 = VK_SAMPLE_COUNT_1_BIT,
+		uint32_t                 					arrayLayers					 = 1,
+		VkImageType              					imageType					 = VK_IMAGE_TYPE_2D,
+		uint32_t                 					mipLevels					 = 10,
+		VkImageCreateFlags       					flags						 = 0,
+		VkImageTiling            					tiling						 = VK_IMAGE_TILING_OPTIMAL,
+		VkSharingMode            					sharingMode					 = VK_SHARING_MODE_EXCLUSIVE,
+		uint32_t                 					queueFamilyIndexCount		 = 0,
+		const uint32_t*          					pQueueFamilyIndices			 = nullptr,
+		const void*              					pNext						 = nullptr)const;
 
 
 	/*Creation*/
@@ -103,7 +126,17 @@ public:
 		const VkCommandBufferAllocateInfo*			pAllocateInfo,
 		VkCommandBuffer*							pCommandBuffers)const;
 
+	const void CreateBuffer(
+		VkDevice									device,
+		const VkBufferCreateInfo*					pCreateInfo,
+		VkBuffer*									pBuffer,
+		const VkAllocationCallbacks*				pAllocator					= nullptr)const;
 
+	const void CreateImage(
+		VkDevice									device,
+		const VkImageCreateInfo*					pCreateInfo,
+		VkImage*									pImage,
+		const VkAllocationCallbacks*				pAllocator					= nullptr)const;
 
 
 	/*Command recording*/
@@ -173,18 +206,24 @@ public:
 
 
 
+
 	/*Enumerations and get functions*/
+	VkSubresourceLayout GetImageSubresourceLayout(VkDevice device, VkImage image, const VkImageSubresource* pSubresource)const;
 	std::vector<VkPhysicalDevice> EnumeratePhysicalDevices(VkInstance instance)const;
 	VkPhysicalDeviceProperties GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice)const;
 	VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties(VkPhysicalDevice phydev)const;
-
 	VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures(VkPhysicalDevice phydev)const;
 	std::vector<VkPhysicalDeviceFeatures> EnumeratePhysicalDeviceFeatures(VkInstance instance)const;
-
 	std::vector<VkQueueFamilyProperties> EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev)const;
 	std::vector<std::vector<VkQueueFamilyProperties>> EnumeratePhysicalDeviceQueueFamilyProperties(VkInstance instance)const;
-
-
+	VkFormatProperties GetPhysicalDeviceFormatProperties(VkPhysicalDevice physicalDevice, VkFormat format)const;
+	VkImageFormatProperties GetPhysicalDeviceImageFormatProperties(
+		VkPhysicalDevice							physicalDevice,
+		VkFormat									format,
+		VkImageType									type,
+		VkImageTiling								tiling,
+		VkImageUsageFlags							usage,
+		VkImageCreateFlags							flags)const;
 
 
 	/*Property printing*/

@@ -166,7 +166,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		1
 	);
 	_vulkanHelpers.AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkCmdBuffer);
-
+	vkGetPhysicalDeviceFeatures
 
 	return 0;
 }

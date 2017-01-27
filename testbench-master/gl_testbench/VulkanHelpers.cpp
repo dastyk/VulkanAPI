@@ -134,6 +134,46 @@ VkMappedMemoryRange VulkanHelpers::MakeMappedMemoryRange(VkDeviceMemory memory, 
 	return range;
 }
 
+VkBufferCreateInfo VulkanHelpers::MakeBufferCreateInfo(VkDeviceSize size, VkBufferUsageFlags usage, VkBufferCreateFlags flags, VkSharingMode sharingMode, uint32_t queueFamilyIndexCount, const uint32_t * pQueueFamilyIndices, const void * pNext) const
+{
+	VkBufferCreateInfo info =
+	{
+		VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+		pNext,
+		flags,
+		size,
+		usage,
+		sharingMode,
+		queueFamilyIndexCount,
+		pQueueFamilyIndices
+	};
+
+	return info;
+}
+
+VkImageCreateInfo VulkanHelpers::MakeImageCreateInfo(VkFormat format, VkExtent3D extent, VkImageUsageFlags usage, VkImageLayout initialLayout, VkSampleCountFlagBits samples, uint32_t arrayLayers, VkImageType imageType, uint32_t mipLevels, VkImageCreateFlags flags, VkImageTiling tiling, VkSharingMode sharingMode, uint32_t queueFamilyIndexCount, const uint32_t * pQueueFamilyIndices, const void * pNext) const
+{
+	VkImageCreateInfo imageCreateInfo =
+	{
+		VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,        // sType
+		pNext,                                    // pNext
+		flags,                                          // flags
+		imageType,                           // imageType
+		format,                   // format
+		extent,                          // extent
+		mipLevels,                                         // mipLevels
+		arrayLayers,                                          // arrayLayers
+		samples,                      // samples
+		tiling,                    // tiling
+		usage,                 // usage
+		sharingMode,                  // sharingMode
+		queueFamilyIndexCount,                                          // queueFamilyIndexCount
+		pQueueFamilyIndices,                                    // pQueueFamilyIndices
+		initialLayout                   // initialLayout
+	};
+	return imageCreateInfo;
+}
+
 const void VulkanHelpers::CreateInstance(const VkInstanceCreateInfo * pCreateInfo, VkInstance * pInstance, const VkAllocationCallbacks * pAllocator) const
 {
 	/******** Create the instance***********/
@@ -172,6 +212,24 @@ const void VulkanHelpers::AllocateCommandBuffers(VkDevice device, const VkComman
 
 	if (result != VK_SUCCESS) {
 		throw std::runtime_error("Failed to allocate command buffers.");
+	}
+}
+
+const void VulkanHelpers::CreateBuffer(VkDevice device, const VkBufferCreateInfo * pCreateInfo, VkBuffer * pBuffer, const VkAllocationCallbacks * pAllocator) const
+{
+	VkResult result = vkCreateBuffer(device, pCreateInfo, pAllocator, pBuffer);
+
+	if (result != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create buffer.");
+	}
+}
+
+const void VulkanHelpers::CreateImage(VkDevice device, const VkImageCreateInfo * pCreateInfo, VkImage* pImage, const VkAllocationCallbacks * pAllocator) const
+{
+	VkResult result = vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+
+	if (result != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create buffer.");
 	}
 }
 
@@ -317,6 +375,15 @@ uint32_t VulkanHelpers::ChooseHeapFromFlags(VkPhysicalDevice physicalDevice, con
 	return selectedType;
 }
 
+VkSubresourceLayout VulkanHelpers::GetImageSubresourceLayout(VkDevice device, VkImage image, const VkImageSubresource * pSubresource) const
+{
+	VkSubresourceLayout layout;
+
+	vkGetImageSubresourceLayout(device, image, pSubresource, &layout);
+
+	return layout;
+}
+
 std::vector<VkPhysicalDevice> VulkanHelpers::EnumeratePhysicalDevices(VkInstance instance)const
 {
 	std::vector<VkPhysicalDevice> physicalDevices;
@@ -411,6 +478,25 @@ std::vector<std::vector<VkQueueFamilyProperties>> VulkanHelpers::EnumeratePhysic
 
 
 	return propDev;
+}
+
+VkFormatProperties VulkanHelpers::GetPhysicalDeviceFormatProperties(VkPhysicalDevice physicalDevice, VkFormat format) const
+{
+	VkFormatProperties prop;
+	vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &prop);
+	return prop;
+}
+
+VkImageFormatProperties VulkanHelpers::GetPhysicalDeviceImageFormatProperties(VkPhysicalDevice physicalDevice, VkFormat format, VkImageType type, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags) const
+{
+	VkImageFormatProperties prop;
+	VkResult result = vkGetPhysicalDeviceImageFormatProperties(physicalDevice, format, type, tiling, usage, flags, &prop);
+
+	if (result != VK_SUCCESS) {
+		throw std::runtime_error("Failed to get Physical Device Image Format Properties.");
+	}
+
+	return prop;
 }
 
 const void VulkanHelpers::PrintPhysicalDeviceProperties(VkPhysicalDeviceProperties prop) const
