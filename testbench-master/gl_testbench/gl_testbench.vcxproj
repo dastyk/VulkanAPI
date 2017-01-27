@@ -183,6 +183,7 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="TransformGL.cpp" />
     <ClCompile Include="VertexBufferGL.cpp" />
+    <ClCompile Include="VulkanHelpers.cpp" />
     <ClCompile Include="VulkanRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +217,7 @@
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TransformGL.h" />
     <ClInclude Include="VertexBufferGL.h" />
+    <ClInclude Include="VulkanHelpers.h" />
     <ClInclude Include="VulkanRenderer.h" />
   </ItemGroup>
   <ItemGroup>

@@ -9,6 +9,11 @@ Renderer* Renderer::makeRenderer(BACKEND option)
 		return new OpenGLRenderer();
 	else if (option == BACKEND::VULKAN)
 		return new VulkanRenderer();
+
+
+	throw std::runtime_error("Invalid Backend");
+
+	return nullptr;
 }
 
 /*

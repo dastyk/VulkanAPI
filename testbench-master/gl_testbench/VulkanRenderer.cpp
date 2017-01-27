@@ -1,5 +1,5 @@
 #include "VulkanRenderer.h"
-
+#include <ConsoleThread.h>
 
 
 VulkanRenderer::VulkanRenderer()
@@ -87,50 +87,41 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 
+
+
+	/******** Create the instance***********/
 	const std::vector<const char*> validationLayers = {
 		"VK_LAYER_LUNARG_core_validation"
 	};
 
-	VkApplicationInfo vkAppInfo = 
-	{
-	VK_STRUCTURE_TYPE_APPLICATION_INFO,	// sType;
-	nullptr,// pNext;
-	"Vulkan Renderer",// Application name
-	VK_MAKE_VERSION(1,0,0),// applicationVersion;
-	"Frengine",// pEngineName;
-	VK_MAKE_VERSION(1,0,0),// engineVersion;
-	VK_API_VERSION_1_0// apiVersion;
-	};
-	VkInstanceCreateInfo vkInstCreateInfo = 
-	{
-		VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,//sType
-		nullptr,//pNext
-		0,//flags	
-		&vkAppInfo,//pApplicationInfo
-		validationLayers.size(),//enabledLayerCount
-		validationLayers.data(),//ppEnabledLayerNames
-		0,// enabledExtCount
-		nullptr// ppEnabledExtNames
-	};
+	const auto vkAppInfo = &_vulkanHelpers.MakeApplicationInfo(
+		"Vulkan Renderer",
+		VK_MAKE_VERSION(1, 0, 0),
+		"Frengine",
+		VK_MAKE_VERSION(1, 0, 0)
+	);
 
-	/******** Create the instance***********/
-	VkResult result = vkCreateInstance(&vkInstCreateInfo, nullptr, &_vkInstance);
-
-	if (result != VK_SUCCESS) {
-		throw std::runtime_error("Failed to create instance.");
-	}
+	const auto vkInstCreateInfo = &_vulkanHelpers.MakeInstanceCreateInfo(
+		0,
+		vkAppInfo,
+		validationLayers.size(),
+		validationLayers.data()
+	);
 
 
-	_vkPhysicalDevices = EnumeratePhysicalDevices();
+	_vulkanHelpers.CreateInstance(vkInstCreateInfo, &_vkInstance);
 
-	if (_vkPhysicalDevices.size() <= 0) {
-		throw std::runtime_error("No physical devices found.");
-	}
 
 
 
 
 	/******** Create the device***********/
+	_vkPhysicalDevices = _vulkanHelpers.EnumeratePhysicalDevices(_vkInstance);
+
+	if (_vkPhysicalDevices.size() <= 0) {
+		throw std::runtime_error("No physical devices found.");
+	}
+
 	VkPhysicalDeviceFeatures supportedFeatures;
 	VkPhysicalDeviceFeatures requiredFeatures = {};
 
@@ -139,39 +130,42 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	requiredFeatures.multiDrawIndirect = supportedFeatures.multiDrawIndirect;
 
-	const VkDeviceQueueCreateInfo deviceQueueCreateInfo =
-	{
-		VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,     // sType
-		nullptr,                                        // pNext
-		0,                                              // flags
-		0,                                              // queueFamilyIndex
-		1,                                              // queueCount
-		nullptr                                         // pQueuePriorities
-	};
-	const VkDeviceCreateInfo deviceCreateInfo =
-	{
-		VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,           // sType
-		nullptr,                                        // pNext
+	const auto deviceQueueCreateInfo = &_vulkanHelpers.MakeDeviceQueueCreateInfo(0, 1);
 
-		0,                                              // flags
-		1,                                              // queueCreateInfoCount
+	const auto deviceCreateInfo = &_vulkanHelpers.MakeDeviceCreateInfo(
+		1,
+		deviceQueueCreateInfo
+	);
 
-		&deviceQueueCreateInfo,                         // pQueueCreateInfos
-		0,                                              // enabledLayerCount
-		nullptr,                                        // ppEnabledLayerNames
-		0,                                              // enabledExtensionCount
-		nullptr,                                        // ppEnabledExtensionNames
-		&requiredFeatures                               // pEnabledFeatures
-	};
 
-	result = vkCreateDevice(_vkPhysicalDevices[0],
-		&deviceCreateInfo,
-		nullptr,
-		&_vkDevice);
+	_vulkanHelpers.CreateLogicDevice(_vkPhysicalDevices[0], deviceCreateInfo, &_vkDevice);
 
 
 
 
+
+	/*******Fetch the main queue**********/
+	vkGetDeviceQueue(_vkDevice, 0, 0, &_vkMainQueue);
+
+
+
+
+
+	/***********Create command pool******************/
+	const auto cmdPoolInfo = &_vulkanHelpers.MakeCommandPoolCreateInfo(0, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+	_vulkanHelpers.CreateCommandPool(_vkDevice, cmdPoolInfo, &_vkCmdPool);
+
+
+
+
+
+	/*********Allocate main command buffer************/
+	const auto cmdBufferAllocInfo = &_vulkanHelpers.MakeCommandBufferAllocateInfo(
+		_vkCmdPool,
+		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		1
+	);
+	_vulkanHelpers.AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkCmdBuffer);
 
 
 	return 0;
@@ -179,6 +173,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 int VulkanRenderer::shutdown()
 {
+	//vkFreeCommandBuffers(_vkDevice, _vkCmdPool, 1, &_vkCmdBuffer); is freed when pool is destroyed
+	vkDestroyCommandPool(_vkDevice, _vkCmdPool, nullptr);
 	vkDestroyDevice(_vkDevice, nullptr);
 	vkDestroyInstance(_vkInstance, nullptr);
 	SDL_Quit();
@@ -212,59 +208,7 @@ void VulkanRenderer::frame()
 void VulkanRenderer::present()
 {
 }
-void printFam(VkQueueFamilyProperties fam)
-{
-	printf("\tQueue Flags: \n");
-	if (fam.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-		printf("\t\t VK_QUEUE_GRAPHICS_BIT\n");
-	if (fam.queueFlags & VK_QUEUE_COMPUTE_BIT)
-		printf("\t\t VK_QUEUE_COMPUTE_BIT\n");
-	if (fam.queueFlags & VK_QUEUE_TRANSFER_BIT)
-		printf("\t\t VK_QUEUE_TRANSFER_BIT\n");
-	if (fam.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT)
-		printf("\t\t VK_QUEUE_SPARSE_BINDING_BIT\n");
 
-	printf("\tQueue Count: %d\n", fam.queueCount);
-}
-
-void printMem(VkPhysicalDeviceMemoryProperties prop)
-{
-
-
-	printf("\tMemory Type Count: %zd\n", prop.memoryTypeCount);
-	for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
-	{
-		auto& memType = prop.memoryTypes[i];
-		printf("\t\tHeap Index: %zd\n", memType.heapIndex);
-		printf("\t\tPropertyFlags: \n");
-		if (memType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-			printf("\t\t\tVK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT\n");
-
-		if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-			printf("\t\t\tVK_MEMORY_PROPERTY_HOST_VISIBLE_BIT\n");
-
-		if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
-			printf("\t\t\tVK_MEMORY_PROPERTY_HOST_COHERENT_BIT\n");
-
-		if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
-			printf("\t\t\tVK_MEMORY_PROPERTY_HOST_CACHED_BIT\n");
-
-		if (memType.propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)
-			printf("\t\t\tVK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT\n");
-		printf("------------------------------------\n\n");
-	}
-
-	printf("\tMemory Heap Count: %zd\n", prop.memoryHeapCount);
-	for (uint32_t i = 0; i < prop.memoryHeapCount; i++)
-	{
-		auto& memHeap = prop.memoryHeaps[i];
-		printf("\t\tHeap Size: %zd\n", memHeap.size);
-		printf("\t\tPropertyFlags: \n");
-		if (memHeap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
-			printf("\t\t\VK_MEMORY_HEAP_DEVICE_LOCAL_BIT\n");
-		printf("------------------------------------\n\n");
-	}
-}
 
 void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 {
@@ -284,21 +228,20 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 
 	if (arg == "phyDev")
 	{
-		auto& pd = me->EnumeratePhysicalDevices();
+		auto& pd = me->_vulkanHelpers.EnumeratePhysicalDevices(me->_vkInstance);
 		printf("%zd Physical Devices found\n", pd.size());
 
 		for (auto d : pd)
 		{
-			auto& prop = me->GetPhysicalDeviceProperties(d);
+			auto& prop = me->_vulkanHelpers.GetPhysicalDeviceProperties(d);
 
-			printf("\tDevice Name: %s\n", prop.deviceName);
-			printf("\tDevice Driver Version: %d\n", prop.driverVersion);
+			me->_vulkanHelpers.PrintPhysicalDeviceProperties(prop);
 
 		}
 	}
 	else if (arg == "queueFam")
 	{
-		auto& pd = me->EnumeratePhysicalDevices();
+		auto& pd = me->_vulkanHelpers.EnumeratePhysicalDevices(me->_vkInstance);
 		char* arg;
 		if (DebugUtils::GetArg("-d", &arg, argc, argv))
 		{
@@ -312,7 +255,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 			
 			
 			
-			auto& families = me->EnumeratePhysicalDeviceQueueFamilyProperties(pd[d]);
+			auto& families = me->_vulkanHelpers.EnumeratePhysicalDeviceQueueFamilyProperties(pd[d]);
 			if (DebugUtils::GetArg("-i", &arg, argc, argv))
 			{
 				int i = std::stoi(arg);
@@ -321,7 +264,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 					printf("Invalid index\n");
 					return;
 				}
-				printFam(families[i]);
+				me->_vulkanHelpers.PrintQueueFamilyProperties(families[i]);
 
 			}
 			else
@@ -330,9 +273,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 				printf("%zd families found\n", families.size());
 				for (auto& fam : families)
 				{
-					printFam(fam);
-
-					printf("***********************************\n\n");
+					me->_vulkanHelpers.PrintQueueFamilyProperties(fam);
 				}
 
 			}
@@ -342,10 +283,10 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 		}
 		else
 		{
-			auto& pdfamprop = me->EnumeratePhysicalDeviceQueueFamilyProperties();
+			auto& pdfamprop = me->_vulkanHelpers.EnumeratePhysicalDeviceQueueFamilyProperties(me->_vkInstance);
 			for (int d = 0; d < pdfamprop.size(); d++)
 			{
-				auto& prop = me->GetPhysicalDeviceProperties(pd[d]);
+				auto& prop = me->_vulkanHelpers.GetPhysicalDeviceProperties(pd[d]);
 
 				printf("%s: \n", prop.deviceName);
 				if (DebugUtils::GetArg("-i", &arg, argc, argv))
@@ -356,7 +297,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 						printf("Invalid index\n");
 						return;
 					}
-					printFam(pdfamprop[d][i]);
+					me->_vulkanHelpers.PrintQueueFamilyProperties(pdfamprop[d][i]);
 
 				}
 				else
@@ -365,9 +306,8 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 					printf("%zd families found\n", pdfamprop[d].size());
 					for (auto& fam : pdfamprop[d])
 					{
-						printFam(fam);
+						me->_vulkanHelpers.PrintQueueFamilyProperties(fam);
 
-						printf("***********************************\n\n");
 					}
 
 				}
@@ -377,7 +317,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 	}
 	else if (arg == "memProp")
 	{
-		auto& pd = me->EnumeratePhysicalDevices();
+		auto& pd = me->_vulkanHelpers.EnumeratePhysicalDevices(me->_vkInstance);
 		char* arg;
 		if (DebugUtils::GetArg("-d", &arg, argc, argv))
 		{
@@ -389,21 +329,21 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 				return;
 			}
 
-			auto& prop = me->GetPhysicalDeviceMemoryProperties(pd[d]);
+			auto& prop = me->_vulkanHelpers.GetPhysicalDeviceMemoryProperties(pd[d]);
 
-			printMem(prop);
+			me->_vulkanHelpers.PrintPhysicalDeviceMemoryProperties(prop);
 
 		}
 		else
 		{
 			for (auto& d : pd)
 			{
-				auto& devInfo = me->GetPhysicalDeviceProperties(d);
+				auto& devInfo = me->_vulkanHelpers.GetPhysicalDeviceProperties(d);
 				printf("%s\n", devInfo.deviceName);
 				
-				auto& prop = me->GetPhysicalDeviceMemoryProperties(d);
+				auto& prop = me->_vulkanHelpers.GetPhysicalDeviceMemoryProperties(d);
 
-				printMem(prop);
+				me->_vulkanHelpers.PrintPhysicalDeviceMemoryProperties(prop);
 			}
 		}
 	}
@@ -435,100 +375,3 @@ void VulkanRenderer::EnumerateHelp(void * userData, int argc, char ** argv)
 	printf("\t queueFam (-d physicalDeviceIndex, -i familyIndex)\n");
 	printf("\t memProp (-d physicalDeviceIndex)\n ");
 }
-
-std::vector<VkPhysicalDevice> VulkanRenderer::EnumeratePhysicalDevices()
-{
-	std::vector<VkPhysicalDevice> physicalDevices;
-	// First figure out how many devices are in the system.
-	uint32_t physicalDeviceCount = 0;
-	vkEnumeratePhysicalDevices(_vkInstance, &physicalDeviceCount, nullptr);
-
-
-	// Size the device array appropriately and get the physical
-	// device handles.
-	physicalDevices.resize(physicalDeviceCount);
-	vkEnumeratePhysicalDevices(_vkInstance,
-		&physicalDeviceCount,
-		&physicalDevices[0]);
-
-	return physicalDevices;
-}
-
-VkPhysicalDeviceProperties VulkanRenderer::GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice)
-{
-	VkPhysicalDeviceProperties properties;
-
-	vkGetPhysicalDeviceProperties(physicalDevice, &properties);
-
-	return properties;
-}
-
-VkPhysicalDeviceMemoryProperties VulkanRenderer::GetPhysicalDeviceMemoryProperties(VkPhysicalDevice phydev)
-{
-	VkPhysicalDeviceMemoryProperties prop;
-
-	vkGetPhysicalDeviceMemoryProperties(phydev, &prop);
-
-	return prop;
-}
-
-VkPhysicalDeviceFeatures VulkanRenderer::GetPhysicalDeviceFeatures(VkPhysicalDevice phydev)
-{
-	VkPhysicalDeviceFeatures feat;
-
-	vkGetPhysicalDeviceFeatures(phydev, &feat);
-
-	return feat;
-}
-
-std::vector<VkPhysicalDeviceFeatures> VulkanRenderer::EnumeratePhysicalDeviceFeatures()
-{
-	std::vector<VkPhysicalDeviceFeatures> features;
-
-	auto& phydevs = EnumeratePhysicalDevices();
-
-	for (auto& pd : phydevs)
-	{
-		features.push_back(GetPhysicalDeviceFeatures(pd));
-	}
-
-	return features;
-}
-
-std::vector<VkQueueFamilyProperties> VulkanRenderer::EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev)
-{
-	uint32_t queueFamilyPropertyCount;
-	std::vector<VkQueueFamilyProperties> queueFamilyProperties;
-
-	// First determine the number of queue families supported by the physical
-	// device.
-	vkGetPhysicalDeviceQueueFamilyProperties(phydev,
-		&queueFamilyPropertyCount,
-		nullptr);
-
-	// Allocate enough space for the queue property structures.
-	queueFamilyProperties.resize(queueFamilyPropertyCount);
-
-	// Now query the actual properties of the queue families.
-	vkGetPhysicalDeviceQueueFamilyProperties(phydev,
-		&queueFamilyPropertyCount,
-		queueFamilyProperties.data());
-
-	return queueFamilyProperties;
-}
-
-std::vector<std::vector<VkQueueFamilyProperties>> VulkanRenderer::EnumeratePhysicalDeviceQueueFamilyProperties()
-{
-	std::vector<std::vector<VkQueueFamilyProperties>> propDev;
-
-	auto& devices = EnumeratePhysicalDevices();
-
-	for (auto& d : devices)
-	{
-		propDev.push_back(EnumeratePhysicalDeviceQueueFamilyProperties(d));
-	}
-
-
-	return propDev;
-}
-

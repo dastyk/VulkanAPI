@@ -1,10 +1,8 @@
 #pragma once
 #include "Renderer.h"
 #include <SDL.h>
-#include <vulkan\vulkan.h>
-#include <ConsoleThread.h>
+#include "VulkanHelpers.h"
 
-#pragma comment(lib,"vulkan-1.lib")
 #pragma comment(lib,"SDL2.lib")
 #pragma comment(lib,"SDL2main.lib")
 
@@ -41,24 +39,18 @@ public:
 private:
 	static void Enumerate(void* userData, int argc, char** argv);
 	static void EnumerateHelp(void* userData, int argc, char** argv);
-	std::vector<VkPhysicalDevice> EnumeratePhysicalDevices();
-	VkPhysicalDeviceProperties GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice);
-	VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties(VkPhysicalDevice phydev);
-
-	VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures(VkPhysicalDevice phydev);
-	std::vector<VkPhysicalDeviceFeatures> EnumeratePhysicalDeviceFeatures();
-
-	std::vector<VkQueueFamilyProperties> EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev);
-	std::vector<std::vector<VkQueueFamilyProperties>> EnumeratePhysicalDeviceQueueFamilyProperties();
-
+	
 
 private:
 	SDL_Window* window;
-	
+	VulkanHelpers _vulkanHelpers;
 
 	VkInstance _vkInstance;
 	std::vector<VkPhysicalDevice> _vkPhysicalDevices;
 	VkDevice _vkDevice;
+	VkQueue _vkMainQueue;
+	VkCommandPool _vkCmdPool;
+	VkCommandBuffer _vkCmdBuffer;
 
 	std::vector<Mesh*> drawList;
 
