@@ -24,7 +24,7 @@ Mesh * VulkanRenderer::makeMesh()
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
 {
-	return nullptr;
+	return new VulkanVertexBuffer(_vkDevice);
 }
 
 ConstantBuffer * VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location)
@@ -95,7 +95,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		"VK_LAYER_LUNARG_core_validation"
 	};
 
-	const auto vkAppInfo = &_vulkanHelpers.MakeApplicationInfo(
+	const auto vkAppInfo = &VulkanHelpers::MakeApplicationInfo(
 		"Vulkan Renderer",
 		VK_MAKE_VERSION(1, 0, 0),
 		"Frengine",
@@ -113,14 +113,14 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	);
 
 
-	_vulkanHelpers.CreateInstance(vkInstCreateInfo, &_vkInstance);
+	VulkanHelpers::CreateInstance(vkInstCreateInfo, &_vkInstance);
 
 
 
 
 
 	/******** Create the device***********/
-	_vkPhysicalDevices = _vulkanHelpers.EnumeratePhysicalDevices(_vkInstance);
+	_vkPhysicalDevices = VulkanHelpers::EnumeratePhysicalDevices(_vkInstance);
 
 	if (_vkPhysicalDevices.size() <= 0) {
 		throw std::runtime_error("No physical devices found.");
@@ -134,15 +134,15 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	requiredFeatures.multiDrawIndirect = supportedFeatures.multiDrawIndirect;
 
-	const auto deviceQueueCreateInfo = &_vulkanHelpers.MakeDeviceQueueCreateInfo(0, 1);
+	const auto deviceQueueCreateInfo = &VulkanHelpers::MakeDeviceQueueCreateInfo(0, 1);
 
-	const auto deviceCreateInfo = &_vulkanHelpers.MakeDeviceCreateInfo(
+	const auto deviceCreateInfo = &VulkanHelpers::MakeDeviceCreateInfo(
 		1,
 		deviceQueueCreateInfo
 	);
 
 
-	_vulkanHelpers.CreateLogicDevice(_vkPhysicalDevices[0], deviceCreateInfo, &_vkDevice);
+	VulkanHelpers::CreateLogicDevice(_vkPhysicalDevices[0], deviceCreateInfo, &_vkDevice);
 
 
 
@@ -156,20 +156,20 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 	/***********Create command pool******************/
-	const auto cmdPoolInfo = &_vulkanHelpers.MakeCommandPoolCreateInfo(0, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-	_vulkanHelpers.CreateCommandPool(_vkDevice, cmdPoolInfo, &_vkCmdPool);
+	const auto cmdPoolInfo = &VulkanHelpers::MakeCommandPoolCreateInfo(0, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+	VulkanHelpers::CreateCommandPool(_vkDevice, cmdPoolInfo, &_vkCmdPool);
 
 
 
 
 
 	/*********Allocate main command buffer************/
-	const auto cmdBufferAllocInfo = &_vulkanHelpers.MakeCommandBufferAllocateInfo(
+	const auto cmdBufferAllocInfo = &VulkanHelpers::MakeCommandBufferAllocateInfo(
 		_vkCmdPool,
 		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 		1
 	);
-	_vulkanHelpers.AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkCmdBuffer);
+	VulkanHelpers::AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkCmdBuffer);
 
 	/**************** Set up window surface *******************/
 	SDL_SysWMinfo wndInfo;
@@ -254,20 +254,20 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 
 	if (arg == "phyDev")
 	{
-		auto& pd = me->_vulkanHelpers.EnumeratePhysicalDevices(me->_vkInstance);
+		auto& pd = VulkanHelpers::EnumeratePhysicalDevices(me->_vkInstance);
 		printf("%zd Physical Devices found\n", pd.size());
 
 		for (auto d : pd)
 		{
-			auto& prop = me->_vulkanHelpers.GetPhysicalDeviceProperties(d);
+			auto& prop = VulkanHelpers::GetPhysicalDeviceProperties(d);
 
-			me->_vulkanHelpers.PrintPhysicalDeviceProperties(prop);
+			VulkanHelpers::PrintPhysicalDeviceProperties(prop);
 
 		}
 	}
 	else if (arg == "queueFam")
 	{
-		auto& pd = me->_vulkanHelpers.EnumeratePhysicalDevices(me->_vkInstance);
+		auto& pd = VulkanHelpers::EnumeratePhysicalDevices(me->_vkInstance);
 		char* arg;
 		if (DebugUtils::GetArg("-d", &arg, argc, argv))
 		{
@@ -281,7 +281,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 			
 			
 			
-			auto& families = me->_vulkanHelpers.EnumeratePhysicalDeviceQueueFamilyProperties(pd[d]);
+			auto& families = VulkanHelpers::EnumeratePhysicalDeviceQueueFamilyProperties(pd[d]);
 			if (DebugUtils::GetArg("-i", &arg, argc, argv))
 			{
 				int i = std::stoi(arg);
@@ -290,7 +290,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 					printf("Invalid index\n");
 					return;
 				}
-				me->_vulkanHelpers.PrintQueueFamilyProperties(families[i]);
+				VulkanHelpers::PrintQueueFamilyProperties(families[i]);
 
 			}
 			else
@@ -299,7 +299,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 				printf("%zd families found\n", families.size());
 				for (auto& fam : families)
 				{
-					me->_vulkanHelpers.PrintQueueFamilyProperties(fam);
+					VulkanHelpers::PrintQueueFamilyProperties(fam);
 				}
 
 			}
@@ -309,10 +309,10 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 		}
 		else
 		{
-			auto& pdfamprop = me->_vulkanHelpers.EnumeratePhysicalDeviceQueueFamilyProperties(me->_vkInstance);
+			auto& pdfamprop = VulkanHelpers::EnumeratePhysicalDeviceQueueFamilyProperties(me->_vkInstance);
 			for (int d = 0; d < pdfamprop.size(); d++)
 			{
-				auto& prop = me->_vulkanHelpers.GetPhysicalDeviceProperties(pd[d]);
+				auto& prop = VulkanHelpers::GetPhysicalDeviceProperties(pd[d]);
 
 				printf("%s: \n", prop.deviceName);
 				if (DebugUtils::GetArg("-i", &arg, argc, argv))
@@ -323,7 +323,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 						printf("Invalid index\n");
 						return;
 					}
-					me->_vulkanHelpers.PrintQueueFamilyProperties(pdfamprop[d][i]);
+					VulkanHelpers::PrintQueueFamilyProperties(pdfamprop[d][i]);
 
 				}
 				else
@@ -332,7 +332,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 					printf("%zd families found\n", pdfamprop[d].size());
 					for (auto& fam : pdfamprop[d])
 					{
-						me->_vulkanHelpers.PrintQueueFamilyProperties(fam);
+						VulkanHelpers::PrintQueueFamilyProperties(fam);
 
 					}
 
@@ -343,7 +343,7 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 	}
 	else if (arg == "memProp")
 	{
-		auto& pd = me->_vulkanHelpers.EnumeratePhysicalDevices(me->_vkInstance);
+		auto& pd = VulkanHelpers::EnumeratePhysicalDevices(me->_vkInstance);
 		char* arg;
 		if (DebugUtils::GetArg("-d", &arg, argc, argv))
 		{
@@ -355,21 +355,21 @@ void VulkanRenderer::Enumerate(void * userData, int argc, char ** argv)
 				return;
 			}
 
-			auto& prop = me->_vulkanHelpers.GetPhysicalDeviceMemoryProperties(pd[d]);
+			auto& prop = VulkanHelpers::GetPhysicalDeviceMemoryProperties(pd[d]);
 
-			me->_vulkanHelpers.PrintPhysicalDeviceMemoryProperties(prop);
+			VulkanHelpers::PrintPhysicalDeviceMemoryProperties(prop);
 
 		}
 		else
 		{
 			for (auto& d : pd)
 			{
-				auto& devInfo = me->_vulkanHelpers.GetPhysicalDeviceProperties(d);
+				auto& devInfo = VulkanHelpers::GetPhysicalDeviceProperties(d);
 				printf("%s\n", devInfo.deviceName);
 				
-				auto& prop = me->_vulkanHelpers.GetPhysicalDeviceMemoryProperties(d);
+				auto& prop = VulkanHelpers::GetPhysicalDeviceMemoryProperties(d);
 
-				me->_vulkanHelpers.PrintPhysicalDeviceMemoryProperties(prop);
+				VulkanHelpers::PrintPhysicalDeviceMemoryProperties(prop);
 			}
 		}
 	}
