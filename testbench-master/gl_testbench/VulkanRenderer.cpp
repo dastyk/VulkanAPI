@@ -226,10 +226,15 @@ void VulkanRenderer::setRenderState(RenderState * ps)
 
 void VulkanRenderer::submit(Mesh * mesh)
 {
+	drawList.push_back(mesh);
 }
 
 void VulkanRenderer::frame()
 {
+	// Förslag:
+	// Till en början kan vi dra igång en render pass och skita i descriptors och sånt
+	// och bara rendera med en hårdkodad pipeline för att se om vi får ut saker på skärmen.
+	// Efter det kan vi kanske successivt lägga till constant buffers och material?
 }
 
 void VulkanRenderer::present()
