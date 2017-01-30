@@ -1,7 +1,9 @@
 #pragma once
+
 #include "Renderer.h"
 #include <SDL.h>
 #include "VulkanHelpers.h"
+
 
 #pragma comment(lib,"SDL2.lib")
 #pragma comment(lib,"SDL2main.lib")
@@ -51,6 +53,7 @@ private:
 	VkQueue _vkMainQueue;
 	VkCommandPool _vkCmdPool;
 	VkCommandBuffer _vkCmdBuffer;
+	VkSurfaceKHR _vkSurface;
 
 	std::vector<Mesh*> drawList;
 

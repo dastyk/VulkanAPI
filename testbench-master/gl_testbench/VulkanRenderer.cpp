@@ -1,5 +1,6 @@
 #include "VulkanRenderer.h"
 #include <ConsoleThread.h>
+#include <SDL_syswm.h>
 
 
 VulkanRenderer::VulkanRenderer()
@@ -100,12 +101,15 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		"Frengine",
 		VK_MAKE_VERSION(1, 0, 0)
 	);
-
+	const char* extensions[] = { "VK_KHR_surface", "VK_KHR_win32_surface" };
 	const auto vkInstCreateInfo = &_vulkanHelpers.MakeInstanceCreateInfo(
 		0,
 		vkAppInfo,
 		validationLayers.size(),
-		validationLayers.data()
+		validationLayers.data(),
+		nullptr,
+		2,
+		extensions
 	);
 
 
@@ -166,6 +170,29 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		1
 	);
 	_vulkanHelpers.AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkCmdBuffer);
+
+	/**************** Set up window surface *******************/
+	SDL_SysWMinfo wndInfo;
+	SDL_VERSION(&wndInfo.version);
+	SDL_GetWindowWMInfo(window, &wndInfo);
+	HWND hwnd = wndInfo.info.win.window;
+
+	TCHAR cname[256];
+	GetClassName(hwnd, cname, 256);
+	WNDCLASS wc;
+	GetClassInfo(GetModuleHandle(NULL), cname, &wc);
+
+	VkWin32SurfaceCreateInfoKHR wndCreateInfo;
+	wndCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+	wndCreateInfo.hwnd = hwnd;
+	wndCreateInfo.hinstance = wc.hInstance;
+	wndCreateInfo.flags = 0;
+	wndCreateInfo.pNext = nullptr;
+	auto CreateWin32SurfaceKHR = (PFN_vkCreateWin32SurfaceKHR) vkGetInstanceProcAddr(_vkInstance, "vkCreateWin32SurfaceKHR");
+
+	if (!CreateWin32SurfaceKHR || vkCreateWin32SurfaceKHR(_vkInstance, &wndCreateInfo, nullptr, &_vkSurface) != VK_SUCCESS)
+		throw std::runtime_error("Window surface creation failed.");
+	
 
 	return 0;
 }
