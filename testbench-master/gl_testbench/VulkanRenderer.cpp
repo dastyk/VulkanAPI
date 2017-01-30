@@ -102,7 +102,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		VK_MAKE_VERSION(1, 0, 0)
 	);
 	const char* extensions[] = { "VK_KHR_surface", "VK_KHR_win32_surface" };
-	const auto vkInstCreateInfo = &_vulkanHelpers.MakeInstanceCreateInfo(
+	const auto vkInstCreateInfo = VulkanHelpers::MakeInstanceCreateInfo(
 		0,
 		vkAppInfo,
 		validationLayers.size(),
@@ -113,7 +113,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	);
 
 
-	VulkanHelpers::CreateInstance(vkInstCreateInfo, &_vkInstance);
+	VulkanHelpers::CreateInstance(&vkInstCreateInfo, &_vkInstance);
 
 
 
