@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include <SDL.h>
 #include "VulkanHelpers.h"
+#include "VulkanVertexBuffer.h"
 
 #pragma comment(lib,"SDL2.lib")
 #pragma comment(lib,"SDL2main.lib")
@@ -43,7 +44,6 @@ private:
 
 private:
 	SDL_Window* window;
-	VulkanHelpers _vulkanHelpers;
 
 	VkInstance _vkInstance;
 	std::vector<VkPhysicalDevice> _vkPhysicalDevices;

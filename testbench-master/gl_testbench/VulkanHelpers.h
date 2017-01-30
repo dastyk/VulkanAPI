@@ -4,13 +4,8 @@
 #pragma comment(lib,"vulkan-1.lib")
 
 #pragma once
-class VulkanHelpers
+namespace VulkanHelpers
 {
-public:
-	VulkanHelpers();
-	~VulkanHelpers();
-
-
 
 
 	/*Struct creation*/
@@ -20,7 +15,7 @@ public:
 		const char*        							pEngineName					= nullptr,
 		uint32_t           							engineVersion				= VK_MAKE_VERSION(0,0,0),
 		uint32_t           							apiVersion					= VK_API_VERSION_1_0,
-		const void*        							pNext						= nullptr)const;
+		const void*        							pNext						= nullptr);
 
 	VkInstanceCreateInfo MakeInstanceCreateInfo(
 		VkInstanceCreateFlags						flags,
@@ -29,14 +24,14 @@ public:
 		const char* const*							ppEnabledLayerNames			= nullptr,
 		const void*									pNext						= nullptr,
 		uint32_t									enabledExtensionCount		= 0,
-		const char* const*							ppEnabledExtensionNames		= nullptr)const;
+		const char* const*							ppEnabledExtensionNames		= nullptr);
 
 	VkDeviceQueueCreateInfo MakeDeviceQueueCreateInfo(		
 		uint32_t									queueFamilyIndex,
 		uint32_t									queueCount,
 		const float*								pQueuePriorities			= nullptr,
 		VkDeviceQueueCreateFlags					flags						= 0,
-		const void*									pNext						= nullptr)const;
+		const void*									pNext						= nullptr);
 
 	VkDeviceCreateInfo MakeDeviceCreateInfo(	
 		uint32_t									queueCreateInfoCount		= 0,
@@ -47,18 +42,18 @@ public:
 		const void*									pNext						= nullptr,
 		uint32_t									enabledExtensionCount		= 0,
 		const char* const*							ppEnabledExtensionNames		= nullptr,
-		VkDeviceCreateFlags							flags						= 0)const;
+		VkDeviceCreateFlags							flags						= 0);
 
 	VkCommandPoolCreateInfo MakeCommandPoolCreateInfo(
 		uint32_t									queueFamilyIndex,
 		VkCommandPoolCreateFlags					flags						= 0,
-		const void*									pNext						= nullptr)const;
+		const void*									pNext						= nullptr);
 
 	VkCommandBufferAllocateInfo MakeCommandBufferAllocateInfo(	
 		VkCommandPool								commandPool,
 		VkCommandBufferLevel						level,
 		uint32_t									commandBufferCount,
-		const void*									pNext						=	nullptr)const;
+		const void*									pNext						=	nullptr);
 
 	VkSubmitInfo MakeSubmitInfo(
 		uint32_t									commandBufferCount,
@@ -68,13 +63,13 @@ public:
 		const VkPipelineStageFlags*					pWaitDstStageMask			= nullptr,
 		uint32_t									signalSemaphoreCount		= 0,
 		const VkSemaphore*							pSignalSemaphores			= nullptr,
-		const void*									pNext						= nullptr)const;
+		const void*									pNext						= nullptr);
 
 	VkMappedMemoryRange MakeMappedMemoryRange(
 		VkDeviceMemory								memory,
 		VkDeviceSize								size						= 0,
 		VkDeviceSize      							offset						= VK_WHOLE_SIZE,
-		const void*        							pNext						= nullptr)const;
+		const void*        							pNext						= nullptr);
 	
 	VkBufferCreateInfo MakeBufferCreateInfo(
 		VkDeviceSize								size,
@@ -83,7 +78,7 @@ public:
 		VkSharingMode          						sharingMode					= VK_SHARING_MODE_EXCLUSIVE,
 		uint32_t               						queueFamilyIndexCount		= 0,
 		const uint32_t*        						pQueueFamilyIndices			= nullptr,
-		const void*            						pNext						= nullptr)const;
+		const void*            						pNext						= nullptr);
 
 	VkImageCreateInfo MakeImageCreateInfo(
 		VkFormat									format,
@@ -99,44 +94,44 @@ public:
 		VkSharingMode            					sharingMode					 = VK_SHARING_MODE_EXCLUSIVE,
 		uint32_t                 					queueFamilyIndexCount		 = 0,
 		const uint32_t*          					pQueueFamilyIndices			 = nullptr,
-		const void*              					pNext						 = nullptr)const;
+		const void*              					pNext						 = nullptr);
 
 
 	/*Creation*/
 	const void CreateInstance(
 		const VkInstanceCreateInfo*                 pCreateInfo,
 		VkInstance*                                 pInstance,
-		const VkAllocationCallbacks*                pAllocator					= nullptr)const;
+		const VkAllocationCallbacks*                pAllocator					= nullptr);
 
 
 	const void CreateLogicDevice(
 		VkPhysicalDevice                            physicalDevice,
 		const VkDeviceCreateInfo*                   pCreateInfo,
 		VkDevice*                                   pDevice,
-		const VkAllocationCallbacks*                pAllocator					= nullptr)const;
+		const VkAllocationCallbacks*                pAllocator					= nullptr);
 
 	const void CreateCommandPool(
 		VkDevice									device,
 		const VkCommandPoolCreateInfo*				pCreateInfo,
 		VkCommandPool*								pCommandPool,
-		const VkAllocationCallbacks*				pAllocator					= nullptr)const;
+		const VkAllocationCallbacks*				pAllocator					= nullptr);
 
 	const void AllocateCommandBuffers(
 		VkDevice									device,
 		const VkCommandBufferAllocateInfo*			pAllocateInfo,
-		VkCommandBuffer*							pCommandBuffers)const;
+		VkCommandBuffer*							pCommandBuffers);
 
 	const void CreateBuffer(
 		VkDevice									device,
 		const VkBufferCreateInfo*					pCreateInfo,
 		VkBuffer*									pBuffer,
-		const VkAllocationCallbacks*				pAllocator					= nullptr)const;
+		const VkAllocationCallbacks*				pAllocator					= nullptr);
 
 	const void CreateImage(
 		VkDevice									device,
 		const VkImageCreateInfo*					pCreateInfo,
 		VkImage*									pImage,
-		const VkAllocationCallbacks*				pAllocator					= nullptr)const;
+		const VkAllocationCallbacks*				pAllocator					= nullptr);
 
 
 	/*Command recording*/
@@ -144,25 +139,25 @@ public:
 		VkCommandBuffer								commandBuffer,
 		VkCommandBufferUsageFlags					flags						= 0,
 		const VkCommandBufferInheritanceInfo*		pInheritanceInfo			= nullptr,
-		const void*									pNext						= nullptr)const;
+		const void*									pNext						= nullptr);
 
 	const void EndCommandBuffer(
-		VkCommandBuffer								commandBuffer)const;
+		VkCommandBuffer								commandBuffer);
 
 	const void ResetCommandBuffer(
 		VkCommandBuffer								commandBuffer,
-		VkCommandBufferResetFlags					flags)const;
+		VkCommandBufferResetFlags					flags);
 
 	const void ResetCommandPool(
 		VkDevice									device,
 		VkCommandPool								commandPool,
-		VkCommandPoolResetFlags						flags)const;
+		VkCommandPoolResetFlags						flags);
 
 	const void QueueSubmit(
 		VkQueue										queue,
 		uint32_t									submitCount,
 		const VkSubmitInfo*							pSubmits,
-		VkFence										fence)const;
+		VkFence										fence);
 
 
 
@@ -174,7 +169,7 @@ public:
 		uint32_t									memoryTypeIndex,
 		VkDeviceMemory*                             pMemory,
 		const void*									pNext						= nullptr,
-		const VkAllocationCallbacks*                pAllocator					= nullptr)const;
+		const VkAllocationCallbacks*                pAllocator					= nullptr);
 
 	const void MapMemory(
 		VkDevice                                    device,
@@ -182,7 +177,7 @@ public:
 		void**                                      ppData,
 		VkDeviceSize                                size						= VK_WHOLE_SIZE,
 		VkDeviceSize                                offset						= 0,
-		VkMemoryMapFlags                            flags						= 0)const;
+		VkMemoryMapFlags                            flags						= 0);
 
 
 
@@ -192,7 +187,7 @@ public:
 		VkCommandBuffer								cmdBuffer,
 		VkBuffer srcBuffer, VkDeviceSize srcOffset,
 		VkBuffer dstBuffer, VkDeviceSize dstOffset,
-		VkDeviceSize								size)const;
+		VkDeviceSize								size);
 
 
 
@@ -202,34 +197,34 @@ public:
 		VkPhysicalDevice							physicalDevice,
 		const VkMemoryRequirements*					memoryRequirements,
 		VkMemoryPropertyFlags						requiredFlags,
-		VkMemoryPropertyFlags						preferredFlags)const;
+		VkMemoryPropertyFlags						preferredFlags);
 
 
 
 
 	/*Enumerations and get functions*/
-	VkSubresourceLayout GetImageSubresourceLayout(VkDevice device, VkImage image, const VkImageSubresource* pSubresource)const;
-	std::vector<VkPhysicalDevice> EnumeratePhysicalDevices(VkInstance instance)const;
-	VkPhysicalDeviceProperties GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice)const;
-	VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties(VkPhysicalDevice phydev)const;
-	VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures(VkPhysicalDevice phydev)const;
-	std::vector<VkPhysicalDeviceFeatures> EnumeratePhysicalDeviceFeatures(VkInstance instance)const;
-	std::vector<VkQueueFamilyProperties> EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev)const;
-	std::vector<std::vector<VkQueueFamilyProperties>> EnumeratePhysicalDeviceQueueFamilyProperties(VkInstance instance)const;
-	VkFormatProperties GetPhysicalDeviceFormatProperties(VkPhysicalDevice physicalDevice, VkFormat format)const;
+	VkSubresourceLayout GetImageSubresourceLayout(VkDevice device, VkImage image, const VkImageSubresource* pSubresource);
+	std::vector<VkPhysicalDevice> EnumeratePhysicalDevices(VkInstance instance);
+	VkPhysicalDeviceProperties GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice);
+	VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties(VkPhysicalDevice phydev);
+	VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures(VkPhysicalDevice phydev);
+	std::vector<VkPhysicalDeviceFeatures> EnumeratePhysicalDeviceFeatures(VkInstance instance);
+	std::vector<VkQueueFamilyProperties> EnumeratePhysicalDeviceQueueFamilyProperties(VkPhysicalDevice phydev);
+	std::vector<std::vector<VkQueueFamilyProperties>> EnumeratePhysicalDeviceQueueFamilyProperties(VkInstance instance);
+	VkFormatProperties GetPhysicalDeviceFormatProperties(VkPhysicalDevice physicalDevice, VkFormat format);
 	VkImageFormatProperties GetPhysicalDeviceImageFormatProperties(
 		VkPhysicalDevice							physicalDevice,
 		VkFormat									format,
 		VkImageType									type,
 		VkImageTiling								tiling,
 		VkImageUsageFlags							usage,
-		VkImageCreateFlags							flags)const;
+		VkImageCreateFlags							flags);
 
 
 	/*Property printing*/
-	const void PrintPhysicalDeviceProperties( VkPhysicalDeviceProperties prop)const;
-	const void PrintQueueFamilyProperties(VkQueueFamilyProperties fam)const;
-	const void PrintPhysicalDeviceMemoryProperties(VkPhysicalDeviceMemoryProperties prop)const;
+	const void PrintPhysicalDeviceProperties( VkPhysicalDeviceProperties prop);
+	const void PrintQueueFamilyProperties(VkQueueFamilyProperties fam);
+	const void PrintPhysicalDeviceMemoryProperties(VkPhysicalDeviceMemoryProperties prop);
 
 
 };
