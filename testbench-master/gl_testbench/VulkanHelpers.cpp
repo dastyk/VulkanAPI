@@ -216,6 +216,34 @@ const void VulkanHelpers::CreateBuffer(VkDevice device, const VkBufferCreateInfo
 	}
 }
 
+const void VulkanHelpers::CreateBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer * buffer, VkDeviceMemory * bufferMemory)
+{
+	/*Create the buffer*/
+	const auto bufferInfo = &VulkanHelpers::MakeBufferCreateInfo(
+		size,
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	VulkanHelpers::CreateBuffer(device, bufferInfo, buffer);
+
+
+	/*Get memory requirments*/
+	VkMemoryRequirements memReq;
+	vkGetBufferMemoryRequirements(device, *buffer, &memReq);
+	auto memTypeIndex = VulkanHelpers::ChooseHeapFromFlags(physicalDevice, &memReq, properties, properties);
+
+
+	/*Allocate the memory*/
+	VulkanHelpers::AllocateMemory(
+		device,
+		memReq.size,
+		memTypeIndex,
+		bufferMemory
+	);
+
+	/*Bind the memory to the buffer*/
+	vkBindBufferMemory(device, *buffer, *bufferMemory, 0);
+}
+
+
 const void VulkanHelpers::CreateImage(VkDevice device, const VkImageCreateInfo * pCreateInfo, VkImage* pImage, const VkAllocationCallbacks * pAllocator)
 {
 	VkResult result = vkCreateImage(device, pCreateInfo, pAllocator, pImage);

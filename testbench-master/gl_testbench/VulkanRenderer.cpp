@@ -6,6 +6,7 @@
 #undef max
 #undef min
 
+#include "MaterialVk.h"
 
 VulkanRenderer::VulkanRenderer()
 {
@@ -18,7 +19,7 @@ VulkanRenderer::~VulkanRenderer()
 
 Material * VulkanRenderer::makeMaterial()
 {
-	return nullptr;
+	return new MaterialVk(_vkDevice);
 }
 
 Mesh * VulkanRenderer::makeMesh()
@@ -28,7 +29,7 @@ Mesh * VulkanRenderer::makeMesh()
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
 {
-	return new VulkanVertexBuffer(_vkDevice);
+	return new VulkanVertexBuffer(_vkPhysicalDevices[0], _vkDevice, _vkMainQueue, _vkCmdPool, _vkCmdBuffer);
 }
 
 ConstantBuffer * VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location)

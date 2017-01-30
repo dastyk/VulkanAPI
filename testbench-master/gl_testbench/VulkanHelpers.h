@@ -54,8 +54,8 @@ namespace VulkanHelpers
 
 	VkCommandBufferAllocateInfo MakeCommandBufferAllocateInfo(	
 		VkCommandPool								commandPool,
-		VkCommandBufferLevel						level,
-		uint32_t									commandBufferCount,
+		VkCommandBufferLevel						level						= VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		uint32_t									commandBufferCount			= 1,
 		const void*									pNext						=	nullptr);
 
 	VkSubmitInfo MakeSubmitInfo(
@@ -82,6 +82,9 @@ namespace VulkanHelpers
 		uint32_t               						queueFamilyIndexCount		= 0,
 		const uint32_t*        						pQueueFamilyIndices			= nullptr,
 		const void*            						pNext						= nullptr);
+
+
+
 
 	VkImageCreateInfo MakeImageCreateInfo(
 		VkFormat									format,
@@ -130,6 +133,14 @@ namespace VulkanHelpers
 		VkBuffer*									pBuffer,
 		const VkAllocationCallbacks*				pAllocator					= nullptr);
 
+	const void CreateBuffer(
+		VkPhysicalDevice                            physicalDevice,
+		VkDevice									device,
+		VkDeviceSize								size,
+		VkBufferUsageFlags							usage,
+		VkMemoryPropertyFlags						properties,
+		VkBuffer* buffer, VkDeviceMemory*			bufferMemory);
+
 	const void CreateImage(
 		VkDevice									device,
 		const VkImageCreateInfo*					pCreateInfo,
@@ -140,7 +151,7 @@ namespace VulkanHelpers
 	/*Command recording*/
 	const void BeginCommandBuffer(
 		VkCommandBuffer								commandBuffer,
-		VkCommandBufferUsageFlags					flags						= 0,
+		VkCommandBufferUsageFlags					flags						= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
 		const VkCommandBufferInheritanceInfo*		pInheritanceInfo			= nullptr,
 		const void*									pNext						= nullptr);
 
@@ -160,7 +171,7 @@ namespace VulkanHelpers
 		VkQueue										queue,
 		uint32_t									submitCount,
 		const VkSubmitInfo*							pSubmits,
-		VkFence										fence);
+		VkFence										fence						= VK_NULL_HANDLE);
 
 
 
