@@ -39,7 +39,7 @@ void VulkanVertexBuffer::setData(const void * data, size_t size, DATA_USAGE usag
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
 		&stagingBuffer, &stagingBufferMemory);
 
-	/*Copy the data to device*/
+	/*Copy the data to staging*/
 	void* pData;
 	VulkanHelpers::MapMemory(_device, stagingBufferMemory, &pData);
 	memcpy(pData, data, size);
