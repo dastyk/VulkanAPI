@@ -80,6 +80,9 @@ namespace VulkanHelpers
 		const uint32_t*        						pQueueFamilyIndices			= nullptr,
 		const void*            						pNext						= nullptr);
 
+
+
+
 	VkImageCreateInfo MakeImageCreateInfo(
 		VkFormat									format,
 		VkExtent3D               					extent,
