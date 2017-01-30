@@ -133,6 +133,14 @@ namespace VulkanHelpers
 		VkBuffer*									pBuffer,
 		const VkAllocationCallbacks*				pAllocator					= nullptr);
 
+	const void CreateBuffer(
+		VkPhysicalDevice                            physicalDevice,
+		VkDevice									device,
+		VkDeviceSize								size,
+		VkBufferUsageFlags							usage,
+		VkMemoryPropertyFlags						properties,
+		VkBuffer* buffer, VkDeviceMemory*			bufferMemory);
+
 	const void CreateImage(
 		VkDevice									device,
 		const VkImageCreateInfo*					pCreateInfo,

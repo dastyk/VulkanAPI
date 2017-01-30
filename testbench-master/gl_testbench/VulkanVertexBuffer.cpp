@@ -28,12 +28,12 @@ void VulkanVertexBuffer::setData(const void * data, size_t size, DATA_USAGE usag
 	if (_buffer != VK_NULL_HANDLE)
 		vkDestroyBuffer(_device, _buffer, nullptr);
 
-
-
 	/*Create the staging buffer*/
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
-	_CreateBuffer(
+	VulkanHelpers::CreateBuffer(
+		_physicalDevice,
+		_device,
 		size, 
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
@@ -46,13 +46,13 @@ void VulkanVertexBuffer::setData(const void * data, size_t size, DATA_USAGE usag
 	vkUnmapMemory(_device, stagingBufferMemory);
 
 	/*Create the buffer*/
-	_CreateBuffer(
+	VulkanHelpers::CreateBuffer(
+		_physicalDevice,
+		_device,
 		size,
 		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		&_buffer, &_memory);
-
-
 
 	/*Create a new temporary cmdbuffer, */
 	const auto allocInfo = &VulkanHelpers::MakeCommandBufferAllocateInfo(_cmdPool);
@@ -86,31 +86,4 @@ void VulkanVertexBuffer::unbind()
 size_t VulkanVertexBuffer::getSize()
 {
 	return _totalSize;
-}
-
-const void VulkanVertexBuffer::_CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer * buffer, VkDeviceMemory * bufferMemory) const
-{
-	/*Create the buffer*/
-	const auto bufferInfo = &VulkanHelpers::MakeBufferCreateInfo(
-		size,
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	VulkanHelpers::CreateBuffer(_device, bufferInfo, buffer);
-
-
-	/*Get memory requirments*/
-	VkMemoryRequirements memReq;
-	vkGetBufferMemoryRequirements(_device, *buffer, &memReq);
-	auto memTypeIndex = VulkanHelpers::ChooseHeapFromFlags(_physicalDevice, &memReq, properties, properties);
-
-
-	/*Allocate the memory*/
-	VulkanHelpers::AllocateMemory(
-		_device,
-		memReq.size,
-		memTypeIndex,
-		bufferMemory
-	);
-
-	/*Bind the memory to the buffer*/
-	vkBindBufferMemory(_device, *buffer, *bufferMemory, 0);
 }

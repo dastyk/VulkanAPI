@@ -18,11 +18,7 @@ public:
 
 private:
 
-	const void _CreateBuffer(
-		VkDeviceSize size,
-		VkBufferUsageFlags usage,
-		VkMemoryPropertyFlags properties,
-		VkBuffer* buffer, VkDeviceMemory* bufferMemory)const;
+	
 
 	VkDevice _device;
 	VkPhysicalDevice _physicalDevice;

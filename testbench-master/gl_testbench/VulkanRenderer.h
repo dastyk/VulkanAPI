@@ -54,6 +54,7 @@ private:
 	VkCommandPool _vkCmdPool;
 	VkCommandBuffer _vkCmdBuffer;
 	VkSurfaceKHR _vkSurface;
+	VkSwapchainKHR _vkSwapChain;
 
 	std::vector<Mesh*> drawList;
 

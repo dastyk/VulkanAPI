@@ -185,6 +185,7 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="TransformGL.cpp" />
     <ClCompile Include="VertexBufferGL.cpp" />
+    <ClCompile Include="VulkanConstantBuffer.cpp" />
     <ClCompile Include="VulkanHelpers.cpp" />
     <ClCompile Include="VulkanRenderer.cpp" />
     <ClCompile Include="VulkanVertexBuffer.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TransformGL.h" />
     <ClInclude Include="VertexBufferGL.h" />
+    <ClInclude Include="VulkanConstantBuffer.h" />
     <ClInclude Include="VulkanHelpers.h" />
     <ClInclude Include="VulkanRenderer.h" />
     <ClInclude Include="VulkanVertexBuffer.h" />
