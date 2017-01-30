@@ -24,7 +24,7 @@ Mesh * VulkanRenderer::makeMesh()
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
 {
-	return new VulkanVertexBuffer(_vkPhysicalDevices[0], _vkDevice, _vkCmdBuffer);
+	return new VulkanVertexBuffer(_vkPhysicalDevices[0], _vkDevice, _vkMainQueue, _vkCmdPool, _vkCmdBuffer);
 }
 
 ConstantBuffer * VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location)

@@ -2,7 +2,8 @@
 #include <glm\glm.hpp>
 #include "VulkanHelpers.h"
 
-VulkanVertexBuffer::VulkanVertexBuffer(VkPhysicalDevice phyDevice, VkDevice device, VkCommandBuffer cmdBuffer) : _physicalDevice(phyDevice), _device(device), _cmdBuffer(cmdBuffer)
+VulkanVertexBuffer::VulkanVertexBuffer(VkPhysicalDevice phyDevice, VkDevice device, VkQueue queue, VkCommandPool cmdPool, VkCommandBuffer cmdBuffer) :
+	_physicalDevice(phyDevice), _device(device), _queue(queue), _cmdPool(cmdPool), _cmdBuffer(cmdBuffer)
 {
 
 	
@@ -29,42 +30,43 @@ void VulkanVertexBuffer::setData(const void * data, size_t size, DATA_USAGE usag
 
 
 
-	/*Create the buffer*/
-	const auto bufferInfo = &VulkanHelpers::MakeBufferCreateInfo(
-		size,
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	VulkanHelpers::CreateBuffer(_device, bufferInfo, &_buffer);
-
-
-	/*Get memory requirments*/
-	VkMemoryRequirements memReq;
-	vkGetBufferMemoryRequirements(_device, _buffer, &memReq);
-	VkMemoryPropertyFlags reqFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-	auto memTypeIndex = VulkanHelpers::ChooseHeapFromFlags(_physicalDevice, &memReq, reqFlags, reqFlags);
-
-
-	/*Allocate the memory*/
-	VulkanHelpers::AllocateMemory(
-		_device,
-		memReq.size,
-		memTypeIndex,
-		&_memory
-	);
-
-	/*Bind the memory to the buffer*/
-	vkBindBufferMemory(_device, _buffer, _memory, 0);
-
+	/*Create the staging buffer*/
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	_CreateBuffer(
+		size, 
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+		&stagingBuffer, &stagingBufferMemory);
 
 	/*Copy the data to device*/
 	void* pData;
-	VulkanHelpers::MapMemory(_device, _memory, &pData);
+	VulkanHelpers::MapMemory(_device, stagingBufferMemory, &pData);
 	memcpy(pData, data, size);
-	vkUnmapMemory(_device, _memory);
+	vkUnmapMemory(_device, stagingBufferMemory);
+
+	/*Create the buffer*/
+	_CreateBuffer(
+		size,
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&_buffer, &_memory);
 
 
 
+	/*Create a new temporary cmdbuffer, */
+	const auto allocInfo = &VulkanHelpers::MakeCommandBufferAllocateInfo(_cmdPool);
+	VkCommandBuffer commandBuffer;
+	VulkanHelpers::AllocateCommandBuffers(_device, allocInfo, &commandBuffer);
 
-
+	/*Copy the data between buffers*/
+	VulkanHelpers::BeginCommandBuffer(commandBuffer);
+	VulkanHelpers::CopyDataBetweenBuffers(commandBuffer, stagingBuffer, 0, _buffer, 0, size);
+	VulkanHelpers::EndCommandBuffer(commandBuffer);
+	const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &commandBuffer);
+	VulkanHelpers::QueueSubmit(_queue, 1, submitInfo);
+	vkQueueWaitIdle(_queue);
+	vkFreeCommandBuffers(_device, _cmdPool, 1, &commandBuffer);
 }
 
 void VulkanVertexBuffer::bind(size_t offset, size_t size, unsigned int location)
@@ -84,4 +86,31 @@ void VulkanVertexBuffer::unbind()
 size_t VulkanVertexBuffer::getSize()
 {
 	return _totalSize;
+}
+
+const void VulkanVertexBuffer::_CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer * buffer, VkDeviceMemory * bufferMemory) const
+{
+	/*Create the buffer*/
+	const auto bufferInfo = &VulkanHelpers::MakeBufferCreateInfo(
+		size,
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	VulkanHelpers::CreateBuffer(_device, bufferInfo, buffer);
+
+
+	/*Get memory requirments*/
+	VkMemoryRequirements memReq;
+	vkGetBufferMemoryRequirements(_device, *buffer, &memReq);
+	auto memTypeIndex = VulkanHelpers::ChooseHeapFromFlags(_physicalDevice, &memReq, properties, properties);
+
+
+	/*Allocate the memory*/
+	VulkanHelpers::AllocateMemory(
+		_device,
+		memReq.size,
+		memTypeIndex,
+		bufferMemory
+	);
+
+	/*Bind the memory to the buffer*/
+	vkBindBufferMemory(_device, *buffer, *bufferMemory, 0);
 }
