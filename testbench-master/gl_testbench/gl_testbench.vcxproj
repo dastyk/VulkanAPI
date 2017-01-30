@@ -187,6 +187,7 @@
     <ClCompile Include="VertexBufferGL.cpp" />
     <ClCompile Include="VulkanHelpers.cpp" />
     <ClCompile Include="VulkanRenderer.cpp" />
+    <ClCompile Include="VulkanVertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\stb_image.h" />
@@ -223,6 +224,7 @@
     <ClInclude Include="VertexBufferGL.h" />
     <ClInclude Include="VulkanHelpers.h" />
     <ClInclude Include="VulkanRenderer.h" />
+    <ClInclude Include="VulkanVertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\GL45\FragmentShader.glsl" />
