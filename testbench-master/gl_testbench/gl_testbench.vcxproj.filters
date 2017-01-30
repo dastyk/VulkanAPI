@@ -120,6 +120,15 @@
     <ClCompile Include="VulkanHelpers.cpp">
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="MaterialVk.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBufferVk.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+	<ClCompile Include="VulkanVertexBuffer.cpp">
+		<Filter>Source Files\Vulkan</Filter>
+	</ClCompile>
     <ClCompile Include="VulkanVertexBuffer.cpp">
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
@@ -225,9 +234,6 @@
       <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="VulkanVertexBuffer.h">
-      <Filter>Header Files\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanConstantBuffer.h">
       <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>

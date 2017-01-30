@@ -2,6 +2,7 @@
 #include <ConsoleThread.h>
 #include <SDL_syswm.h>
 
+#include "MaterialVk.h"
 
 VulkanRenderer::VulkanRenderer()
 {
@@ -14,7 +15,7 @@ VulkanRenderer::~VulkanRenderer()
 
 Material * VulkanRenderer::makeMaterial()
 {
-	return nullptr;
+	return new MaterialVk(_vkDevice);
 }
 
 Mesh * VulkanRenderer::makeMesh()
