@@ -6,7 +6,7 @@ class VulkanConstantBuffer :
 	public ConstantBuffer
 {
 public:
-	VulkanConstantBuffer(std::string NAME, unsigned int location);
+	VulkanConstantBuffer(std::string NAME, unsigned int location, VkPhysicalDevice phyDevice, VkDevice device, VkQueue queue, VkCommandPool cmdPool, VkCommandBuffer cmdBuffer);
 	~VulkanConstantBuffer();
 
 
@@ -21,7 +21,13 @@ private:
 	VkDevice _device;
 	VkPhysicalDevice _physicalDevice;
 	VkBuffer _buffer;
-	VkCommandBuffer _cmdBuffer;
 	VkDeviceMemory _memory;
+	VkBuffer _stagingBuffer;
+	VkDeviceMemory _stagingBufferMemory;
+	VkCommandPool _cmdPool;
+	VkQueue _queue;
+	VkCommandBuffer _cmdBuffer;
+	
+
 };
 
