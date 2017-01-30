@@ -16,7 +16,7 @@ public:
 private:
 	std::string _name;
 	uint32_t _location;
-
+	bool _first;
 
 	VkDevice _device;
 	VkPhysicalDevice _physicalDevice;
