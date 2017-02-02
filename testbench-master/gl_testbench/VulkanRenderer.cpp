@@ -288,8 +288,10 @@ int VulkanRenderer::shutdown()
 {
 	vkDestroyRenderPass(_vkDevice, _renderPass, nullptr);
 	//vkFreeCommandBuffers(_vkDevice, _vkCmdPool, 1, &_vkCmdBuffer); is freed when pool is destroyed
+	vkDestroySwapchainKHR(_vkDevice, _vkSwapChain, nullptr);
 	vkDestroyCommandPool(_vkDevice, _vkCmdPool, nullptr);
 	vkDestroyDevice(_vkDevice, nullptr);
+	vkDestroySurfaceKHR(_vkInstance, _vkSurface, nullptr);
 	vkDestroyInstance(_vkInstance, nullptr);
 	SDL_Quit();
 	return 0;
