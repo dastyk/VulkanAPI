@@ -8,6 +8,8 @@
 
 #include "MaterialVk.h"
 
+#define MB *1024*1024
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	VkDebugReportFlagsEXT flags,
 	VkDebugReportObjectTypeEXT objType,
@@ -62,7 +64,7 @@ Mesh * VulkanRenderer::makeMesh()
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
 {
-	return new VulkanVertexBuffer(_vkPhysicalDevices[0], _vkDevice, _vkMainQueue, _vkCmdPool, _vkCmdBuffer);
+	return new VulkanVertexBuffer(_vkDevice);
 }
 
 ConstantBuffer * VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location)
@@ -204,6 +206,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 
+
+
+
 	/*******Fetch the main queue**********/
 	vkGetDeviceQueue(_vkDevice, 0, 0, &_vkMainQueue);
 
@@ -322,6 +327,20 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		throw std::runtime_error("Failed to create swapchain");
 
 	_createRenderPass();
+
+
+
+
+
+	/*Allocate device memory*/
+	VkMemoryRequirements vbufferReq;
+	//vbufferReq.memoryTypeBits = 
+
+	//_vertexBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, 256 MB ,)
+
+
+
+
 
 	return 0;
 }

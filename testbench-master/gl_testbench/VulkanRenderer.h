@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include "VulkanHelpers.h"
 #include "VulkanVertexBuffer.h"
-
+#include "VulkanMemAllocator.h"
 
 #pragma comment(lib,"SDL2.lib")
 #pragma comment(lib,"SDL2main.lib")
@@ -58,6 +58,9 @@ private:
 	VkSwapchainKHR _vkSwapChain;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	VkDebugReportCallbackEXT _vkDebugCallback;
+
+
+	VulkanMemAllocator* _vertexBufferAllocator;
 
 	std::vector<Mesh*> drawList;
 
