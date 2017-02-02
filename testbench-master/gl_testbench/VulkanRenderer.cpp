@@ -8,6 +8,37 @@
 
 #include "MaterialVk.h"
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+	VkDebugReportFlagsEXT flags,
+	VkDebugReportObjectTypeEXT objType,
+	uint64_t obj,
+	size_t location,
+	int32_t code,
+	const char* layerPrefix,
+	const char* msg,
+	void* userData) {
+
+	printf("validation layer: %s\n", msg);
+	return VK_FALSE;
+}
+
+VkResult CreateDebugReportCallbackEXT(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback) {
+	auto func = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+	if (func != nullptr) {
+		return func(instance, pCreateInfo, pAllocator, pCallback);
+	}
+	else {
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+	}
+}
+
+void DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator) {
+	auto func = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+	if (func != nullptr) {
+		func(instance, callback, pAllocator);
+	}
+}
+
 VulkanRenderer::VulkanRenderer()
 {
 }
@@ -106,7 +137,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		"Frengine",
 		VK_MAKE_VERSION(1, 0, 0)
 	);
-	std::array<const char*, 2> extensions = { "VK_KHR_surface", "VK_KHR_win32_surface"};
+	std::array<const char*, 3> extensions = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME};
 	const auto vkInstCreateInfo = VulkanHelpers::MakeInstanceCreateInfo(
 		0,
 		vkAppInfo,
@@ -120,6 +151,17 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	VulkanHelpers::CreateInstance(&vkInstCreateInfo, &_vkInstance);
 
+
+	/*Create debug callback*/
+	VkDebugReportCallbackCreateInfoEXT createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+	createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+	createInfo.pfnCallback = debugCallback;
+
+	
+	if (CreateDebugReportCallbackEXT(_vkInstance, &createInfo, nullptr, &_vkDebugCallback) != VK_SUCCESS) {
+		throw std::runtime_error("failed to set up debug callback!");
+	}
 
 
 
@@ -286,6 +328,7 @@ int VulkanRenderer::shutdown()
 	//vkFreeCommandBuffers(_vkDevice, _vkCmdPool, 1, &_vkCmdBuffer); is freed when pool is destroyed
 	vkDestroyCommandPool(_vkDevice, _vkCmdPool, nullptr);
 	vkDestroyDevice(_vkDevice, nullptr);
+	DestroyDebugReportCallbackEXT(_vkInstance, _vkDebugCallback, nullptr);
 	vkDestroyInstance(_vkInstance, nullptr);
 	SDL_Quit();
 	return 0;

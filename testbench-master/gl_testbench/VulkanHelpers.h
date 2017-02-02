@@ -15,7 +15,7 @@ namespace VulkanHelpers
 	protected:
 		DeviceAllocator() {};
 	public:
-		DeviceAllocator() {};
+		~DeviceAllocator() {};
 
 		virtual const void Allocate(VkDeviceSize size) = 0;
 	};

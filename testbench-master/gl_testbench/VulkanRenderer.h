@@ -55,6 +55,7 @@ private:
 	VkCommandBuffer _vkCmdBuffer;
 	VkSurfaceKHR _vkSurface;
 	VkSwapchainKHR _vkSwapChain;
+	VkDebugReportCallbackEXT _vkDebugCallback;
 
 	std::vector<Mesh*> drawList;
 
