@@ -43,6 +43,7 @@ private:
 	static void Enumerate(void* userData, int argc, char** argv);
 	static void EnumerateHelp(void* userData, int argc, char** argv);
 	void _createRenderPass(void);
+	void _createFramebuffers(void);
 
 private:
 	SDL_Window* window;
@@ -55,8 +56,12 @@ private:
 	VkCommandBuffer _vkCmdBuffer;
 	VkSurfaceKHR _vkSurface;
 	VkFormat _swapchainFormat;
+	VkExtent2D _swapchainExtent;
 	VkSwapchainKHR _vkSwapChain;
+	std::vector<VkImage> _swapchainImages;
+	std::vector<VkImageView> _swapchainImageViews;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
+	std::vector<VkFramebuffer> _framebuffers;
 	VkDebugReportCallbackEXT _vkDebugCallback;
 
 

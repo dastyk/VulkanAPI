@@ -300,6 +300,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	VkExtent2D bestExtent = { width, height };
 	bestExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, width));
 	bestExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, height));
+	_swapchainExtent = bestExtent;
 
 	uint32_t imageCount = std::min(capabilities.minImageCount + 1, capabilities.maxImageCount);
 
@@ -326,7 +327,40 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	if (vkCreateSwapchainKHR(_vkDevice, &swapCreateInfo, nullptr, &_vkSwapChain) != VK_SUCCESS)
 		throw std::runtime_error("Failed to create swapchain");
 
+	uint32_t swapchainImageCount = 0;
+	if (vkGetSwapchainImagesKHR(_vkDevice, _vkSwapChain, &swapchainImageCount, nullptr) != VK_SUCCESS)
+	{
+		throw runtime_error("Failed to get swapchain image count!");
+	}
+	_swapchainImages.resize(swapchainImageCount);
+	if (vkGetSwapchainImagesKHR(_vkDevice, _vkSwapChain, &swapchainImageCount, _swapchainImages.data()) != VK_SUCCESS)
+	{
+		throw runtime_error("Failed to get swapchain images!");
+	}
+
+	_swapchainImageViews.resize(_swapchainImages.size());
+	for (uint32_t i = 0; i < _swapchainImages.size(); ++i)
+	{
+		VkImageViewCreateInfo viewInfo = {};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.pNext = nullptr;
+		viewInfo.flags = 0;
+		viewInfo.image = _swapchainImages[i];
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = _swapchainFormat;
+		viewInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		if (vkCreateImageView(_vkDevice, &viewInfo, nullptr, &_swapchainImageViews[i]) != VK_SUCCESS)
+			throw runtime_error("Failed to create swapchain image view!");
+	}
+
 	_createRenderPass();
+	_createFramebuffers();
 
 
 
@@ -347,7 +381,15 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 int VulkanRenderer::shutdown()
 {
+	for (auto& f : _framebuffers)
+	{
+		vkDestroyFramebuffer(_vkDevice, f, nullptr);
+	}
 	vkDestroyRenderPass(_vkDevice, _renderPass, nullptr);
+	for (auto& view : _swapchainImageViews)
+	{
+		vkDestroyImageView(_vkDevice, view, nullptr);
+	}
 	//vkFreeCommandBuffers(_vkDevice, _vkCmdPool, 1, &_vkCmdBuffer); is freed when pool is destroyed
 	vkDestroySwapchainKHR(_vkDevice, _vkSwapChain, nullptr);
 	vkDestroyCommandPool(_vkDevice, _vkCmdPool, nullptr);
@@ -603,5 +645,29 @@ void VulkanRenderer::_createRenderPass(void)
 	if (result != VK_SUCCESS)
 	{
 		throw std::runtime_error("Failed to create render pass!");
+	}
+}
+
+void VulkanRenderer::_createFramebuffers(void)
+{
+	_framebuffers.resize(_swapchainImages.size());
+
+	for (uint32_t i = 0; i < _swapchainImages.size(); ++i)
+	{
+		array<VkImageView, 1> attachments = { _swapchainImageViews[i] };
+
+		VkFramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.pNext = nullptr;
+		framebufferInfo.flags = 0;
+		framebufferInfo.renderPass = _renderPass;
+		framebufferInfo.attachmentCount = attachments.size();
+		framebufferInfo.pAttachments = attachments.data();
+		framebufferInfo.width = _swapchainExtent.width;
+		framebufferInfo.height = _swapchainExtent.height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(_vkDevice, &framebufferInfo, nullptr, &_framebuffers[i]) != VK_SUCCESS)
+			throw runtime_error("Failed to create framebuffer!");
 	}
 }
