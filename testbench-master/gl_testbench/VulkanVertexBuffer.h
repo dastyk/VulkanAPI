@@ -6,7 +6,7 @@
 class VulkanVertexBuffer : public VertexBuffer
 {
 public:
-	VulkanVertexBuffer(VkPhysicalDevice phyDevice, VkDevice device, VkQueue queue, VkCommandPool cmdPool, VkCommandBuffer cmdBuffer);
+	VulkanVertexBuffer(VkDevice device);
 	~VulkanVertexBuffer();
 
 
@@ -14,21 +14,13 @@ public:
 	void bind(size_t offset, size_t size, unsigned int location);
 	void unbind();
 	size_t getSize();
-
+	void* getData();
 
 private:
-
-	
-
 	VkDevice _device;
-	VkPhysicalDevice _physicalDevice;
 	VkBuffer _buffer;
-	VkCommandPool _cmdPool;
-	VkQueue _queue;
-	VkCommandBuffer _cmdBuffer;
-	VkDeviceMemory _memory;
 
-
+	void* _data;
 	size_t _totalSize;
 };
 
