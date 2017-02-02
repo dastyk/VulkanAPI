@@ -39,6 +39,8 @@ void DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT
 	}
 }
 
+using namespace std;
+
 VulkanRenderer::VulkanRenderer()
 {
 }
@@ -281,6 +283,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 			}
 		}
 	}
+	_swapchainFormat = bestFormat.format;
 	//Unless something better comes along, use the standard mode
 	VkPresentModeKHR bestPresentMode = VK_PRESENT_MODE_FIFO_KHR;
 	for (const auto& i : supportedPresentModes)
@@ -318,16 +321,19 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	if (vkCreateSwapchainKHR(_vkDevice, &swapCreateInfo, nullptr, &_vkSwapChain) != VK_SUCCESS)
 		throw std::runtime_error("Failed to create swapchain");
 
-
+	_createRenderPass();
 
 	return 0;
 }
 
 int VulkanRenderer::shutdown()
 {
+	vkDestroyRenderPass(_vkDevice, _renderPass, nullptr);
 	//vkFreeCommandBuffers(_vkDevice, _vkCmdPool, 1, &_vkCmdBuffer); is freed when pool is destroyed
+	vkDestroySwapchainKHR(_vkDevice, _vkSwapChain, nullptr);
 	vkDestroyCommandPool(_vkDevice, _vkCmdPool, nullptr);
 	vkDestroyDevice(_vkDevice, nullptr);
+	vkDestroySurfaceKHR(_vkInstance, _vkSurface, nullptr);
 	DestroyDebugReportCallbackEXT(_vkInstance, _vkDebugCallback, nullptr);
 	vkDestroyInstance(_vkInstance, nullptr);
 	SDL_Quit();
@@ -532,4 +538,51 @@ void VulkanRenderer::EnumerateHelp(void * userData, int argc, char ** argv)
 	printf("\t phyDev\n");
 	printf("\t queueFam (-d physicalDeviceIndex, -i familyIndex)\n");
 	printf("\t memProp (-d physicalDeviceIndex)\n ");
+}
+
+void VulkanRenderer::_createRenderPass(void)
+{
+	array<VkAttachmentDescription, 1> attachments = {};
+	attachments[0].flags = 0;
+	attachments[0].format = _swapchainFormat;
+	attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
+	attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachments[0].initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	VkAttachmentReference colorAttachment = {};
+	colorAttachment.attachment = 0;
+	colorAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass;
+	subpass.flags = 0;
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.inputAttachmentCount = 0;
+	subpass.pInputAttachments = nullptr;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachment;
+	subpass.pResolveAttachments = nullptr;
+	subpass.pDepthStencilAttachment = nullptr;
+	subpass.preserveAttachmentCount = 0;
+	subpass.pPreserveAttachments = nullptr;
+
+	VkRenderPassCreateInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.pNext = nullptr;
+	renderPassInfo.flags = 0;
+	renderPassInfo.attachmentCount = attachments.size();
+	renderPassInfo.pAttachments = attachments.data();
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = 0;
+	renderPassInfo.pDependencies = nullptr;
+
+	VkResult result = vkCreateRenderPass(_vkDevice, &renderPassInfo, nullptr, &_renderPass);
+	if (result != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create render pass!");
+	}
 }
