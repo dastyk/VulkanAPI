@@ -166,6 +166,35 @@ VkImageCreateInfo VulkanHelpers::MakeImageCreateInfo(VkFormat format, VkExtent3D
 	return imageCreateInfo;
 }
 
+VkDescriptorSetLayoutCreateInfo VulkanHelpers::MakeDescriptorSetLayoutCreateInfo(VkDescriptorSetLayoutCreateFlags flags, uint32_t bindingCount, const VkDescriptorSetLayoutBinding * pBindings, const void * pNext)
+{
+	VkDescriptorSetLayoutCreateInfo info =
+	{
+		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+		pNext,
+		flags,
+		bindingCount,
+		pBindings
+	};
+	return info;
+}
+
+VkPipelineLayoutCreateInfo VulkanHelpers::MakePipelineLayoutCreateInfo(uint32_t setLayoutCount, const VkDescriptorSetLayout * pSetLayouts, uint32_t pushConstantRangeCount, const VkPushConstantRange * pPushConstantRanges, VkPipelineLayoutCreateFlags flags, const void * pNext)
+{
+	VkPipelineLayoutCreateInfo info =
+	{
+		VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+		pNext,
+		flags,
+		setLayoutCount,
+		pSetLayouts,
+		pushConstantRangeCount,
+		pPushConstantRanges
+	};
+	return info;
+}
+
+
 const void VulkanHelpers::CreateInstance(const VkInstanceCreateInfo * pCreateInfo, VkInstance * pInstance, const VkAllocationCallbacks * pAllocator)
 {
 	/******** Create the instance***********/

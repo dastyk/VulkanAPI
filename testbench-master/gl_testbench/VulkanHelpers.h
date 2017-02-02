@@ -9,6 +9,16 @@
 #pragma once
 namespace VulkanHelpers
 {
+	/*Abstract allocator class*/
+	class DeviceAllocator
+	{
+	protected:
+		DeviceAllocator() {};
+	public:
+		DeviceAllocator() {};
+
+		virtual const void Allocate(VkDeviceSize size) = 0;
+	};
 
 
 	/*Struct creation*/
@@ -102,6 +112,21 @@ namespace VulkanHelpers
 		const uint32_t*          					pQueueFamilyIndices			 = nullptr,
 		const void*              					pNext						 = nullptr);
 
+
+
+	VkDescriptorSetLayoutCreateInfo  MakeDescriptorSetLayoutCreateInfo(
+		VkDescriptorSetLayoutCreateFlags			flags,
+		uint32_t									bindingCount,
+		const VkDescriptorSetLayoutBinding*			pBindings,
+		const void*									pNext						 = nullptr);
+
+	VkPipelineLayoutCreateInfo MakePipelineLayoutCreateInfo(
+		uint32_t									setLayoutCount,
+		const VkDescriptorSetLayout*				pSetLayouts,
+		uint32_t                        			pushConstantRangeCount		 = 0,
+		const VkPushConstantRange*      			pPushConstantRanges			 = nullptr,
+		VkPipelineLayoutCreateFlags     			flags						 = 0,
+		const void*                     			pNext						 = nullptr);
 
 	/*Creation*/
 	const void CreateInstance(
