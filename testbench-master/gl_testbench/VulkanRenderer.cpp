@@ -362,15 +362,46 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	_createRenderPass();
 	_createFramebuffers();
 
+	DebugUtils::DebugConsole::Command_Structure bufferReqCmd =
+	{
+		this,
+		[](void * userData, int argc, char ** argv) {
+		VulkanRenderer* me = (VulkanRenderer*)userData;
+		VkBuffer buff;
+		const auto createInfo = &VulkanHelpers::MakeBufferCreateInfo(
+			1000,
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
 
+		VulkanHelpers::CreateBuffer(me->_vkDevice, createInfo, &buff);
+
+
+		/*Get memory requirments*/
+		VkMemoryRequirements memReq;
+		vkGetBufferMemoryRequirements(me->_vkDevice, buff, &memReq);
+		//auto memTypeIndex = VulkanHelpers::ChooseHeapFromFlags(me->_vkPhysicalDevices[0], &memReq, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+		printf("Memory Type Bits: %d\nAlignment: %d\n", memReq.memoryTypeBits, memReq.alignment);
+	
+	},
+		[](void * userData, int argc, char ** argv) {},
+		"Req",
+		"Prints memoryTypeBits for memory requirement for buffer."
+	};
+
+	DebugUtils::ConsoleThread::AddCommand(&bufferReqCmd);
 
 
 	/*Allocate device memory*/
-	VkMemoryRequirements vbufferReq;
-	//vbufferReq.memoryTypeBits = 
+	VkBuffer buff;
+	const auto binfo = &VulkanHelpers::MakeBufferCreateInfo(
+		1000,
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+	VulkanHelpers::CreateBuffer(_vkDevice, binfo, &buff);
+	VkMemoryRequirements memReq;
+	vkGetBufferMemoryRequirements(_vkDevice, buff, &memReq);
+	vkDestroyBuffer(_vkDevice, buff, nullptr);
 
-	//_vertexBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, 256 MB ,)
+	_vertexBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, 256 MB, memReq, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 
 
@@ -381,6 +412,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 int VulkanRenderer::shutdown()
 {
+	delete _vertexBufferAllocator;
 	for (auto& f : _framebuffers)
 	{
 		vkDestroyFramebuffer(_vkDevice, f, nullptr);
