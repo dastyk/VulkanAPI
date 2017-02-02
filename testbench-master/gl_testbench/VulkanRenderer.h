@@ -42,7 +42,7 @@ public:
 private:
 	static void Enumerate(void* userData, int argc, char** argv);
 	static void EnumerateHelp(void* userData, int argc, char** argv);
-	
+	void _createRenderPass(void);
 
 private:
 	SDL_Window* window;
@@ -54,7 +54,9 @@ private:
 	VkCommandPool _vkCmdPool;
 	VkCommandBuffer _vkCmdBuffer;
 	VkSurfaceKHR _vkSurface;
+	VkFormat _swapchainFormat;
 	VkSwapchainKHR _vkSwapChain;
+	VkRenderPass _renderPass = VK_NULL_HANDLE;
 
 	std::vector<Mesh*> drawList;
 
