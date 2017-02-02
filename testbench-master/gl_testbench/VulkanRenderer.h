@@ -62,6 +62,7 @@ private:
 	std::vector<VkImageView> _swapchainImageViews;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	std::vector<VkFramebuffer> _framebuffers;
+	VkDebugReportCallbackEXT _vkDebugCallback;
 
 	std::vector<Mesh*> drawList;
 
