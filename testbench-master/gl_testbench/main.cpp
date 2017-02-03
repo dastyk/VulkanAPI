@@ -49,7 +49,7 @@ void run() {
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_ESCAPE) break;
 		}
 		//updateScene();
-		//renderScene();
+		renderScene();
 	}
 }
 
@@ -95,11 +95,11 @@ void updateScene()
 
 void renderScene()
 {
-	renderer->clearBuffer(CLEAR_BUFFER_FLAGS::COLOR | CLEAR_BUFFER_FLAGS::DEPTH);
-	for (auto m : scene)
-	{
-		renderer->submit(m);
-	}
+	//renderer->clearBuffer(CLEAR_BUFFER_FLAGS::COLOR | CLEAR_BUFFER_FLAGS::DEPTH);
+	//for (auto m : scene)
+	//{
+	//	renderer->submit(m);
+	//}
 	renderer->frame();
 	renderer->present();
 }

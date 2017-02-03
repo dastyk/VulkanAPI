@@ -42,6 +42,7 @@ public:
 private:
 	static void Enumerate(void* userData, int argc, char** argv);
 	static void EnumerateHelp(void* userData, int argc, char** argv);
+	void _createSemaphores(void);
 	void _createRenderPass(void);
 	void _createFramebuffers(void);
 
@@ -60,6 +61,9 @@ private:
 	VkSwapchainKHR _vkSwapChain;
 	std::vector<VkImage> _swapchainImages;
 	std::vector<VkImageView> _swapchainImageViews;
+	uint32_t _swapchainImageIndex = UINT32_MAX;
+	VkSemaphore _swapchainImageAvailable = VK_NULL_HANDLE;
+	VkSemaphore _renderingComplete = VK_NULL_HANDLE;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	std::vector<VkFramebuffer> _framebuffers;
 	VkDebugReportCallbackEXT _vkDebugCallback;
