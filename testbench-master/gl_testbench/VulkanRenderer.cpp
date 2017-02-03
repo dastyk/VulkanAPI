@@ -43,7 +43,7 @@ void DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT
 
 using namespace std;
 
-VulkanRenderer::VulkanRenderer()
+VulkanRenderer::VulkanRenderer() : _first(true)
 {
 }
 
@@ -64,7 +64,43 @@ Mesh * VulkanRenderer::makeMesh()
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
 {
-	return new VulkanVertexBuffer(_vkDevice);
+	VulkanVertexBuffer* vBuffer = new VulkanVertexBuffer(_vkDevice, [this](VkBuffer buffer, const void* data, size_t size) {
+	
+		VkDeviceMemory mem;
+		VkDeviceSize offset;
+		_vertexBufferAllocator->Allocate(size, &mem, &offset);
+		vkBindBufferMemory(_vkDevice, buffer, mem, offset);
+		printf("Offset: %d\n", offset);
+
+		/*Create the staging buffer*/
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		VulkanHelpers::CreateBuffer(
+			_vkPhysicalDevices[0],
+			_vkDevice,
+			size,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			&stagingBuffer, &stagingBufferMemory);
+
+		/*Copy the data to staging*/
+		void* pData;
+		VulkanHelpers::MapMemory(_vkDevice, stagingBufferMemory, &pData);
+		memcpy(pData, data, size);
+		vkUnmapMemory(_vkDevice, stagingBufferMemory);
+
+		if (!_first)
+		{			
+			VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
+		}
+
+		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer, 0, buffer, 0, size);
+
+		_first = true;
+	
+	});
+
+	return vBuffer;
 }
 
 ConstantBuffer * VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location)
@@ -225,12 +261,23 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 	/*********Allocate main command buffer************/
-	const auto cmdBufferAllocInfo = &VulkanHelpers::MakeCommandBufferAllocateInfo(
+	auto cmdBufferAllocInfo = &VulkanHelpers::MakeCommandBufferAllocateInfo(
 		_vkCmdPool,
 		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 		1
 	);
 	VulkanHelpers::AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkCmdBuffer);
+
+	/*********Allocate Init transfer buffer***********/
+	cmdBufferAllocInfo = &VulkanHelpers::MakeCommandBufferAllocateInfo(
+		_vkCmdPool,
+		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		1
+	);
+	VulkanHelpers::AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkInitTransferCmdBuffer);
+	
+
+
 
 	/**************** Set up window surface *******************/
 	SDL_SysWMinfo wndInfo;
@@ -367,45 +414,48 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		this,
 		[](void * userData, int argc, char ** argv) {
 		VulkanRenderer* me = (VulkanRenderer*)userData;
-		VkBuffer buff;
-		const auto createInfo = &VulkanHelpers::MakeBufferCreateInfo(
-			1000,
-			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+		
+		if (DebugUtils::GetArg("-b", nullptr, argc, argv))
+		{
+			if (DebugUtils::GetArg("-v", nullptr, argc, argv))
+			{
+				auto buff = me->makeVertexBuffer();
+				char test[21233];
+				buff->setData(test, 21233, VertexBuffer::DATA_USAGE::DONTCARE);
+			}
+		}
+		
 
-
-		VulkanHelpers::CreateBuffer(me->_vkDevice, createInfo, &buff);
-
-
-		/*Get memory requirments*/
-		VkMemoryRequirements memReq;
-		vkGetBufferMemoryRequirements(me->_vkDevice, buff, &memReq);
-		//auto memTypeIndex = VulkanHelpers::ChooseHeapFromFlags(me->_vkPhysicalDevices[0], &memReq, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-		printf("Memory Type Bits: %d\nAlignment: %d\n", memReq.memoryTypeBits, memReq.alignment);
-	
 	},
-		[](void * userData, int argc, char ** argv) {},
-		"Req",
-		"Prints memoryTypeBits for memory requirement for buffer."
+		[](void * userData, int argc, char ** argv) {printf("Creates stuff (-b to create buffer, -v specifies vertex buffer)\n");},
+		"Create",
+		"Creates stuff"
+
 	};
 
 	DebugUtils::ConsoleThread::AddCommand(&bufferReqCmd);
 
 
-	/*Allocate device memory*/
+	/********************Allocate device memory************************/
 	VkBuffer buff;
-	const auto binfo = &VulkanHelpers::MakeBufferCreateInfo(
-		1000,
+	const auto bInfo = &VulkanHelpers::MakeBufferCreateInfo(
+		256 MB,
 		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-	VulkanHelpers::CreateBuffer(_vkDevice, binfo, &buff);
+
+
+	VulkanHelpers::CreateBuffer(_vkDevice, bInfo, &buff);
+
+
+	/**********************Get memory requirments**********************/
 	VkMemoryRequirements memReq;
 	vkGetBufferMemoryRequirements(_vkDevice, buff, &memReq);
 	vkDestroyBuffer(_vkDevice, buff, nullptr);
 
-	_vertexBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, 256 MB, memReq, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_vertexBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, memReq, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 
-
-
+	/**********Start recording init buffers****************/
+	VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
 
 	return 0;
 }
@@ -456,6 +506,22 @@ void VulkanRenderer::submit(Mesh * mesh)
 
 void VulkanRenderer::frame()
 {
+	if (_first)
+	{
+		_first = false;
+		VulkanHelpers::EndCommandBuffer(_vkInitTransferCmdBuffer);
+
+
+		const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_vkInitTransferCmdBuffer);
+		VulkanHelpers::QueueSubmit(_vkMainQueue, 1, submitInfo);
+		vkQueueWaitIdle(_vkMainQueue);
+
+	}
+
+
+
+
+
 	// Förslag:
 	// Till en början kan vi dra igång en render pass och skita i descriptors och sånt
 	// och bara rendera med en hårdkodad pipeline för att se om vi får ut saker på skärmen.

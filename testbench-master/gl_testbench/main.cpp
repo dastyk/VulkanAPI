@@ -49,7 +49,7 @@ void run() {
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_ESCAPE) break;
 		}
 		//updateScene();
-		//renderScene();
+		renderScene();
 	}
 }
 

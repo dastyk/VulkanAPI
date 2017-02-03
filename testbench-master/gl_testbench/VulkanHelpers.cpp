@@ -250,7 +250,7 @@ const void VulkanHelpers::CreateBuffer(VkPhysicalDevice physicalDevice, VkDevice
 	/*Create the buffer*/
 	const auto bufferInfo = &VulkanHelpers::MakeBufferCreateInfo(
 		size,
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		usage);
 	VulkanHelpers::CreateBuffer(device, bufferInfo, buffer);
 
 

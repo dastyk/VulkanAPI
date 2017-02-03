@@ -46,6 +46,7 @@ private:
 	void _createFramebuffers(void);
 
 private:
+	bool _first;
 	SDL_Window* window;
 
 	VkInstance _vkInstance;
@@ -53,6 +54,7 @@ private:
 	VkDevice _vkDevice;
 	VkQueue _vkMainQueue;
 	VkCommandPool _vkCmdPool;
+	VkCommandBuffer _vkInitTransferCmdBuffer;
 	VkCommandBuffer _vkCmdBuffer;
 	VkSurfaceKHR _vkSurface;
 	VkFormat _swapchainFormat;

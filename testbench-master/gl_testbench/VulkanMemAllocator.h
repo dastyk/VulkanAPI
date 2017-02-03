@@ -5,7 +5,7 @@
 class VulkanMemAllocator
 {
 public:
-	VulkanMemAllocator(VkPhysicalDevice phyDev, VkDevice device, VkDeviceSize size, VkMemoryRequirements req, VkMemoryPropertyFlags memoryFlags);
+	VulkanMemAllocator(VkPhysicalDevice phyDev, VkDevice device, VkMemoryRequirements req, VkMemoryPropertyFlags memoryFlags);
 	~VulkanMemAllocator();
 
 	const void Allocate(VkDeviceSize size, VkDeviceMemory* memory, VkDeviceSize* offset);
@@ -14,9 +14,8 @@ private:
 	VkDevice _device;
 	VkDeviceMemory _memory;
 
-	VkDeviceSize _totalSize;
+	VkMemoryRequirements _memoryReq;
 	VkDeviceSize _freeSize;
 	VkDeviceSize _firstFree;
-
 };
 

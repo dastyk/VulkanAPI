@@ -2,19 +2,17 @@
 #include <glm\glm.hpp>
 #include "VulkanHelpers.h"
 
-VulkanVertexBuffer::VulkanVertexBuffer(VkDevice device) :
-	_device(device), _data(nullptr)
-{	
 
-	
+
+VulkanVertexBuffer::VulkanVertexBuffer(VkDevice device, const std::function<void(VkBuffer buffer, const void*data, size_t size)>& callback) :
+	_device(device), _callBack(callback), _buffer(VK_NULL_HANDLE)
+{
 }
-
 
 VulkanVertexBuffer::~VulkanVertexBuffer()
 {
 	if (_buffer != VK_NULL_HANDLE)
 		vkDestroyBuffer(_device, _buffer, nullptr);
-	operator delete(_data);
 }
 
 void VulkanVertexBuffer::setData(const void * data, size_t size, DATA_USAGE usage)
@@ -31,7 +29,7 @@ void VulkanVertexBuffer::setData(const void * data, size_t size, DATA_USAGE usag
 	VulkanHelpers::CreateBuffer(_device, createInfo, &_buffer);
 
 
-	_data = operator new(_totalSize);
+	_callBack(_buffer, data, size);
 
 	//if (_memory != VK_NULL_HANDLE)
 	//	vkFreeMemory(_device, _memory, nullptr);
@@ -94,9 +92,4 @@ void VulkanVertexBuffer::unbind()
 size_t VulkanVertexBuffer::getSize()
 {
 	return _totalSize;
-}
-
-void * VulkanVertexBuffer::getData()
-{
-	return _data;
 }
