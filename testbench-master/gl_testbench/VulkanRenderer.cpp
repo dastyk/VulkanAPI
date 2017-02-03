@@ -406,6 +406,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 			throw runtime_error("Failed to create swapchain image view!");
 	}
 
+	_createSemaphores();
 	_createRenderPass();
 	_createFramebuffers();
 
@@ -462,6 +463,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 int VulkanRenderer::shutdown()
 {
+	vkDeviceWaitIdle(_vkDevice);
+
 	delete _vertexBufferAllocator;
 	for (auto& f : _framebuffers)
 	{
@@ -472,6 +475,8 @@ int VulkanRenderer::shutdown()
 	{
 		vkDestroyImageView(_vkDevice, view, nullptr);
 	}
+	vkDestroySemaphore(_vkDevice, _renderingComplete, nullptr);
+	vkDestroySemaphore(_vkDevice, _swapchainImageAvailable, nullptr);
 	//vkFreeCommandBuffers(_vkDevice, _vkCmdPool, 1, &_vkCmdBuffer); is freed when pool is destroyed
 	vkDestroySwapchainKHR(_vkDevice, _vkSwapChain, nullptr);
 	vkDestroyCommandPool(_vkDevice, _vkCmdPool, nullptr);
@@ -514,9 +519,59 @@ void VulkanRenderer::frame()
 
 		const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_vkInitTransferCmdBuffer);
 		VulkanHelpers::QueueSubmit(_vkMainQueue, 1, submitInfo);
-		vkQueueWaitIdle(_vkMainQueue);
 
 	}
+
+	// Note: this is a really bad way of synchronizing frames, but for the sake
+	// of getting things running it'll suffice.
+	vkQueueWaitIdle(_vkMainQueue);
+
+	if (vkAcquireNextImageKHR(_vkDevice, _vkSwapChain, UINT64_MAX, _swapchainImageAvailable, VK_NULL_HANDLE, &_swapchainImageIndex) != VK_SUCCESS)
+		throw runtime_error("Failed to acquire swapchain error or suboptimal");
+
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.pNext = nullptr;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	beginInfo.pInheritanceInfo = nullptr;
+
+	vkBeginCommandBuffer(_vkCmdBuffer, &beginInfo);
+
+	array<VkClearValue, 1> clearValues = { { 0.7f, 0.2f, 0.3f} };
+
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.pNext = nullptr;
+	renderPassInfo.renderPass = _renderPass;
+	renderPassInfo.framebuffer = _framebuffers[_swapchainImageIndex];
+	renderPassInfo.renderArea = { {0, 0}, _swapchainExtent };
+	renderPassInfo.clearValueCount = clearValues.size();
+	renderPassInfo.pClearValues = clearValues.data();
+
+	vkCmdBeginRenderPass(_vkCmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	
+
+
+	vkCmdEndRenderPass(_vkCmdBuffer);
+
+	vkEndCommandBuffer(_vkCmdBuffer);
+
+	const uint32_t waitSemaphoreCount = 1;
+	array<VkSemaphore, waitSemaphoreCount> waitSemaphores = { _swapchainImageAvailable };
+	array<VkPipelineStageFlags, waitSemaphoreCount> waitStages = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+	VkSubmitInfo submit_info = {};
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.pNext = nullptr;
+	submit_info.waitSemaphoreCount = waitSemaphores.size();
+	submit_info.pWaitSemaphores = waitSemaphores.data();
+	submit_info.pWaitDstStageMask = waitStages.data();
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &_vkCmdBuffer;
+	submit_info.signalSemaphoreCount = 1;
+	submit_info.pSignalSemaphores = &_renderingComplete;
+
+	vkQueueSubmit(_vkMainQueue, 1, &submit_info, VK_NULL_HANDLE);
 
 
 
@@ -530,6 +585,18 @@ void VulkanRenderer::frame()
 
 void VulkanRenderer::present()
 {
+	VkPresentInfoKHR present_info = {};
+	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	present_info.pNext = nullptr;
+	present_info.waitSemaphoreCount = 1;
+	present_info.pWaitSemaphores = &_renderingComplete;
+	present_info.swapchainCount = 1;
+	present_info.pSwapchains = &_vkSwapChain;
+	present_info.pImageIndices = &_swapchainImageIndex;
+	present_info.pResults = nullptr;
+
+	if (vkQueuePresentKHR(_vkMainQueue, &present_info) != VK_SUCCESS)
+		throw runtime_error("Failed to present!");
 }
 
 
@@ -699,6 +766,20 @@ void VulkanRenderer::EnumerateHelp(void * userData, int argc, char ** argv)
 	printf("\t memProp (-d physicalDeviceIndex)\n ");
 }
 
+void VulkanRenderer::_createSemaphores(void)
+{
+	VkSemaphoreCreateInfo semaphore_info = {};
+	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	semaphore_info.pNext = nullptr;
+	semaphore_info.flags = 0;
+
+	if (vkCreateSemaphore(_vkDevice, &semaphore_info, nullptr, &_swapchainImageAvailable) != VK_SUCCESS)
+		throw runtime_error("Failed to create swapchain image available semaphore!");
+
+	if (vkCreateSemaphore(_vkDevice, &semaphore_info, nullptr, &_renderingComplete) != VK_SUCCESS)
+		throw runtime_error("Failed to create rendering complete semaphore!");
+}
+
 void VulkanRenderer::_createRenderPass(void)
 {
 	array<VkAttachmentDescription, 1> attachments = {};
@@ -709,7 +790,7 @@ void VulkanRenderer::_createRenderPass(void)
 	attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachments[0].initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 	VkAttachmentReference colorAttachment = {};
