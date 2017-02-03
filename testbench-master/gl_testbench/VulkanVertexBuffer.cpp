@@ -2,34 +2,21 @@
 #include <glm\glm.hpp>
 #include "VulkanHelpers.h"
 
-
-
-VulkanVertexBuffer::VulkanVertexBuffer(VkDevice device, const std::function<void(VkBuffer buffer, const void*data, size_t size)>& callback) :
-	_device(device), _callBack(callback), _buffer(VK_NULL_HANDLE)
+VulkanVertexBuffer::VulkanVertexBuffer(const std::function<VkDeviceSize(const void*data, size_t size)>& callback):
+	_callBack(callback)
 {
 }
 
 VulkanVertexBuffer::~VulkanVertexBuffer()
 {
-	if (_buffer != VK_NULL_HANDLE)
-		vkDestroyBuffer(_device, _buffer, nullptr);
+
 }
 
 void VulkanVertexBuffer::setData(const void * data, size_t size, DATA_USAGE usage)
 {
 	_totalSize = size;
-	if (_buffer != VK_NULL_HANDLE)
-		throw std::runtime_error("Tried to recreate a vertex buffer.");
-
-	const auto createInfo = &VulkanHelpers::MakeBufferCreateInfo(
-		size,
-		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-
-
-	VulkanHelpers::CreateBuffer(_device, createInfo, &_buffer);
-
-
-	_callBack(_buffer, data, size);
+	
+	_offset = _callBack(data, size);
 
 	//if (_memory != VK_NULL_HANDLE)
 	//	vkFreeMemory(_device, _memory, nullptr);

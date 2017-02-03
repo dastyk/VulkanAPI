@@ -64,12 +64,11 @@ Mesh * VulkanRenderer::makeMesh()
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
 {
-	VulkanVertexBuffer* vBuffer = new VulkanVertexBuffer(_vkDevice, [this](VkBuffer buffer, const void* data, size_t size) {
+	VulkanVertexBuffer* vBuffer = new VulkanVertexBuffer([this](const void* data, size_t size) -> VkDeviceSize {
 	
-		VkDeviceMemory mem;
+		VkBuffer buffer;
 		VkDeviceSize offset;
-		_vertexBufferAllocator->Allocate(size, &mem, &offset);
-		vkBindBufferMemory(_vkDevice, buffer, mem, offset);
+		_vertexBufferAllocator->Allocate(size, &buffer, &offset);
 		printf("Offset: %d\n", offset);
 
 		/*Create the staging buffer*/
@@ -306,7 +305,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	std::vector<VkPresentModeKHR> supportedPresentModes;
 
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_vkPhysicalDevices[0], _vkSurface, &capabilities);
-	
+
+
 	uint32_t formatCount;
 	vkGetPhysicalDeviceSurfaceFormatsKHR(_vkPhysicalDevices[0], _vkSurface, &formatCount, nullptr);
 	supportedFormats.resize(formatCount);

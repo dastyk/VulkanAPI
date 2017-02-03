@@ -16,7 +16,7 @@ VulkanMemAllocator::~VulkanMemAllocator()
 	vkFreeMemory(_device, _memory, nullptr);
 }
 
-const void VulkanMemAllocator::Allocate(VkDeviceSize size, VkDeviceMemory * memory, VkDeviceSize * offset)
+const void VulkanMemAllocator::Allocate(VkDeviceSize size, VkBuffer * buffer, VkDeviceSize * offset)
 {
 	uint32_t blocks = (uint32_t)std::ceil((float)size / (float)_memoryReq.alignment);
 	VkDeviceSize allocSize = blocks*_memoryReq.alignment;
@@ -24,7 +24,7 @@ const void VulkanMemAllocator::Allocate(VkDeviceSize size, VkDeviceMemory * memo
 	if (_freeSize < allocSize)
 		throw std::runtime_error("Out of device memory");
 
-	*memory = _memory;
+	*buffer = _buffer;
 	*offset = _firstFree;
 	_firstFree += allocSize;
 

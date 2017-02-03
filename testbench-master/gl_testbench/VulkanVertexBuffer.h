@@ -6,7 +6,7 @@
 class VulkanVertexBuffer : public VertexBuffer
 {
 public:
-	VulkanVertexBuffer(VkDevice device, const std::function<void(VkBuffer buffer, const void* data, size_t size)>& callback);
+	VulkanVertexBuffer(const std::function<VkDeviceSize(const void* data, size_t size)>& callback);
 	~VulkanVertexBuffer();
 
 
@@ -16,12 +16,9 @@ public:
 	size_t getSize();
 
 private:
-	VkDevice _device;
-	VkBuffer _buffer;
-
-	size_t _totalSize;
-
-	std::function<void(VkBuffer buffer, const void* data, size_t size)> _callBack;
+	VkDeviceSize _totalSize;
+	VkDeviceSize _offset;
+	std::function<VkDeviceSize(const void* data, size_t size)> _callBack;
 
 };
 

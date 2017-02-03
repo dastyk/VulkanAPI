@@ -72,6 +72,8 @@ private:
 
 
 	VulkanMemAllocator* _vertexBufferAllocator;
+	VulkanMemAllocator* _constantBufferAllocator;
+
 
 	std::vector<Mesh*> drawList;
 
