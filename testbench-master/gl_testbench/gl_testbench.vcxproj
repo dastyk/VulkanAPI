@@ -156,8 +156,8 @@
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="ConstantBufferGL.cpp" />
-    <ClCompile Include="ConstantBufferVk.cpp" />
     <ClCompile Include="MaterialVk.cpp" />
+    <ClCompile Include="MeshVK.cpp" />
     <ClCompile Include="Sampler2D.cpp" />
     <ClCompile Include="Sampler2DGL.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -195,11 +195,12 @@
     <ClInclude Include="..\include\stb_image.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConstantBufferGL.h" />
-    <ClInclude Include="ConstantBufferVk.h" />
     <ClInclude Include="MaterialVk.h" />
+    <ClInclude Include="MeshVK.h" />
     <ClInclude Include="Sampler2D.h" />
     <ClInclude Include="Sampler2DGL.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="StagingBuffer.h" />
     <ClInclude Include="Texture2DGL.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="Camera.h" />

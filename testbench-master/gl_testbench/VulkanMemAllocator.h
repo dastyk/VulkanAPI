@@ -2,6 +2,8 @@
 
 #include <vulkan\vulkan.h>
 
+#include "StagingBuffer.h"
+
 class VulkanMemAllocator
 {
 public:
@@ -9,6 +11,7 @@ public:
 	~VulkanMemAllocator();
 
 	const void AllocateBufferMemory(VkDeviceSize size, VkBuffer& buffer);
+	const void AllocateBufferMemory(VkDeviceSize size, StagingBuffer& buffer);
 private:
 	VkPhysicalDevice _physicalDevice;
 	VkDevice _device;

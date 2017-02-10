@@ -74,11 +74,8 @@ private:
 
 	VulkanMemAllocator* _vertexBufferAllocator;
 	VulkanMemAllocator* _constantBufferAllocator;
-	struct StagingBuffer
-	{
-		VkBuffer buffer;
-		VkDeviceMemory memory;
-	};
+	VulkanMemAllocator* _constantBufferStagingAllocator;
+
 	std::vector<StagingBuffer> _vertexStagingBuffers;
 
 	std::vector<Mesh*> drawList;

@@ -29,3 +29,18 @@ const void VulkanMemAllocator::AllocateBufferMemory(VkDeviceSize size, VkBuffer&
 	return void();
 }
 
+const void VulkanMemAllocator::AllocateBufferMemory(VkDeviceSize size, StagingBuffer & buffer)
+{
+	uint32_t blocks = (uint32_t)std::ceil((float)size / (float)_memoryReq.alignment);
+	VkDeviceSize allocSize = blocks*_memoryReq.alignment;
+
+	if (_freeSize < allocSize)
+		throw std::runtime_error("Out of device memory");
+	buffer.memory = _memory;
+	buffer.offset = _firstFree;
+	vkBindBufferMemory(_device, buffer.buffer, buffer.memory, buffer.offset);
+	_firstFree += allocSize;
+
+	return void();
+}
+
