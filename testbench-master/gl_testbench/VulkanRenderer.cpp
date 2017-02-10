@@ -3,6 +3,7 @@
 #include <array>
 #include <SDL_syswm.h>
 #include <algorithm>
+#include <fstream>
 #undef max
 #undef min
 
@@ -494,11 +495,24 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 				char test[12312];
 				buffer->setData(test, 12312, nullptr, 0);
 			}
+			
 		}
-		
+		if (DebugUtils::GetArg("-d", nullptr, argc, argv))
+		{
+			VulkanMesh mesh;
+			auto buff = me->makeVertexBuffer();
+			char test[21233];
+			buff->setData(test, 21233, VertexBuffer::DATA_USAGE::DONTCARE);
+			mesh.addIAVertexBufferBinding(buff, 0, 21233, POSITION);
+
+			mesh.CreateDescriptor(me->_vkDevice, me->_vkDescriptorPool);
+		}
 
 	},
-		[](void * userData, int argc, char ** argv) {printf("Creates stuff (-b to create buffer, -v specifies vertex buffer, -c for constant buffer)\n");},
+		[](void * userData, int argc, char ** argv) {
+		printf("Creates stuff:\n \t-b to create buffer, -v specifies vertex buffer, -c for constant buffer\n");
+		printf("\t-d to create descriptor set\n");
+	},
 		"Create",
 		"Creates stuff"
 
@@ -967,3 +981,108 @@ void VulkanRenderer::_createFramebuffers(void)
 			throw runtime_error("Failed to create framebuffer!");
 	}
 }
+
+void VulkanRenderer::_createTestPipeline()
+{
+	const std::string vertexFileName = "shaders/vertexShaderTest.spv";
+	const std::string fragmentFileName = "shaders/fragmentShaderTest.spv";
+	_createShaderModule(vertexFileName);
+	_createShaderModule(fragmentFileName);
+
+	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
+	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+	vertShaderStageInfo.module = _shaderModules[vertexFileName];
+	vertShaderStageInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
+	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	fragShaderStageInfo.module = _shaderModules[fragmentFileName];
+	fragShaderStageInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+
+	//Skipping inputAssemblyStateCreateInfo, attributeDescriptions and bindingDescriptions since this is not needed when we use vertex pulling (?)
+
+	VkViewport vp = {};
+	vp.x = 0.0f;
+	vp.y = 0.0f;
+	vp.width = _swapchainExtent.width;
+	vp.height = _swapchainExtent.height;
+	vp.minDepth = 0.0f;
+	vp.maxDepth = 1.0f;
+
+	VkRect2D scissor = {};
+	scissor.offset = { 0,0 };
+	scissor.extent = _swapchainExtent;
+
+	VkPipelineViewportStateCreateInfo vpCreateInfo = {};
+	vpCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	vpCreateInfo.pScissors = &scissor;
+	vpCreateInfo.pViewports = &vp;
+	vpCreateInfo.viewportCount = 1;
+	vpCreateInfo.scissorCount = 1;
+
+	VkPipelineRasterizationStateCreateInfo rastCreateInfo = {};
+	rastCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rastCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+	rastCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
+	rastCreateInfo.depthClampEnable = VK_FALSE;
+	rastCreateInfo.rasterizerDiscardEnable = VK_FALSE;
+	rastCreateInfo.lineWidth = 1.0f;
+	rastCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rastCreateInfo.depthBiasEnable = VK_FALSE;
+
+	VkPipelineMultisampleStateCreateInfo msCreateInfo = {};
+	msCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	msCreateInfo.sampleShadingEnable = VK_FALSE;
+	msCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
+	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+	colorBlendAttachment.blendEnable = VK_FALSE;
+
+	VkPipelineColorBlendStateCreateInfo colorBlendInfo = {};
+	colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	colorBlendInfo.logicOpEnable = VK_FALSE;
+	colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
+	colorBlendInfo.attachmentCount = 1;
+	colorBlendInfo.pAttachments = &colorBlendAttachment;
+	colorBlendInfo.blendConstants[0] = 0.0f;
+	colorBlendInfo.blendConstants[1] = 0.0f;
+	colorBlendInfo.blendConstants[2] = 0.0f;
+	colorBlendInfo.blendConstants[3] = 0.0f;
+
+	//VkDescriptorSetLayout dsLayouts[] = {_de}
+
+	
+}
+
+
+void VulkanRenderer::_createShaderModule(const std::string & filename)
+{
+	if (_shaderModules.find(filename) != _shaderModules.end())
+		return;
+	
+	std::vector<char> shaderCode;
+	std::ifstream fin(filename, std::ios_base::in | std::ios_base::binary);
+	fin.seekg(std::ios_base::end);
+	size_t size = fin.tellg();
+	fin.seekg(0);
+	shaderCode.resize(size);
+	fin.read(shaderCode.data(), shaderCode.size());
+
+	VkShaderModuleCreateInfo cinfo = {};
+	cinfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	cinfo.codeSize = shaderCode.size();
+	cinfo.pCode = (uint32_t*)shaderCode.data();
+
+	VkShaderModule shaderModule;
+	if (vkCreateShaderModule(_vkDevice, &cinfo, nullptr, &shaderModule) != VK_SUCCESS)
+		throw std::runtime_error("Failed to create shader module.");
+
+	_shaderModules[filename] = shaderModule;
+}
+
+
