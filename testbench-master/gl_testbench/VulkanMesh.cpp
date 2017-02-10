@@ -23,7 +23,7 @@ const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool pool)
 				buffer.first,
 				VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
 				1,
-				VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+				VK_SHADER_STAGE_VERTEX_BIT,
 				nullptr
 			};
 

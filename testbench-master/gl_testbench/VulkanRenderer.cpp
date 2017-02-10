@@ -494,11 +494,24 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 				char test[12312];
 				buffer->setData(test, 12312, nullptr, 0);
 			}
+			
 		}
-		
+		if (DebugUtils::GetArg("-d", nullptr, argc, argv))
+		{
+			VulkanMesh mesh;
+			auto buff = me->makeVertexBuffer();
+			char test[21233];
+			buff->setData(test, 21233, VertexBuffer::DATA_USAGE::DONTCARE);
+			mesh.addIAVertexBufferBinding(buff, 0, 21233, POSITION);
+
+			mesh.CreateDescriptor(me->_vkDevice, me->_vkDescriptorPool);
+		}
 
 	},
-		[](void * userData, int argc, char ** argv) {printf("Creates stuff (-b to create buffer, -v specifies vertex buffer, -c for constant buffer)\n");},
+		[](void * userData, int argc, char ** argv) {
+		printf("Creates stuff:\n \t-b to create buffer, -v specifies vertex buffer, -c for constant buffer\n");
+		printf("\t-d to create descriptor set\n");
+	},
 		"Create",
 		"Creates stuff"
 
