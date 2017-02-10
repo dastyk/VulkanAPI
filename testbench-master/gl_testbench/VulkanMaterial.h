@@ -3,11 +3,11 @@
 #include "ConstantBufferVk.h"
 #include <vulkan\vulkan.h>
 
-class MaterialVk : public Material
+class VulkanMaterial : public Material
 {
 public:
-	MaterialVk(VkDevice device);
-	~MaterialVk();
+	VulkanMaterial(VkDevice device);
+	~VulkanMaterial();
 
 	// Inherited
 	void setShader(const std::string& shaderFileName, ShaderType type);
