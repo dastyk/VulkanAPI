@@ -8,11 +8,10 @@ public:
 	VulkanMemAllocator(VkPhysicalDevice phyDev, VkDevice device, VkMemoryRequirements req, VkMemoryPropertyFlags memoryFlags);
 	~VulkanMemAllocator();
 
-	const void Allocate(VkDeviceSize size, VkBuffer* buffer, VkDeviceSize* offset);
+	const void AllocateBufferMemory(VkDeviceSize size, VkBuffer& buffer);
 private:
 	VkPhysicalDevice _physicalDevice;
 	VkDevice _device;
-	VkBuffer _buffer;
 	VkDeviceMemory _memory;
 
 	VkMemoryRequirements _memoryReq;

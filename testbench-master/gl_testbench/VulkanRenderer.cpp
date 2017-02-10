@@ -64,12 +64,13 @@ Mesh * VulkanRenderer::makeMesh()
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
 {
-	VulkanVertexBuffer* vBuffer = new VulkanVertexBuffer([this](const void* data, size_t size) -> VkDeviceSize {
-	
-		VkBuffer buffer;
-		VkDeviceSize offset;
-		_vertexBufferAllocator->Allocate(size, &buffer, &offset);
-		printf("Offset: %d\n", offset);
+	VulkanVertexBuffer* vBuffer = new VulkanVertexBuffer([this](const void* data, size_t size, VkBuffer& buffer) {
+
+		const auto info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+		VulkanHelpers::CreateBuffer(_vkDevice, info, &buffer);
+
+		_vertexBufferAllocator->AllocateBufferMemory(size, buffer);
 
 		/*Create the staging buffer*/
 		VulkanRenderer::StagingBuffer stagingBuffer;
@@ -92,11 +93,10 @@ VertexBuffer * VulkanRenderer::makeVertexBuffer()
 			VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
 		}
 
-		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, offset, size);
+		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
 
 		_first = true;
-	
-		return offset;
+
 	});
 
 	return vBuffer;

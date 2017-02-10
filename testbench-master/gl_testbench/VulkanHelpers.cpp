@@ -282,6 +282,43 @@ const void VulkanHelpers::CreateImage(VkDevice device, const VkImageCreateInfo *
 	}
 }
 
+const void VulkanHelpers::CreateDescriptorSetLayout(VkDevice device, const VkDescriptorSetLayoutCreateInfo * pCreateInfo, VkDescriptorSetLayout * pSetLayout, uint32_t bindingCount, const VkDescriptorSetLayoutBinding * pBindings, VkDescriptorSetLayoutCreateFlags flags, const VkAllocationCallbacks * pAllocator, const void * pNext)
+{
+	VkDescriptorSetLayoutCreateInfo info = {
+		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+		pNext,
+		flags,
+		bindingCount,
+		pBindings
+	};
+
+	VkResult r = vkCreateDescriptorSetLayout(device, pCreateInfo, pAllocator, pSetLayout);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create Descriptor set layout");
+	}
+}
+
+
+const void VulkanHelpers::CreatePipelineLayout(VkDevice device, VkPipelineLayout * pPipelineLayout, uint32_t setLayoutCount, const VkDescriptorSetLayout * pSetLayouts, uint32_t pushConstantRangeCount, const VkPushConstantRange * pPushConstantRanges, const VkAllocationCallbacks * pAllocator, const void * pNext, VkPipelineLayoutCreateFlags flags)
+{
+	VkPipelineLayoutCreateInfo info = {
+		VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+		pNext,
+		flags,
+		setLayoutCount,
+		pSetLayouts,
+		pushConstantRangeCount,
+		pPushConstantRanges
+	};
+
+	VkResult r = vkCreatePipelineLayout(device, &info, pAllocator, pPipelineLayout);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create pipeline layout");
+	}
+
+	return void();
+}
+
 const void VulkanHelpers::BeginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo * pInheritanceInfo, const void* pNext)
 {
 	/*typedef struct VkCommandBufferBeginInfo {

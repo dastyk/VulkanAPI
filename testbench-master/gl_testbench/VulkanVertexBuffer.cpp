@@ -2,7 +2,7 @@
 #include <glm\glm.hpp>
 #include "VulkanHelpers.h"
 
-VulkanVertexBuffer::VulkanVertexBuffer(const std::function<VkDeviceSize(const void*data, size_t size)>& callback):
+VulkanVertexBuffer::VulkanVertexBuffer(const std::function<void(const void* data, size_t size, VkBuffer& buffer)>& callback):
 	_callBack(callback)
 {
 }
@@ -16,7 +16,7 @@ void VulkanVertexBuffer::setData(const void * data, size_t size, DATA_USAGE usag
 {
 	_totalSize = size;
 	
-	_offset = _callBack(data, size);
+	_callBack(data, size, _buffer);
 
 	//if (_memory != VK_NULL_HANDLE)
 	//	vkFreeMemory(_device, _memory, nullptr);

@@ -172,6 +172,27 @@ namespace VulkanHelpers
 		VkImage*									pImage,
 		const VkAllocationCallbacks*				pAllocator					= nullptr);
 
+	const void CreateDescriptorSetLayout(
+		VkDevice									device,
+		const VkDescriptorSetLayoutCreateInfo*		pCreateInfo,
+		VkDescriptorSetLayout*						pSetLayout,
+		uint32_t									bindingCount,
+		const VkDescriptorSetLayoutBinding*			pBindings,
+		VkDescriptorSetLayoutCreateFlags			flags						= 0,
+		const VkAllocationCallbacks*				pAllocator					= nullptr,
+		const void*									pNext						= nullptr);
+
+	const void CreatePipelineLayout(
+		VkDevice									device,
+		VkPipelineLayout*							pPipelineLayout,
+		uint32_t									setLayoutCount,
+		const VkDescriptorSetLayout*				pSetLayouts,
+		uint32_t									pushConstantRangeCount		= 0,
+		const VkPushConstantRange*					pPushConstantRanges			= 0,
+		const VkAllocationCallbacks*				pAllocator					= nullptr,
+		const void*									pNext						= nullptr,
+		VkPipelineLayoutCreateFlags					flags						= 0);
+
 
 	/*Command recording*/
 	const void BeginCommandBuffer(
