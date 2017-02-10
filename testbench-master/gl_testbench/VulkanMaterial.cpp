@@ -1,16 +1,18 @@
-#include "MaterialVk.h"
+#include "VulkanMaterial.h"
 
 #include <assert.h>
 #include <fstream>
 
 using namespace std;
 
-MaterialVk::MaterialVk(VkDevice device) : _device(device)
-{
 
+VulkanMaterial::VulkanMaterial(VkDevice device, const std::function<void(const void*data, size_t size, VkBuffer&buffer, StagingBuffer&stagingBuffer)>& createBufferCallback, std::function<void(const void*data, size_t size, VkBuffer&buffer, StagingBuffer&stagingBuffer)> updateBufferCallback)
+	: _device(device),
+	_createBufferCallback(createBufferCallback), _updateBufferCallback(updateBufferCallback) 
+{
 }
 
-MaterialVk::~MaterialVk()
+VulkanMaterial::~VulkanMaterial()
 {
 	for (auto& buffer : constantBuffers)
 	{
@@ -19,7 +21,7 @@ MaterialVk::~MaterialVk()
 	}
 }
 
-void MaterialVk::setShader(const std::string& shaderFileName, ShaderType type)
+void VulkanMaterial::setShader(const std::string& shaderFileName, ShaderType type)
 {
 	if (shaderFileNames.find(type) != shaderFileNames.end())
 	{
@@ -29,7 +31,7 @@ void MaterialVk::setShader(const std::string& shaderFileName, ShaderType type)
 	shaderFileNames[type] = shaderFileName;
 }
 
-void MaterialVk::removeShader(ShaderType type)
+void VulkanMaterial::removeShader(ShaderType type)
 {
 	VkShaderModule shader = shaderObjects[static_cast<uint32_t>(type)];
 
@@ -46,12 +48,12 @@ void MaterialVk::removeShader(ShaderType type)
 	}
 }
 
-void MaterialVk::setDiffuse(Color c)
+void VulkanMaterial::setDiffuse(Color c)
 {
 
 }
 
-int MaterialVk::compileMaterial(std::string& errString)
+int VulkanMaterial::compileMaterial(std::string& errString)
 {
 	// Remove pre-existing shaders
 	removeShader(ShaderType::VS);
@@ -77,30 +79,30 @@ int MaterialVk::compileMaterial(std::string& errString)
 }
 
 // TODO: not really sure how this should map to Vulkan
-void MaterialVk::addConstantBuffer(std::string name, unsigned int location)
+void VulkanMaterial::addConstantBuffer(std::string name, unsigned int location)
 {
-	constantBuffers[location] = new ConstantBufferVk(name, location);
+	constantBuffers[location] = new VulkanConstantBuffer(name, location, _createBufferCallback, _updateBufferCallback);
 }
 
-void MaterialVk::updateConstantBuffer(const void* data, size_t size, unsigned int location)
+void VulkanMaterial::updateConstantBuffer(const void* data, size_t size, unsigned int location)
 {
 	//constantBuffers[location]->setData(data, size, this, location);
 }
 
-int MaterialVk::enable()
+int VulkanMaterial::enable()
 {
 	// What!?
-	// Vulkan is stateless, it's not like we're enabled a material by itself
+	// Vulkan is stateless, it's not like we enable a material by itself
 
 	return 0;
 }
 
-void MaterialVk::disable()
+void VulkanMaterial::disable()
 {
-	// Nothing to disable... completely pointless
+	// Nothing to disable...
 }
 
-bool MaterialVk::_createShader(ShaderType type)
+bool VulkanMaterial::_createShader(ShaderType type)
 {
 	ifstream file(shaderFileNames[type], ios::binary | ios::ate);
 	if (!file)

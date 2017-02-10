@@ -2,17 +2,19 @@
 
 #include <vulkan\vulkan.h>
 
+#include "StagingBuffer.h"
+
 class VulkanMemAllocator
 {
 public:
 	VulkanMemAllocator(VkPhysicalDevice phyDev, VkDevice device, VkMemoryRequirements req, VkMemoryPropertyFlags memoryFlags);
 	~VulkanMemAllocator();
 
-	const void Allocate(VkDeviceSize size, VkBuffer* buffer, VkDeviceSize* offset);
+	const void AllocateBufferMemory(VkDeviceSize size, VkBuffer& buffer);
+	const void AllocateBufferMemory(VkDeviceSize size, StagingBuffer& buffer);
 private:
 	VkPhysicalDevice _physicalDevice;
 	VkDevice _device;
-	VkBuffer _buffer;
 	VkDeviceMemory _memory;
 
 	VkMemoryRequirements _memoryReq;

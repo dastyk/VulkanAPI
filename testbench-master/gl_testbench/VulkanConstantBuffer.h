@@ -1,12 +1,16 @@
 #pragma once
 #include "ConstantBuffer.h"
 #include <vulkan\vulkan.h>
+#include <functional>
+#include "StagingBuffer.h"
 
 class VulkanConstantBuffer :
 	public ConstantBuffer
 {
 public:
-	VulkanConstantBuffer(std::string NAME, unsigned int location, VkPhysicalDevice phyDevice, VkDevice device, VkQueue queue, VkCommandPool cmdPool, VkCommandBuffer cmdBuffer);
+	VulkanConstantBuffer(std::string NAME, unsigned int location, 
+		const std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)>& createBufferCallback,
+		std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> updateBufferCallback);
 	~VulkanConstantBuffer();
 
 
@@ -16,18 +20,11 @@ public:
 private:
 	std::string _name;
 	uint32_t _location;
-	bool _first;
-
-	VkDevice _device;
-	VkPhysicalDevice _physicalDevice;
+	VkDeviceSize _size;
 	VkBuffer _buffer;
-	VkDeviceMemory _memory;
-	VkBuffer _stagingBuffer;
-	VkDeviceMemory _stagingBufferMemory;
-	VkCommandPool _cmdPool;
-	VkQueue _queue;
-	VkCommandBuffer _cmdBuffer;
-	
+	StagingBuffer _stagningBuffer;
 
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> _createBufferCallback;
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> _updateBufferCallback;
 };
 
