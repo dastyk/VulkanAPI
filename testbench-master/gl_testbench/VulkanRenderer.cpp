@@ -589,6 +589,10 @@ int VulkanRenderer::shutdown()
 	{
 		vkDestroyImageView(_vkDevice, view, nullptr);
 	}
+	for (auto& i : _shaderModules)
+	{
+		vkDestroyShaderModule(_vkDevice, i.second, nullptr);
+	}
 	
 	vkDestroySemaphore(_vkDevice, _renderingComplete, nullptr);
 	vkDestroySemaphore(_vkDevice, _swapchainImageAvailable, nullptr);
@@ -1047,6 +1051,7 @@ void VulkanRenderer::_createTestPipeline()
 	colorBlendInfo.blendConstants[3] = 0.0f;
 
 	//VkDescriptorSetLayout dsLayouts[] = {_de}
+	
 
 	
 }
