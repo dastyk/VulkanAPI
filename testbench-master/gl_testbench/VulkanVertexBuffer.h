@@ -13,6 +13,7 @@ public:
 	void setData(const void* data, size_t size, DATA_USAGE usage);
 	void bind(size_t offset, size_t size, unsigned int location);
 	void unbind();
+	VkBufferView GetBufferView();
 	size_t getSize();
 
 private:
