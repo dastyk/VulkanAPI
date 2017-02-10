@@ -565,6 +565,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	};
 	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkDescriptorPool, 0, 10000, size(pSize), pSize);
 
+
+	
 	return 0;
 }
 
@@ -988,8 +990,8 @@ void VulkanRenderer::_createFramebuffers(void)
 
 void VulkanRenderer::_createTestPipeline()
 {
-	const std::string vertexFileName = "shaders/vertexShaderTest.spv";
-	const std::string fragmentFileName = "shaders/fragmentShaderTest.spv";
+	const std::string vertexFileName = "../assets/Vulkan/cube-vert.spv";
+	const std::string fragmentFileName = "../assets/Vulkan/cube-frag.spv";
 	_createShaderModule(vertexFileName);
 	_createShaderModule(fragmentFileName);
 
@@ -1058,9 +1060,33 @@ void VulkanRenderer::_createTestPipeline()
 	colorBlendInfo.blendConstants[2] = 0.0f;
 	colorBlendInfo.blendConstants[3] = 0.0f;
 
-	//VkDescriptorSetLayout dsLayouts[] = {_de}
-	
 
+	//Temporary, need descriptor set to work
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 0;
+	pipelineLayoutInfo.pSetLayouts = nullptr;
+
+	if (vkCreatePipelineLayout(_vkDevice, &pipelineLayoutInfo, nullptr, &_testPipelineLayout) != VK_SUCCESS)
+		throw std::runtime_error("Could not create pipeline layout");
+
+	//VkGraphicsPipelineCreateInfo pipelineInfo = {};
+	//pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	//pipelineInfo.stageCount = 2;
+	//pipelineInfo.pStages = shaderStages;
+	//pipelineInfo.pVertexInputState = nullptr;
+	//pipelineInfo.pInputAssemblyState = nullptr;
+	//pipelineInfo.pViewportState = &vpCreateInfo;
+	//pipelineInfo.pRasterizationState = &rastCreateInfo;
+	//pipelineInfo.pMultisampleState = &msCreateInfo;
+	//pipelineInfo.pColorBlendState = &colorBlendInfo;
+	//pipelineInfo.layout = _testPipelineLayout;
+	//pipelineInfo.renderPass = _renderPass;
+	//pipelineInfo.subpass = NULL;
+	//pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+	//if (vkCreateGraphicsPipelines(_vkDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_testPipeline) != VK_SUCCESS)
+	//	throw std::runtime_error("Could not create graphics pipeline");
 	
 }
 
@@ -1072,9 +1098,11 @@ void VulkanRenderer::_createShaderModule(const std::string & filename)
 	
 	std::vector<char> shaderCode;
 	std::ifstream fin(filename, std::ios_base::in | std::ios_base::binary);
-	fin.seekg(std::ios_base::end);
+	if (!fin.is_open())
+		throw std::runtime_error("Could not find shader: " + filename);
+	fin.seekg(0,std::ios_base::end);
 	size_t size = fin.tellg();
-	fin.seekg(0);
+	fin.seekg(0,std::ios_base::beg);
 	shaderCode.resize(size);
 	fin.read(shaderCode.data(), shaderCode.size());
 

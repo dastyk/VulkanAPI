@@ -55,6 +55,7 @@ private:
 	SDL_Window* window;
 
 	VkPipeline _testPipeline;
+	VkPipelineLayout _testPipelineLayout;
 	VkDescriptorSet _testDescriptorSet;
 
 	VkInstance _vkInstance;
