@@ -235,6 +235,12 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		0
 	);
 
+	// For validation purposes
+	uint32_t familyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(_vkPhysicalDevices[0], &familyCount, nullptr);
+	VkQueueFamilyProperties* familyProperties = new VkQueueFamilyProperties[familyCount];
+	vkGetPhysicalDeviceQueueFamilyProperties(_vkPhysicalDevices[0], &familyCount, familyProperties);
+	delete[] familyProperties;
 
 	VulkanHelpers::CreateLogicDevice(_vkPhysicalDevices[0], deviceCreateInfo, &_vkDevice);
 
@@ -299,6 +305,15 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	
 	if (vkCreateWin32SurfaceKHR(_vkInstance, &wndCreateInfo, nullptr, &_vkSurface) != VK_SUCCESS)
 		throw std::runtime_error("Window surface creation failed.");
+
+	// For validation purposes
+	VkBool32 surfaceSupported;
+	vkGetPhysicalDeviceSurfaceSupportKHR(_vkPhysicalDevices[0], 0, _vkSurface, &surfaceSupported);
+	if (surfaceSupported == VK_FALSE)
+	{
+		throw runtime_error("Surface is not supported for the physical device!");
+	}
+
 	
 	/************** Set up swap chain ****************/
 	VkSurfaceCapabilitiesKHR capabilities;
