@@ -113,6 +113,20 @@ namespace VulkanHelpers
 		const void*              					pNext						 = nullptr);
 
 
+	VkWriteDescriptorSet MakeWriteDescriptorSet(
+		VkDescriptorSet								dstSet,
+		uint32_t									dstBinding,
+		uint32_t									dstArrayElement,
+		uint32_t									descriptorCount,
+		VkDescriptorType							descriptorType,
+		const VkDescriptorImageInfo*				pImageInfo,
+		const VkDescriptorBufferInfo*				pBufferInfo,
+		const VkBufferView*							pTexelBufferView,
+		const void*									pNext						= nullptr);
+
+
+
+
 
 	/*Creation*/
 	const void CreateInstance(

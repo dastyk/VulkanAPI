@@ -83,6 +83,11 @@ void VulkanVertexBuffer::unbind()
 
 }
 
+VkBufferView VulkanVertexBuffer::GetBufferView()
+{
+	return VkBufferView();
+}
+
 size_t VulkanVertexBuffer::getSize()
 {
 	return _totalSize;

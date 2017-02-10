@@ -503,7 +503,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 			auto buff = me->makeVertexBuffer();
 			char test[21233];
 			buff->setData(test, 21233, VertexBuffer::DATA_USAGE::DONTCARE);
-			mesh.addIAVertexBufferBinding(buff, 0, 21233, POSITION);
+			mesh.addIAVertexBufferBinding(buff, 0, 21233/(sizeof(float)*3), POSITION);
 
 			mesh.CreateDescriptor(me->_vkDevice, me->_vkDescriptorPool);
 		}
