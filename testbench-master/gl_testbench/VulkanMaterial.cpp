@@ -7,9 +7,11 @@
 
 using namespace std;
 
-VulkanMaterial::VulkanMaterial(VkDevice device, VkPipelineLayout pipelineLayout, VkRenderPass renderPass) : _device(device), _pipelineLayout(pipelineLayout), _renderPass(renderPass)
-{
 
+VulkanMaterial::VulkanMaterial(VkDevice device, VkPipelineLayout pipelineLayout, VkRenderPass renderPass, const std::function<void(const void*data, size_t size, VkBuffer&buffer, StagingBuffer&stagingBuffer)>& createBufferCallback, std::function<void(const void*data, size_t size, VkBuffer&buffer, StagingBuffer&stagingBuffer)> updateBufferCallback)
+	: _device(device), _pipelineLayout(pipelineLayout), _renderPass(renderPass),
+	_createBufferCallback(createBufferCallback), _updateBufferCallback(updateBufferCallback) 
+{
 }
 
 VulkanMaterial::~VulkanMaterial()
@@ -218,7 +220,7 @@ int VulkanMaterial::compileMaterial(std::string& errString)
 // TODO: not really sure how this should map to Vulkan
 void VulkanMaterial::addConstantBuffer(std::string name, unsigned int location)
 {
-	constantBuffers[location] = new ConstantBufferVk(name, location);
+	constantBuffers[location] = new VulkanConstantBuffer(name, location, _createBufferCallback, _updateBufferCallback);
 }
 
 void VulkanMaterial::updateConstantBuffer(const void* data, size_t size, unsigned int location)

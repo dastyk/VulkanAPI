@@ -6,7 +6,7 @@
 #include "VulkanVertexBuffer.h"
 #include "VulkanMemAllocator.h"
 #include "VulkanConstantBuffer.h"
-
+#include "VulkanMesh.h"
 #pragma comment(lib,"SDL2.lib")
 #pragma comment(lib,"SDL2main.lib")
 
@@ -58,6 +58,8 @@ private:
 	VkCommandPool _vkCmdPool;
 	VkCommandBuffer _vkInitTransferCmdBuffer;
 	VkCommandBuffer _vkCmdBuffer;
+	VkDescriptorPool _vkDescriptorPool;
+
 	VkSurfaceKHR _vkSurface;
 	VkFormat _swapchainFormat;
 	VkExtent2D _swapchainExtent;
@@ -74,14 +76,11 @@ private:
 
 	VulkanMemAllocator* _vertexBufferAllocator;
 	VulkanMemAllocator* _constantBufferAllocator;
-	struct StagingBuffer
-	{
-		VkBuffer buffer;
-		VkDeviceMemory memory;
-	};
+	VulkanMemAllocator* _constantBufferStagingAllocator;
+
 	std::vector<StagingBuffer> _vertexStagingBuffers;
 
-	std::vector<Mesh*> drawList;
+	std::vector<VulkanMesh*> drawList;
 
 	bool globalWireframeMode = false;
 
@@ -93,5 +92,8 @@ private:
 	//	{ CLEAR_BUFFER_FLAGS::STENCIL, GL_STENCIL_BUFFER_BIT }
 	//};
 
+
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> _createBufferCallback;
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> _updateBufferCallback;
 };
 

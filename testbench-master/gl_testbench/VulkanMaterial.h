@@ -1,12 +1,14 @@
 #pragma once
 #include "Material.h"
-#include "ConstantBufferVk.h"
+#include "VulkanConstantBuffer.h"
 #include <vulkan\vulkan.h>
 
 class VulkanMaterial : public Material
 {
 public:
-	VulkanMaterial(VkDevice device, VkPipelineLayout pipelineLayout, VkRenderPass renderPass);
+	VulkanMaterial(VkDevice device, VkPipelineLayout pipelineLayout, VkRenderPass renderPass,
+		const std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)>& createBufferCallback,
+		std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> updateBufferCallback);
 	~VulkanMaterial();
 
 	// Inherited
@@ -29,9 +31,12 @@ private:
 	// Shader modules corresponding to various shader stages
 	VkShaderModule _shaderObjects[4] = { VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE };
 
-	std::map<unsigned int, ConstantBufferVk*> constantBuffers;
+	std::map<unsigned int, VulkanConstantBuffer*> constantBuffers;
 
 	VkPipeline _pipeline = VK_NULL_HANDLE;
+
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> _createBufferCallback;
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> _updateBufferCallback;
 
 	// Provided by renderer, same for all materials
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;

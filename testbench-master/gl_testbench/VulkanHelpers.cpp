@@ -166,33 +166,6 @@ VkImageCreateInfo VulkanHelpers::MakeImageCreateInfo(VkFormat format, VkExtent3D
 	return imageCreateInfo;
 }
 
-VkDescriptorSetLayoutCreateInfo VulkanHelpers::MakeDescriptorSetLayoutCreateInfo(VkDescriptorSetLayoutCreateFlags flags, uint32_t bindingCount, const VkDescriptorSetLayoutBinding * pBindings, const void * pNext)
-{
-	VkDescriptorSetLayoutCreateInfo info =
-	{
-		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-		pNext,
-		flags,
-		bindingCount,
-		pBindings
-	};
-	return info;
-}
-
-VkPipelineLayoutCreateInfo VulkanHelpers::MakePipelineLayoutCreateInfo(uint32_t setLayoutCount, const VkDescriptorSetLayout * pSetLayouts, uint32_t pushConstantRangeCount, const VkPushConstantRange * pPushConstantRanges, VkPipelineLayoutCreateFlags flags, const void * pNext)
-{
-	VkPipelineLayoutCreateInfo info =
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-		pNext,
-		flags,
-		setLayoutCount,
-		pSetLayouts,
-		pushConstantRangeCount,
-		pPushConstantRanges
-	};
-	return info;
-}
 
 
 const void VulkanHelpers::CreateInstance(const VkInstanceCreateInfo * pCreateInfo, VkInstance * pInstance, const VkAllocationCallbacks * pAllocator)
@@ -280,6 +253,77 @@ const void VulkanHelpers::CreateImage(VkDevice device, const VkImageCreateInfo *
 	if (result != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create buffer.");
 	}
+}
+
+const void VulkanHelpers::CreateDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout * pSetLayout, uint32_t bindingCount, const VkDescriptorSetLayoutBinding * pBindings, VkDescriptorSetLayoutCreateFlags flags, const VkAllocationCallbacks * pAllocator, const void * pNext)
+{
+	VkDescriptorSetLayoutCreateInfo info = {
+		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+		pNext,
+		flags,
+		bindingCount,
+		pBindings
+	};
+
+	VkResult r = vkCreateDescriptorSetLayout(device, &info, pAllocator, pSetLayout);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create Descriptor set layout");
+	}
+}
+
+
+const void VulkanHelpers::CreatePipelineLayout(VkDevice device, VkPipelineLayout * pPipelineLayout, uint32_t setLayoutCount, const VkDescriptorSetLayout * pSetLayouts, uint32_t pushConstantRangeCount, const VkPushConstantRange * pPushConstantRanges, const VkAllocationCallbacks * pAllocator, const void * pNext, VkPipelineLayoutCreateFlags flags)
+{
+	VkPipelineLayoutCreateInfo info = {
+		VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+		pNext,
+		flags,
+		setLayoutCount,
+		pSetLayouts,
+		pushConstantRangeCount,
+		pPushConstantRanges
+	};
+
+	VkResult r = vkCreatePipelineLayout(device, &info, pAllocator, pPipelineLayout);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create pipeline layout");
+	}
+
+}
+
+const void VulkanHelpers::CreateDescriptorPool(VkDevice device, VkDescriptorPool * pDescriptorPool, VkDescriptorPoolCreateFlags flags, uint32_t maxSets, uint32_t poolSizeCount, const VkDescriptorPoolSize * pPoolSizes, const VkAllocationCallbacks * pAllocator, const void * pNext)
+{
+
+	VkDescriptorPoolCreateInfo info = {
+		VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		pNext,
+		flags,
+		maxSets,
+		poolSizeCount,
+		pPoolSizes
+	};
+
+	VkResult r = vkCreateDescriptorPool(device, &info, pAllocator, pDescriptorPool);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create descriptor pool");
+	}
+}
+
+const void VulkanHelpers::AllocateDescriptorSets(VkDevice device, VkDescriptorPool descriptorPool, uint32_t descriptorSetCount, const VkDescriptorSetLayout * pSetLayouts, VkDescriptorSet * pDescriptorSets, const void * pNext)
+{
+	VkDescriptorSetAllocateInfo info = {
+		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+		pNext,
+		descriptorPool,
+		descriptorSetCount,
+		pSetLayouts
+	};
+
+	VkResult r = vkAllocateDescriptorSets(device, &info, pDescriptorSets);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create allocate descriptor sets");
+	}
+
 }
 
 const void VulkanHelpers::BeginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo * pInheritanceInfo, const void* pNext)
