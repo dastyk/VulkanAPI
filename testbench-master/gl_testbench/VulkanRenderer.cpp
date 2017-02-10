@@ -6,7 +6,7 @@
 #undef max
 #undef min
 
-#include "MaterialVk.h"
+#include "VulkanMaterial.h"
 
 #define MB *1024*1024
 
@@ -54,7 +54,7 @@ VulkanRenderer::~VulkanRenderer()
 
 Material * VulkanRenderer::makeMaterial()
 {
-	return new MaterialVk(_vkDevice);
+	return new VulkanMaterial(_vkDevice);
 }
 
 Mesh * VulkanRenderer::makeMesh()
