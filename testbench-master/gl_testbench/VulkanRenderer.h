@@ -46,10 +46,16 @@ private:
 	void _createSemaphores(void);
 	void _createRenderPass(void);
 	void _createFramebuffers(void);
+	void _createTestPipeline();
+	
+	void _createShaderModule(const std::string& filename); //Also saves it in _shaderModules which is a map from the filename to the shader module
 
 private:
 	bool _first;
 	SDL_Window* window;
+
+	VkPipeline _testPipeline;
+	VkDescriptorSet _testDescriptorSet;
 
 	VkInstance _vkInstance;
 	std::vector<VkPhysicalDevice> _vkPhysicalDevices;
@@ -72,7 +78,8 @@ private:
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	std::vector<VkFramebuffer> _framebuffers;
 	VkDebugReportCallbackEXT _vkDebugCallback;
-
+	std::unordered_map <std::string, VkShaderModule> _shaderModules;
+	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 
 	VulkanMemAllocator* _vertexBufferAllocator;
 	VulkanMemAllocator* _constantBufferAllocator;
