@@ -166,6 +166,24 @@ VkImageCreateInfo VulkanHelpers::MakeImageCreateInfo(VkFormat format, VkExtent3D
 	return imageCreateInfo;
 }
 
+VkWriteDescriptorSet VulkanHelpers::MakeWriteDescriptorSet(VkDescriptorSet dstSet, uint32_t dstBinding, uint32_t dstArrayElement, uint32_t descriptorCount, VkDescriptorType descriptorType, const VkDescriptorImageInfo * pImageInfo, const VkDescriptorBufferInfo * pBufferInfo, const VkBufferView * pTexelBufferView, const void * pNext)
+{
+	VkWriteDescriptorSet info = {
+		VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+		nullptr,
+		dstSet,
+		dstBinding,
+		dstArrayElement,
+		descriptorCount,
+		descriptorType,
+		pImageInfo,
+		pBufferInfo,
+		pTexelBufferView
+	};
+
+	return info;
+}
+
 
 
 const void VulkanHelpers::CreateInstance(const VkInstanceCreateInfo * pCreateInfo, VkInstance * pInstance, const VkAllocationCallbacks * pAllocator)

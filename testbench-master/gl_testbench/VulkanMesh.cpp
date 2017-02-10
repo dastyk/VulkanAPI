@@ -1,6 +1,6 @@
 #include "VulkanMesh.h"
 #include "VulkanHelpers.h"
-
+#include "VulkanVertexBuffer.h"
 
 VulkanMesh::VulkanMesh() : _set(VK_NULL_HANDLE)
 {
@@ -38,6 +38,16 @@ const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool pool)
 
 		VulkanHelpers::AllocateDescriptorSets(device, pool, 1, &_setLayout, &_set);
 
+		std::vector<VkWriteDescriptorSet> WriteDS;
+		for (auto& buffer : geometryBuffers)
+		{
+			auto view = ((VulkanVertexBuffer*)buffer.second.buffer)->GetBufferView();
+			WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_set, buffer.first, 0, 1, VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, nullptr, nullptr, &view));
+
+		}
+
+		vkUpdateDescriptorSets(device, WriteDS.size(), WriteDS.data(), 0, nullptr);
+		
 
 	}
 
