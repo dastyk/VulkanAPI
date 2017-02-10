@@ -114,20 +114,6 @@ namespace VulkanHelpers
 
 
 
-	VkDescriptorSetLayoutCreateInfo  MakeDescriptorSetLayoutCreateInfo(
-		VkDescriptorSetLayoutCreateFlags			flags,
-		uint32_t									bindingCount,
-		const VkDescriptorSetLayoutBinding*			pBindings,
-		const void*									pNext						 = nullptr);
-
-	VkPipelineLayoutCreateInfo MakePipelineLayoutCreateInfo(
-		uint32_t									setLayoutCount,
-		const VkDescriptorSetLayout*				pSetLayouts,
-		uint32_t                        			pushConstantRangeCount		 = 0,
-		const VkPushConstantRange*      			pPushConstantRanges			 = nullptr,
-		VkPipelineLayoutCreateFlags     			flags						 = 0,
-		const void*                     			pNext						 = nullptr);
-
 	/*Creation*/
 	const void CreateInstance(
 		const VkInstanceCreateInfo*                 pCreateInfo,
@@ -174,7 +160,6 @@ namespace VulkanHelpers
 
 	const void CreateDescriptorSetLayout(
 		VkDevice									device,
-		const VkDescriptorSetLayoutCreateInfo*		pCreateInfo,
 		VkDescriptorSetLayout*						pSetLayout,
 		uint32_t									bindingCount,
 		const VkDescriptorSetLayoutBinding*			pBindings,
@@ -192,6 +177,27 @@ namespace VulkanHelpers
 		const VkAllocationCallbacks*				pAllocator					= nullptr,
 		const void*									pNext						= nullptr,
 		VkPipelineLayoutCreateFlags					flags						= 0);
+
+
+	const void CreateDescriptorPool(
+		VkDevice									device,
+		VkDescriptorPool*							pDescriptorPool, 
+		VkDescriptorPoolCreateFlags					flags,
+		uint32_t									maxSets,
+		uint32_t									poolSizeCount,
+		const VkDescriptorPoolSize*					pPoolSizes,
+		const VkAllocationCallbacks*				pAllocator					= nullptr,
+		const void*									pNext						= nullptr);
+
+	const void AllocateDescriptorSets(
+		VkDevice									device,
+		VkDescriptorPool							descriptorPool,
+		uint32_t									descriptorSetCount,
+		const VkDescriptorSetLayout*				pSetLayouts,
+		VkDescriptorSet*							pDescriptorSets,
+		const void*									pNext						= nullptr);
+
+
 
 
 	/*Command recording*/

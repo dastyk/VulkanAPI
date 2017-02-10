@@ -45,6 +45,55 @@ using namespace std;
 
 VulkanRenderer::VulkanRenderer() : _first(true)
 {
+	_createBufferCallback = [this](const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer) {
+
+		auto info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+		VulkanHelpers::CreateBuffer(_vkDevice, info, &buffer);
+
+		_constantBufferAllocator->AllocateBufferMemory(size, buffer);
+
+		info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
+		VulkanHelpers::CreateBuffer(_vkDevice, info, &stagingBuffer.buffer);
+
+		_constantBufferStagingAllocator->AllocateBufferMemory(size, stagingBuffer);
+
+		/*Copy the data to staging*/
+		void* pData;
+		VulkanHelpers::MapMemory(_vkDevice, stagingBuffer.memory, &pData);
+		memcpy((char*)pData + stagingBuffer.offset, data, size);
+		vkUnmapMemory(_vkDevice, stagingBuffer.memory);
+
+		if (!_first)
+		{
+			VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
+		}
+
+		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
+
+		_first = true;
+
+	};
+	
+	_updateBufferCallback = [this](const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer) {
+
+		/*Copy the data to staging*/
+		void* pData;
+		VulkanHelpers::MapMemory(_vkDevice, stagingBuffer.memory, &pData);
+		memcpy((char*)pData + stagingBuffer.offset, data, size);
+		vkUnmapMemory(_vkDevice, stagingBuffer.memory);
+
+		if (!_first)
+		{
+			VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
+		}
+
+		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
+
+		_first = true;
+
+	};
 }
 
 
@@ -54,7 +103,7 @@ VulkanRenderer::~VulkanRenderer()
 
 Material * VulkanRenderer::makeMaterial()
 {
-	return new VulkanMaterial(_vkDevice);
+	return new VulkanMaterial(_vkDevice, _createBufferCallback, _updateBufferCallback);
 }
 
 Mesh * VulkanRenderer::makeMesh()
@@ -104,53 +153,7 @@ VertexBuffer * VulkanRenderer::makeVertexBuffer()
 
 ConstantBuffer * VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location)
 {
-	return new VulkanConstantBuffer(NAME, location, [this](const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer) {
-	
-		auto info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-
-		VulkanHelpers::CreateBuffer(_vkDevice, info, &buffer);
-
-		_constantBufferAllocator->AllocateBufferMemory(size, buffer);
-
-		info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-
-		VulkanHelpers::CreateBuffer(_vkDevice, info, &stagingBuffer.buffer);
-
-		_constantBufferStagingAllocator->AllocateBufferMemory(size, stagingBuffer);
-
-		/*Copy the data to staging*/
-		void* pData;
-		VulkanHelpers::MapMemory(_vkDevice, stagingBuffer.memory, &pData);
-		memcpy((char*)pData + stagingBuffer.offset, data, size);
-		vkUnmapMemory(_vkDevice, stagingBuffer.memory);
-
-		if (!_first)
-		{
-			VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
-		}
-
-		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
-
-		_first = true;
-
-	}, [this](const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer) {
-
-		/*Copy the data to staging*/
-		void* pData;
-		VulkanHelpers::MapMemory(_vkDevice, stagingBuffer.memory, &pData);
-		memcpy((char*)pData + stagingBuffer.offset, data, size);
-		vkUnmapMemory(_vkDevice, stagingBuffer.memory);
-
-		if (!_first)
-		{
-			VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
-		}
-
-		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
-
-		_first = true;
-
-	});
+	return new VulkanConstantBuffer(NAME, location,_createBufferCallback, _updateBufferCallback);
 }
 
 ResourceBinding * VulkanRenderer::makeResourceBinding()
@@ -538,12 +541,25 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	/**********Start recording init buffers****************/
 	VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
 
+
+
+
+
+	/*************Create descriptor pool**************/
+	VkDescriptorPoolSize pSize[] = {
+		{VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 3}
+	};
+	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkDescriptorPool, 0, 10000, size(pSize), pSize);
+
 	return 0;
 }
 
 int VulkanRenderer::shutdown()
 {
 	vkDeviceWaitIdle(_vkDevice);
+
+	vkDestroyDescriptorPool(_vkDevice, _vkDescriptorPool, nullptr);
+
 	delete _constantBufferStagingAllocator;
 	_constantBufferStagingAllocator = nullptr;
 	delete _constantBufferAllocator;
@@ -559,6 +575,7 @@ int VulkanRenderer::shutdown()
 	{
 		vkDestroyImageView(_vkDevice, view, nullptr);
 	}
+	
 	vkDestroySemaphore(_vkDevice, _renderingComplete, nullptr);
 	vkDestroySemaphore(_vkDevice, _swapchainImageAvailable, nullptr);
 	//vkFreeCommandBuffers(_vkDevice, _vkCmdPool, 1, &_vkCmdBuffer); is freed when pool is destroyed
@@ -590,9 +607,9 @@ void VulkanRenderer::setRenderState(RenderState * ps)
 
 void VulkanRenderer::submit(Mesh * mesh)
 {
-
-
-	drawList.push_back(mesh);
+	auto vMesh = (VulkanMesh*)mesh;
+	vMesh->CreateDescriptor(_vkDevice, _vkDescriptorPool);
+	drawList.push_back(vMesh);
 }
 
 void VulkanRenderer::frame()

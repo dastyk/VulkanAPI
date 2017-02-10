@@ -58,6 +58,8 @@ private:
 	VkCommandPool _vkCmdPool;
 	VkCommandBuffer _vkInitTransferCmdBuffer;
 	VkCommandBuffer _vkCmdBuffer;
+	VkDescriptorPool _vkDescriptorPool;
+
 	VkSurfaceKHR _vkSurface;
 	VkFormat _swapchainFormat;
 	VkExtent2D _swapchainExtent;
@@ -78,7 +80,7 @@ private:
 
 	std::vector<StagingBuffer> _vertexStagingBuffers;
 
-	std::vector<Mesh*> drawList;
+	std::vector<VulkanMesh*> drawList;
 
 	bool globalWireframeMode = false;
 
@@ -90,5 +92,8 @@ private:
 	//	{ CLEAR_BUFFER_FLAGS::STENCIL, GL_STENCIL_BUFFER_BIT }
 	//};
 
+
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> _createBufferCallback;
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer)> _updateBufferCallback;
 };
 

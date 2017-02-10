@@ -156,8 +156,6 @@
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="ConstantBufferGL.cpp" />
-    <ClCompile Include="ConstantBufferVk.cpp" />
-    <ClCompile Include="MaterialVk.cpp" />
     <ClCompile Include="Sampler2D.cpp" />
     <ClCompile Include="Sampler2DGL.cpp" />
     <ClCompile Include="Scene.cpp" />
