@@ -72,31 +72,31 @@ VertexBuffer * VulkanRenderer::makeVertexBuffer()
 		printf("Offset: %d\n", offset);
 
 		/*Create the staging buffer*/
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
+		VulkanRenderer::StagingBuffer stagingBuffer;
 		VulkanHelpers::CreateBuffer(
 			_vkPhysicalDevices[0],
 			_vkDevice,
 			size,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			&stagingBuffer, &stagingBufferMemory);
+			&stagingBuffer.buffer, &stagingBuffer.memory);
 
 		/*Copy the data to staging*/
 		void* pData;
-		VulkanHelpers::MapMemory(_vkDevice, stagingBufferMemory, &pData);
+		VulkanHelpers::MapMemory(_vkDevice, stagingBuffer.memory, &pData);
 		memcpy(pData, data, size);
-		vkUnmapMemory(_vkDevice, stagingBufferMemory);
-
+		vkUnmapMemory(_vkDevice, stagingBuffer.memory);
+		_vertexStagingBuffers.push_back(stagingBuffer);
 		if (!_first)
 		{			
 			VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
 		}
 
-		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer, 0, buffer, 0, size);
+		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, offset, size);
 
 		_first = true;
 	
+		return offset;
 	});
 
 	return vBuffer;
@@ -104,6 +104,7 @@ VertexBuffer * VulkanRenderer::makeVertexBuffer()
 
 ConstantBuffer * VulkanRenderer::makeConstantBuffer(std::string NAME, unsigned int location)
 {
+	//return new VulkanConstantBuffer(name, location;
 	return nullptr;
 }
 
@@ -428,7 +429,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		
 
 	},
-		[](void * userData, int argc, char ** argv) {printf("Creates stuff (-b to create buffer, -v specifies vertex buffer)\n");},
+		[](void * userData, int argc, char ** argv) {printf("Creates stuff (-b to create buffer, -v specifies vertex buffer, -c for constant buffer)\n");},
 		"Create",
 		"Creates stuff"
 
@@ -447,13 +448,13 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	VulkanHelpers::CreateBuffer(_vkDevice, bInfo, &buff);
 
 
-	/**********************Get memory requirments**********************/
+	// Get memory requirments
 	VkMemoryRequirements memReq;
 	vkGetBufferMemoryRequirements(_vkDevice, buff, &memReq);
 	vkDestroyBuffer(_vkDevice, buff, nullptr);
-
+	// Create the allocator
 	_vertexBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, memReq, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
+	//_constantBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, memReq, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	/**********Start recording init buffers****************/
 	VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
@@ -465,7 +466,10 @@ int VulkanRenderer::shutdown()
 {
 	vkDeviceWaitIdle(_vkDevice);
 
-	delete _vertexBufferAllocator;
+	//delete _constantBufferAllocator;
+	_constantBufferAllocator = nullptr;
+	//delete _vertexBufferAllocator;
+	_vertexBufferAllocator = nullptr;
 	for (auto& f : _framebuffers)
 	{
 		vkDestroyFramebuffer(_vkDevice, f, nullptr);
@@ -519,7 +523,12 @@ void VulkanRenderer::frame()
 
 		const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_vkInitTransferCmdBuffer);
 		VulkanHelpers::QueueSubmit(_vkMainQueue, 1, submitInfo);
-
+		for (auto& buffer : _vertexStagingBuffers)
+		{
+			vkFreeMemory(_vkDevice, buffer.memory, nullptr);
+			vkDestroyBuffer(_vkDevice, buffer.buffer, nullptr);
+		}
+		_vertexStagingBuffers.clear();
 	}
 
 	// Note: this is a really bad way of synchronizing frames, but for the sake
@@ -550,7 +559,7 @@ void VulkanRenderer::frame()
 
 	vkCmdBeginRenderPass(_vkCmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	
-
+	// Render here
 
 	vkCmdEndRenderPass(_vkCmdBuffer);
 

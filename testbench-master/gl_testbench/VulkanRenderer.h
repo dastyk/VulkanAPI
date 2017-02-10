@@ -5,6 +5,7 @@
 #include "VulkanHelpers.h"
 #include "VulkanVertexBuffer.h"
 #include "VulkanMemAllocator.h"
+#include "VulkanConstantBuffer.h"
 
 #pragma comment(lib,"SDL2.lib")
 #pragma comment(lib,"SDL2main.lib")
@@ -73,7 +74,12 @@ private:
 
 	VulkanMemAllocator* _vertexBufferAllocator;
 	VulkanMemAllocator* _constantBufferAllocator;
-
+	struct StagingBuffer
+	{
+		VkBuffer buffer;
+		VkDeviceMemory memory;
+	};
+	std::vector<StagingBuffer> _vertexStagingBuffers;
 
 	std::vector<Mesh*> drawList;
 
