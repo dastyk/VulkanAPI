@@ -104,7 +104,7 @@ VulkanRenderer::~VulkanRenderer()
 
 Material * VulkanRenderer::makeMaterial()
 {
-	return new VulkanMaterial(_vkDevice, _createBufferCallback, _updateBufferCallback);
+	return new VulkanMaterial(_vkDevice, _pipelineLayout, _renderPass, _createBufferCallback, _updateBufferCallback);
 }
 
 Mesh * VulkanRenderer::makeMesh()
@@ -578,8 +578,16 @@ int VulkanRenderer::shutdown()
 	_constantBufferStagingAllocator = nullptr;
 	delete _constantBufferAllocator;
 	_constantBufferAllocator = nullptr;
+
 	delete _vertexBufferAllocator;
 	_vertexBufferAllocator = nullptr;
+
+	if (_pipelineLayout)
+	{
+		vkDestroyPipelineLayout(_vkDevice, _pipelineLayout, nullptr);
+		_pipelineLayout = VK_NULL_HANDLE;
+	}
+
 	for (auto& f : _framebuffers)
 	{
 		vkDestroyFramebuffer(_vkDevice, f, nullptr);
