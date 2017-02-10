@@ -70,7 +70,7 @@ private:
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	std::vector<VkFramebuffer> _framebuffers;
 	VkDebugReportCallbackEXT _vkDebugCallback;
-
+	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 
 	VulkanMemAllocator* _vertexBufferAllocator;
 	VulkanMemAllocator* _constantBufferAllocator;

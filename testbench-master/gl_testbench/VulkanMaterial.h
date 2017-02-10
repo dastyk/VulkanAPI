@@ -6,7 +6,7 @@
 class VulkanMaterial : public Material
 {
 public:
-	VulkanMaterial(VkDevice device);
+	VulkanMaterial(VkDevice device, VkPipelineLayout pipelineLayout, VkRenderPass renderPass);
 	~VulkanMaterial();
 
 	// Inherited
@@ -20,14 +20,20 @@ public:
 	void disable();
 
 private:
-	bool _createShader(ShaderType type);
+	bool _compileShader(ShaderType type);
 
 private:
 	// Device that created the shaders
 	VkDevice _device = VK_NULL_HANDLE;
 
 	// Shader modules corresponding to various shader stages
-	VkShaderModule shaderObjects[4] = { VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE };
+	VkShaderModule _shaderObjects[4] = { VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE };
 
 	std::map<unsigned int, ConstantBufferVk*> constantBuffers;
+
+	VkPipeline _pipeline = VK_NULL_HANDLE;
+
+	// Provided by renderer, same for all materials
+	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
+	VkRenderPass _renderPass = VK_NULL_HANDLE;
 };
