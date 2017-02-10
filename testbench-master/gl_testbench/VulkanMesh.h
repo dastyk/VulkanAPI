@@ -1,10 +1,10 @@
 #pragma once
 #include "Mesh.h"
-class MeshVK :
+class VulkanMesh :
 	public Mesh
 {
 public:
-	MeshVK();
-	~MeshVK();
+	VulkanMesh();
+	~VulkanMesh();
 };
 

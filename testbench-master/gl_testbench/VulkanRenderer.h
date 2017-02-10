@@ -6,7 +6,7 @@
 #include "VulkanVertexBuffer.h"
 #include "VulkanMemAllocator.h"
 #include "VulkanConstantBuffer.h"
-
+#include "VulkanMesh.h"
 #pragma comment(lib,"SDL2.lib")
 #pragma comment(lib,"SDL2main.lib")
 

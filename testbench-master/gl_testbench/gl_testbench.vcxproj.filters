@@ -135,8 +135,8 @@
     <ClCompile Include="VulkanMemAllocator.cpp">
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="MeshVK.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="VulkanMesh.cpp">
+      <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -251,8 +251,8 @@
     <ClInclude Include="StagingBuffer.h">
       <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="MeshVK.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="VulkanMesh.h">
+      <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
