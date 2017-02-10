@@ -4,6 +4,7 @@
 #include <array>
 #include <assert.h>
 #include <fstream>
+#include <Windows.h>
 
 using namespace std;
 
@@ -243,7 +244,68 @@ void VulkanMaterial::disable()
 
 bool VulkanMaterial::_compileShader(ShaderType type)
 {
-	ifstream file(shaderFileNames[type], ios::binary | ios::ate);
+	// Open the file and read to string
+	ifstream file(shaderFileNames[type]);
+	string shaderText;
+	if (file)
+	{
+		shaderText = string(istreambuf_iterator<char>(file), istreambuf_iterator<char>());
+		file.close();
+	}
+	else
+	{
+		throw runtime_error("Can't find file: " + shaderFileNames[type]);
+	}
+
+	// Final vector of string
+	string finalShader = _expandShaderText(shaderText, type);
+
+	// Call glslangvalidator to compile the shader code
+
+	// Extension of shader file for glslang to deduce shader type
+	wstring shaderExtension = L"";
+	if (type == ShaderType::VS)
+		shaderExtension = L"vert";
+	else if (type == ShaderType::PS)
+		shaderExtension = L"frag";
+
+	// Dump shader code in a temporary file
+	ofstream tempstorage(L"temp." + shaderExtension);
+	if (!tempstorage)
+	{
+		throw runtime_error("Failed to create temporary shader file!");
+	}
+	tempstorage << finalShader << endl;
+	tempstorage.close();
+	wstring glslangcommand = L"glslangvalidator -V temp." + shaderExtension + L" -o temp.spv";
+
+	// Create a process that runs glslang
+	// https://msdn.microsoft.com/en-us/library/ms682512(v=vs.85).aspx
+	STARTUPINFO startupInfo;
+	PROCESS_INFORMATION processInfo;
+	memset(&startupInfo, 0, sizeof(startupInfo));
+	startupInfo.cb = sizeof(startupInfo);
+	memset(&processInfo, 0, sizeof(processInfo));
+	CreateProcess(NULL, const_cast<wchar_t*>(glslangcommand.c_str()), NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
+
+	// Wait for glslangvalidator to finish
+	WaitForSingleObject(processInfo.hProcess, INFINITE);
+
+	DWORD exitCode;
+	GetExitCodeProcess(processInfo.hProcess, &exitCode);
+
+	// Close process and thread handles
+	CloseHandle(processInfo.hProcess);
+	CloseHandle(processInfo.hThread);
+
+	if (exitCode != 0)
+	{
+		throw runtime_error("Failed to compile GLSL code (I think)");
+	}
+
+	// With shader compiled it's time to create a shader module from SPIR-V
+
+	file.open("temp.spv", ios::binary | ios::ate);
 	if (!file)
 	{
 		return false;
@@ -270,4 +332,16 @@ bool VulkanMaterial::_compileShader(ShaderType type)
 	}
 
 	return true;
+}
+
+string&& VulkanMaterial::_expandShaderText(const string& shaderSource, ShaderType type)
+{
+	string result("#version 450\n");
+	for (auto& define : shaderDefines[type])
+	{
+		result += define;
+	}
+	result += shaderSource;
+
+	return move(result);
 }
