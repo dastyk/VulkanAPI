@@ -25,6 +25,9 @@
     <Filter Include="Source Files\Vulkan">
       <UniqueIdentifier>{bc46bca4-84f0-4459-bc53-d643a5481681}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{9b8146dd-5dc1-448b-ad9d-02120c33dca1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -267,6 +270,18 @@
     </None>
     <None Include="..\assets\GL45\VertexShader.glsl">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\assets\Vulkan\FragmentShader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\assets\Vulkan\VertexShader.glsl.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\assets\Vulkan\test-fs.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\assets\Vulkan\test-vs.vert">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

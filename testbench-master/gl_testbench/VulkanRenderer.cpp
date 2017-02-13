@@ -591,7 +591,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	};
 	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkDescriptorPool, 0, 10000, size(pSize), pSize);
 
-
+	_createTestPipeline();
 	
 	return 0;
 }
@@ -609,6 +609,17 @@ int VulkanRenderer::shutdown()
 
 	delete _vertexBufferAllocator;
 	_vertexBufferAllocator = nullptr;
+
+	if (_testPipeline)
+	{
+		vkDestroyPipeline(_vkDevice, _testPipeline, nullptr);
+		_testPipeline = VK_NULL_HANDLE;
+	}
+	if (_testPipelineLayout)
+	{
+		vkDestroyPipelineLayout(_vkDevice, _testPipelineLayout, nullptr);
+		_pipelineLayout = VK_NULL_HANDLE;
+	}
 
 	if (_pipelineLayout)
 	{
@@ -713,7 +724,8 @@ void VulkanRenderer::frame()
 
 	vkCmdBeginRenderPass(_vkCmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	
-	// Render here
+	vkCmdBindPipeline(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipeline);
+	vkCmdDraw(_vkCmdBuffer, 3, 1, 0, 0);
 
 	vkCmdEndRenderPass(_vkCmdBuffer);
 
@@ -1016,8 +1028,8 @@ void VulkanRenderer::_createFramebuffers(void)
 
 void VulkanRenderer::_createTestPipeline()
 {
-	const std::string vertexFileName = "../assets/Vulkan/cube-vert.spv";
-	const std::string fragmentFileName = "../assets/Vulkan/cube-frag.spv";
+	const std::string vertexFileName = "../assets/Vulkan/test-vs.spv";
+	const std::string fragmentFileName = "../assets/Vulkan/test-fs.spv";
 	_createShaderModule(vertexFileName);
 	_createShaderModule(fragmentFileName);
 
@@ -1036,6 +1048,23 @@ void VulkanRenderer::_createTestPipeline()
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
 	//Skipping inputAssemblyStateCreateInfo, attributeDescriptions and bindingDescriptions since this is not needed when we use vertex pulling (?)
+	//Edit: oops we do need them
+	VkPipelineVertexInputStateCreateInfo vertexInput = {};
+	vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInput.pNext = nullptr;
+	vertexInput.flags = 0;
+	vertexInput.vertexBindingDescriptionCount = 0;
+	vertexInput.pVertexBindingDescriptions = nullptr;
+	vertexInput.vertexAttributeDescriptionCount = 0;
+	vertexInput.pVertexAttributeDescriptions = nullptr;
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
+	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssembly.pNext = nullptr;
+	inputAssembly.flags = 0;
+	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssembly.primitiveRestartEnable = VK_FALSE;
+
 
 	VkViewport vp = {};
 	vp.x = 0.0f;
@@ -1096,23 +1125,23 @@ void VulkanRenderer::_createTestPipeline()
 	if (vkCreatePipelineLayout(_vkDevice, &pipelineLayoutInfo, nullptr, &_testPipelineLayout) != VK_SUCCESS)
 		throw std::runtime_error("Could not create pipeline layout");
 
-	//VkGraphicsPipelineCreateInfo pipelineInfo = {};
-	//pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	//pipelineInfo.stageCount = 2;
-	//pipelineInfo.pStages = shaderStages;
-	//pipelineInfo.pVertexInputState = nullptr;
-	//pipelineInfo.pInputAssemblyState = nullptr;
-	//pipelineInfo.pViewportState = &vpCreateInfo;
-	//pipelineInfo.pRasterizationState = &rastCreateInfo;
-	//pipelineInfo.pMultisampleState = &msCreateInfo;
-	//pipelineInfo.pColorBlendState = &colorBlendInfo;
-	//pipelineInfo.layout = _testPipelineLayout;
-	//pipelineInfo.renderPass = _renderPass;
-	//pipelineInfo.subpass = NULL;
-	//pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+	VkGraphicsPipelineCreateInfo pipelineInfo = {};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = 2;
+	pipelineInfo.pStages = shaderStages;
+	pipelineInfo.pVertexInputState = &vertexInput;
+	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	pipelineInfo.pViewportState = &vpCreateInfo;
+	pipelineInfo.pRasterizationState = &rastCreateInfo;
+	pipelineInfo.pMultisampleState = &msCreateInfo;
+	pipelineInfo.pColorBlendState = &colorBlendInfo;
+	pipelineInfo.layout = _testPipelineLayout;
+	pipelineInfo.renderPass = _renderPass;
+	pipelineInfo.subpass = NULL;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-	//if (vkCreateGraphicsPipelines(_vkDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_testPipeline) != VK_SUCCESS)
-	//	throw std::runtime_error("Could not create graphics pipeline");
+	if (vkCreateGraphicsPipelines(_vkDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_testPipeline) != VK_SUCCESS)
+		throw std::runtime_error("Could not create graphics pipeline");
 	
 }
 

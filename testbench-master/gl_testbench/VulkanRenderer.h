@@ -54,9 +54,9 @@ private:
 	bool _first;
 	SDL_Window* window;
 
-	VkPipeline _testPipeline;
-	VkPipelineLayout _testPipelineLayout;
-	VkDescriptorSet _testDescriptorSet;
+	VkPipeline _testPipeline = VK_NULL_HANDLE;
+	VkPipelineLayout _testPipelineLayout = VK_NULL_HANDLE;
+	
 
 	VkInstance _vkInstance;
 	std::vector<VkPhysicalDevice> _vkPhysicalDevices;
