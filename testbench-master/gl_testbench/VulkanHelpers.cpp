@@ -344,6 +344,25 @@ const void VulkanHelpers::AllocateDescriptorSets(VkDevice device, VkDescriptorPo
 
 }
 
+const void VulkanHelpers::CreateBufferView(VkDevice device, VkBuffer buffer, VkBufferView * pView, VkFormat format, VkDeviceSize offset, VkDeviceSize range, VkBufferViewCreateFlags flags, const void * pNext, const VkAllocationCallbacks * pAllocator)
+{
+	VkBufferViewCreateInfo info = {
+		VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO,
+		pNext,
+		flags,
+		buffer,
+		format,
+		offset,
+		range
+	};
+
+	VkResult r = vkCreateBufferView(device, &info, pAllocator, pView);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create buffer view");
+	}
+
+}
+
 const void VulkanHelpers::BeginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo * pInheritanceInfo, const void* pNext)
 {
 	/*typedef struct VkCommandBufferBeginInfo {

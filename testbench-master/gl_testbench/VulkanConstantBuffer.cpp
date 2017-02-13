@@ -82,3 +82,13 @@ void VulkanConstantBuffer::bind(Material *m)
 {
 
 }
+
+uint32_t VulkanConstantBuffer::GetLocation() const
+{
+	return _location;
+}
+
+VkBuffer VulkanConstantBuffer::GetBuffer() const
+{
+	return _buffer;
+}

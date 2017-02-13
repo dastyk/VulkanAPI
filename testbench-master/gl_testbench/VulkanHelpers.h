@@ -211,7 +211,16 @@ namespace VulkanHelpers
 		VkDescriptorSet*							pDescriptorSets,
 		const void*									pNext						= nullptr);
 
-
+	const void CreateBufferView(
+		VkDevice                                    device,
+		VkBuffer									buffer,
+		VkBufferView*                               pView,
+		VkFormat									format,
+		VkDeviceSize								offset						= 0,
+		VkDeviceSize								range						= VK_WHOLE_SIZE,
+		VkBufferViewCreateFlags						flags						= 0,
+		const void*									pNext						= nullptr,	
+		const VkAllocationCallbacks*                pAllocator					= nullptr);
 
 
 	/*Command recording*/

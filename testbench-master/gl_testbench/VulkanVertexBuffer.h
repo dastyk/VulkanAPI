@@ -6,7 +6,7 @@
 class VulkanVertexBuffer : public VertexBuffer
 {
 public:
-	VulkanVertexBuffer(const std::function<void(const void* data, size_t size, VkBuffer& buffer)>& createBufferCallback);
+	VulkanVertexBuffer(const std::function<void(const void* data, size_t size, VkBuffer& buffer, VkBufferView& view)>& createBufferCallback);
 	~VulkanVertexBuffer();
 
 
@@ -19,7 +19,8 @@ public:
 private:
 	VkDeviceSize _totalSize;
 	VkBuffer _buffer;
-	std::function<void(const void* data, size_t size, VkBuffer& buffer)> _createBufferCallback;
+	VkBufferView _view;
+	std::function<void(const void* data, size_t size, VkBuffer& buffer, VkBufferView& view)> _createBufferCallback;
 
 };
 

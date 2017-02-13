@@ -16,7 +16,8 @@ public:
 
 	void setData(const void* data, size_t size, Material* m, unsigned int location);
 	void bind(Material*);
-
+	uint32_t GetLocation()const;
+	VkBuffer GetBuffer()const;
 private:
 	std::string _name;
 	uint32_t _location;
