@@ -106,7 +106,7 @@ Material * VulkanRenderer::makeMaterial()
 
 Mesh * VulkanRenderer::makeMesh()
 {
-	return nullptr;
+	return new VulkanMesh();
 }
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
@@ -121,7 +121,7 @@ VertexBuffer * VulkanRenderer::makeVertexBuffer()
 
 
 		/*Create a view for the buffer*/
-		VulkanHelpers::CreateBufferView(_vkDevice, buffer, &view, VK_FORMAT_R32G32B32_SFLOAT);
+		VulkanHelpers::CreateBufferView(_vkDevice, buffer, &view, VK_FORMAT_R32G32B32A32_SFLOAT);
 
 		/*Create the staging buffer*/
 		StagingBuffer stagingBuffer;
@@ -586,10 +586,10 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	/*************Create descriptor pool**************/
 	VkDescriptorPoolSize pSize[] = {
-		{VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 3},
-		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
+		{VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 3 * 10000},
+		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 * 10000}
 	};
-	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkDescriptorPool, 0, 10000, size(pSize), pSize);
+	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkDescriptorPool, 0, 10000, 2, pSize);
 
 	std::vector<VkDescriptorSetLayoutBinding> bindings;
 
@@ -761,6 +761,8 @@ void VulkanRenderer::frame()
 	vkCmdBeginRenderPass(_vkCmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	
 	vkCmdBindPipeline(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipeline);
+	VkDescriptorSet set = drawList[0]->getDescriptorSet();
+	vkCmdBindDescriptorSets(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipelineLayout, 0, 1, &set, 0, nullptr);
 	vkCmdDraw(_vkCmdBuffer, 3, 1, 0, 0);
 
 	vkCmdEndRenderPass(_vkCmdBuffer);
@@ -1064,8 +1066,8 @@ void VulkanRenderer::_createFramebuffers(void)
 
 void VulkanRenderer::_createTestPipeline()
 {
-	const std::string vertexFileName = "../assets/Vulkan/test-vs.spv";
-	const std::string fragmentFileName = "../assets/Vulkan/test-fs.spv";
+	const std::string vertexFileName = "../assets/Vulkan/VertexShader.spv";
+	const std::string fragmentFileName = "../assets/Vulkan/FragmentShader.spv";
 	_createShaderModule(vertexFileName);
 	_createShaderModule(fragmentFileName);
 
@@ -1123,7 +1125,7 @@ void VulkanRenderer::_createTestPipeline()
 
 	VkPipelineRasterizationStateCreateInfo rastCreateInfo = {};
 	rastCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rastCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+	rastCreateInfo.cullMode = VK_CULL_MODE_NONE;
 	rastCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
 	rastCreateInfo.depthClampEnable = VK_FALSE;
 	rastCreateInfo.rasterizerDiscardEnable = VK_FALSE;
@@ -1155,8 +1157,8 @@ void VulkanRenderer::_createTestPipeline()
 	//Temporary, need descriptor set to work
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 0;
-	pipelineLayoutInfo.pSetLayouts = nullptr;
+	pipelineLayoutInfo.setLayoutCount = 1;
+	pipelineLayoutInfo.pSetLayouts = &_setLayout;
 
 	if (vkCreatePipelineLayout(_vkDevice, &pipelineLayoutInfo, nullptr, &_testPipelineLayout) != VK_SUCCESS)
 		throw std::runtime_error("Could not create pipeline layout");

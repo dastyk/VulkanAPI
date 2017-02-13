@@ -11,9 +11,9 @@ public:
 
 
 	const void CreateDescriptor(VkDevice device, VkDescriptorPool pool, VkDescriptorSetLayout layout);
+	VkDescriptorSet getDescriptorSet(void) const { return _set; }
 
 private:
 	VkDescriptorSet _set;
-	VkPipelineLayout _pipelineLayout;
 };
 

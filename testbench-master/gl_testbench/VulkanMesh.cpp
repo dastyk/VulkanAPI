@@ -16,9 +16,6 @@ const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool pool, 
 {
 	if (_set == VK_NULL_HANDLE)
 	{
-		/*Create the pipelinelayout*/
-		VulkanHelpers::CreatePipelineLayout(device, &_pipelineLayout, 1, &layout);
-
 		/*Allocate a descritpor set*/
 		VulkanHelpers::AllocateDescriptorSets(device, pool, 1, &layout, &_set);
 
