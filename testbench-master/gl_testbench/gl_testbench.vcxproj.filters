@@ -141,6 +141,9 @@
     <ClCompile Include="VulkanMesh.cpp">
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanTexture2D.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h">
@@ -262,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="MaterialVk.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTexture2D.h">
+      <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -189,6 +189,7 @@
     <ClCompile Include="VulkanMemAllocator.cpp" />
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VulkanRenderer.cpp" />
+    <ClCompile Include="VulkanTexture2D.cpp" />
     <ClCompile Include="VulkanVertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -231,6 +232,7 @@
     <ClInclude Include="VulkanMemAllocator.h" />
     <ClInclude Include="VulkanMesh.h" />
     <ClInclude Include="VulkanRenderer.h" />
+    <ClInclude Include="VulkanTexture2D.h" />
     <ClInclude Include="VulkanVertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
