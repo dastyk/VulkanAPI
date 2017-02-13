@@ -236,6 +236,10 @@
   <ItemGroup>
     <None Include="..\assets\GL45\FragmentShader.glsl" />
     <None Include="..\assets\GL45\VertexShader.glsl" />
+    <None Include="..\assets\Vulkan\FragmentShader.glsl" />
+    <None Include="..\assets\Vulkan\test-fs.frag" />
+    <None Include="..\assets\Vulkan\test-vs.vert" />
+    <None Include="..\assets\Vulkan\VertexShader.glsl.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
