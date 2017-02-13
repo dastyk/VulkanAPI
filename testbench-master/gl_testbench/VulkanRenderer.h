@@ -66,6 +66,7 @@ private:
 	VkCommandBuffer _vkInitTransferCmdBuffer;
 	VkCommandBuffer _vkCmdBuffer;
 	VkDescriptorPool _vkDescriptorPool;
+	VkDescriptorSetLayout _setLayout;
 
 	VkSurfaceKHR _vkSurface;
 	VkFormat _swapchainFormat;

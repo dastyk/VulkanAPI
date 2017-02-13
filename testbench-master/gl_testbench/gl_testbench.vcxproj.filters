@@ -188,9 +188,6 @@
     <ClInclude Include="RenderState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IA.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="VertexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -266,6 +263,9 @@
     <ClInclude Include="MaterialVk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="VulkanTexture2D.h">
       <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
@@ -283,10 +283,10 @@
     <None Include="..\assets\Vulkan\VertexShader.glsl.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\assets\Vulkan\test-fs.frag">
+    <None Include="..\assets\Vulkan\VertexShader.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\assets\Vulkan\test-vs.vert">
+    <None Include="..\assets\Vulkan\FragmentShader.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

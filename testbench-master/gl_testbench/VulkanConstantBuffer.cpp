@@ -30,7 +30,7 @@ void VulkanConstantBuffer::setData(const void * data, size_t size, Material * m,
 	}
 
 	_size = size;
-	_createBufferCallback(data, size, _buffer, _stagningBuffer);
+	f(data, size, _buffer, _stagningBuffer);
 
 	//if (_first)
 	//{

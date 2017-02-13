@@ -12,48 +12,12 @@ VulkanMesh::~VulkanMesh()
 {
 }
 
-const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool pool)
+const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool pool, VkDescriptorSetLayout layout)
 {
 	if (_set == VK_NULL_HANDLE)
 	{
-		std::vector<VkDescriptorSetLayoutBinding> bindings;
-		
-		/*Create descriptor layoutbinding for each vertex buffer*/
-		for (auto& buffer : geometryBuffers)
-		{
-			VkDescriptorSetLayoutBinding binding =
-			{
-				buffer.first,
-				VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
-				1,
-				VK_SHADER_STAGE_VERTEX_BIT,
-				nullptr
-			};
-
-			bindings.push_back(binding);
-		}
-		/*Create layoutbinding for the constantbuffer*/
-		VkDescriptorSetLayoutBinding binding =
-		{
-			static_cast<VulkanConstantBuffer*>(txBuffer)->GetLocation(),
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			1,
-			VK_SHADER_STAGE_VERTEX_BIT,
-			nullptr
-		};
-
-		bindings.push_back(binding);
-
-
-		/* Create the descriptor set layout*/
-		VulkanHelpers::CreateDescriptorSetLayout(device, &_setLayout, bindings.size(), bindings.data());
-
-
-		/*Create the pipelinelayout*/
-		VulkanHelpers::CreatePipelineLayout(device, &_pipelineLayout, 1, &_setLayout);
-
 		/*Allocate a descritpor set*/
-		VulkanHelpers::AllocateDescriptorSets(device, pool, 1, &_setLayout, &_set);
+		VulkanHelpers::AllocateDescriptorSets(device, pool, 1, &layout, &_set);
 
 		/*Create a write descriptor set for each vertex buffer*/
 		std::vector<VkWriteDescriptorSet> WriteDS;
