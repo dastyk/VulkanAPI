@@ -82,15 +82,7 @@ VulkanRenderer::VulkanRenderer() : _first(true)
 		memcpy((char*)pData + stagingBuffer.offset, data, size);
 		vkUnmapMemory(_vkDevice, stagingBuffer.memory);
 
-		if (!_first)
-		{
-			VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
-		}
-
 		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
-
-		_first = true;
-
 	};
 }
 
@@ -715,22 +707,19 @@ void VulkanRenderer::submit(Mesh * mesh)
 
 void VulkanRenderer::frame()
 {
-	if (_first)
+	_first = false;
+	VulkanHelpers::EndCommandBuffer(_vkInitTransferCmdBuffer);
+
+
+	const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_vkInitTransferCmdBuffer);
+	VulkanHelpers::QueueSubmit(_vkMainQueue, 1, submitInfo);
+	vkQueueWaitIdle(_vkMainQueue);
+	for (auto& buffer : _vertexStagingBuffers)
 	{
-		_first = false;
-		VulkanHelpers::EndCommandBuffer(_vkInitTransferCmdBuffer);
-
-
-		const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_vkInitTransferCmdBuffer);
-		VulkanHelpers::QueueSubmit(_vkMainQueue, 1, submitInfo);
-		vkQueueWaitIdle(_vkMainQueue);
-		for (auto& buffer : _vertexStagingBuffers)
-		{
-			vkFreeMemory(_vkDevice, buffer.memory, nullptr);
-			vkDestroyBuffer(_vkDevice, buffer.buffer, nullptr);
-		}
-		_vertexStagingBuffers.clear();
+		vkFreeMemory(_vkDevice, buffer.memory, nullptr);
+		vkDestroyBuffer(_vkDevice, buffer.buffer, nullptr);
 	}
+	_vertexStagingBuffers.clear();
 
 	// Note: this is a really bad way of synchronizing frames, but for the sake
 	// of getting things running it'll suffice.
@@ -786,9 +775,9 @@ void VulkanRenderer::frame()
 
 	vkQueueSubmit(_vkMainQueue, 1, &submit_info, VK_NULL_HANDLE);
 
+	drawList.clear();
 
-
-
+	VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
 
 	// Förslag:
 	// Till en början kan vi dra igång en render pass och skita i descriptors och sånt

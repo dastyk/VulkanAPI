@@ -48,7 +48,7 @@ void run() {
 			if (windowEvent.type == SDL_QUIT) break;
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_ESCAPE) break;
 		}
-		//updateScene();
+		updateScene();
 		renderScene();
 	}
 }
@@ -71,8 +71,10 @@ void updateScene()
 	translation[1] = yt[(0+shift) % (4*360)];
 	translation[2] = -0.1;
 
-	scene[0]->txBuffer->setData( translation, sizeof(translation), 
-			scene[0]->technique->material, TRANSLATION);
+	//scene[0]->txBuffer->setData( translation, sizeof(translation), 
+	//		scene[0]->technique->material, TRANSLATION);
+	scene[0]->txBuffer->setData(translation, sizeof(translation),
+		nullptr, TRANSLATION);
 	translation[2] = 0.0;
 
 
@@ -82,10 +84,15 @@ void updateScene()
 		translation[1] = yt[(i+shift) % (4*360)];
 
 		// updates the buffer data (whenever the implementation decides...)
+		//scene[i]->txBuffer->setData(
+		//	translation, 
+		//	sizeof(translation), 
+		//	scene[i]->technique->material,
+		//	TRANSLATION);
 		scene[i]->txBuffer->setData(
-			translation, 
-			sizeof(translation), 
-			scene[i]->technique->material,
+			translation,
+			sizeof(translation),
+			nullptr,
 			TRANSLATION);
 	}
 	shift++;
@@ -224,7 +231,7 @@ int initialiseTestbench()
 
 		//// we can create a constant buffer outside the material, for example as part of the Mesh.
 		m->txBuffer = renderer->makeConstantBuffer(std::string(TRANSLATION_NAME), TRANSLATION);
-		m->txBuffer->setData(nullptr, 0, nullptr, 0);
+		//m->txBuffer->setData(nullptr, 0, nullptr, 0);
 		//
 		//if (i == 0) {
 		//	m->technique = techniques[2];
