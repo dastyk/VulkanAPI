@@ -750,9 +750,13 @@ void VulkanRenderer::frame()
 	vkCmdBeginRenderPass(_vkCmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	
 	vkCmdBindPipeline(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipeline);
-	VkDescriptorSet set = drawList[0]->getDescriptorSet();
-	vkCmdBindDescriptorSets(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipelineLayout, 0, 1, &set, 0, nullptr);
-	vkCmdDraw(_vkCmdBuffer, 3, 1, 0, 0);
+
+	for (auto m : drawList)
+	{
+		VkDescriptorSet set = m->getDescriptorSet();
+		vkCmdBindDescriptorSets(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipelineLayout, 0, 1, &set, 0, nullptr);
+		vkCmdDraw(_vkCmdBuffer, 3, 1, 0, 0);
+	}
 
 	vkCmdEndRenderPass(_vkCmdBuffer);
 
