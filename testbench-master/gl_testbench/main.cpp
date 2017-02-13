@@ -141,12 +141,12 @@ int initialiseTestbench()
 	//	   defineTXName + defineDiffCol + defineDiffColName + defineDiffuse	}
 	//};
 
-	//float degToRad = M_PI / 180.0;
-	//for (int a = 0; a < 4*360; a++)
-	//{
-	//	xt[a] = 0.8f * cosf(degToRad * (a/4.0) * 3.0);
-	//	yt[a] = 0.8f * sinf(degToRad * (a/4.0) * 2.0);
-	//};
+	float degToRad = M_PI / 180.0;
+	for (int a = 0; a < 4*360; a++)
+	{
+		xt[a] = 0.8f * cosf(degToRad * (a/4.0) * 3.0);
+		yt[a] = 0.8f * sinf(degToRad * (a/4.0) * 2.0);
+	};
 
 	//// triangle geometry:
 	float4 triPos[3] = { { 0.0f,  0.05, 0.0f, 1.0f },{ 0.05, -0.05, 0.0f, 1.0f },{ -0.05, -0.05, 0.0f, 1.0f } };
