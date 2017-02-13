@@ -565,7 +565,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	};
 	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkDescriptorPool, 0, 10000, size(pSize), pSize);
 
-
+	_createTestPipeline();
 	
 	return 0;
 }
@@ -698,7 +698,8 @@ void VulkanRenderer::frame()
 
 	vkCmdBeginRenderPass(_vkCmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	
-	// Render here
+	vkCmdBindPipeline(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipeline);
+	vkCmdDraw(_vkCmdBuffer, 3, 1, 0, 0);
 
 	vkCmdEndRenderPass(_vkCmdBuffer);
 
@@ -1001,8 +1002,8 @@ void VulkanRenderer::_createFramebuffers(void)
 
 void VulkanRenderer::_createTestPipeline()
 {
-	const std::string vertexFileName = "../assets/Vulkan/cube-vert.spv";
-	const std::string fragmentFileName = "../assets/Vulkan/cube-frag.spv";
+	const std::string vertexFileName = "../assets/Vulkan/test-vs.spv";
+	const std::string fragmentFileName = "../assets/Vulkan/test-fs.spv";
 	_createShaderModule(vertexFileName);
 	_createShaderModule(fragmentFileName);
 

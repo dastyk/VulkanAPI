@@ -1,8 +1,8 @@
 #version 450
 
 const vec3 c_positions[] = {
-	vec3(0.0f, -0.7f, 0.0f),
 	vec3(0.7f, 0.7f, 0.0f),
+	vec3(0.0f, -0.7f, 0.0f),
 	vec3(-0.7f, 0.7f, 0.0f)
 };
 
