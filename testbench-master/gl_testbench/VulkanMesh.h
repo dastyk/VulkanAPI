@@ -10,10 +10,9 @@ public:
 
 
 
-	const void CreateDescriptor(VkDevice device, VkDescriptorPool pool);
+	const void CreateDescriptor(VkDevice device, VkDescriptorPool pool, VkDescriptorSetLayout layout);
 
 private:
-	VkDescriptorSetLayout _setLayout;
 	VkDescriptorSet _set;
 	VkPipelineLayout _pipelineLayout;
 };

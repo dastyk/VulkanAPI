@@ -511,7 +511,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 			char test2[sizeof(float) * 4];
 			mesh.txBuffer->setData(test2, sizeof(float)*4, nullptr, 0);
 
-			mesh.CreateDescriptor(me->_vkDevice, me->_vkDescriptorPool);
+			//mesh.CreateDescriptor(me->_vkDevice, me->_vkDescriptorPool, );
 
 
 
@@ -590,6 +590,42 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
 	};
 	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkDescriptorPool, 0, 10000, size(pSize), pSize);
+
+	std::vector<VkDescriptorSetLayoutBinding> bindings;
+
+	/*Create descriptor layoutbinding for each vertex buffer*/
+	bindings.push_back({
+		POSITION,
+		VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
+		1,
+		VK_SHADER_STAGE_VERTEX_BIT,
+		nullptr
+	});
+	bindings.push_back({
+		NORMAL,
+		VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
+		1,
+		VK_SHADER_STAGE_VERTEX_BIT,
+		nullptr
+	});
+	bindings.push_back({
+		TEXTCOORD,
+		VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
+		1,
+		VK_SHADER_STAGE_VERTEX_BIT,
+		nullptr
+	});
+	/*Create layoutbinding for the constantbuffer*/
+	bindings.push_back({
+		TRANSLATION,
+		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		1,
+		VK_SHADER_STAGE_VERTEX_BIT,
+		nullptr
+	});
+
+	/* Create the descriptor set layout*/
+	VulkanHelpers::CreateDescriptorSetLayout(_vkDevice, &_setLayout, bindings.size(), bindings.data());
 
 	_createTestPipeline();
 	
@@ -673,7 +709,7 @@ void VulkanRenderer::setRenderState(RenderState * ps)
 void VulkanRenderer::submit(Mesh * mesh)
 {
 	auto vMesh = (VulkanMesh*)mesh;
-	vMesh->CreateDescriptor(_vkDevice, _vkDescriptorPool);
+	vMesh->CreateDescriptor(_vkDevice, _vkDescriptorPool, _setLayout);
 	drawList.push_back(vMesh);
 }
 
