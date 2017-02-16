@@ -95,7 +95,7 @@ VulkanRenderer::~VulkanRenderer()
 
 Material * VulkanRenderer::makeMaterial()
 {
-	return new VulkanMaterial(_vkDevice, _pipelineLayout, _renderPass, _createBufferCallback, _updateBufferCallback);
+	return new VulkanMaterial(_vkDevice, _testPipelineLayout, _renderPass, _createBufferCallback, _updateBufferCallback);
 }
 
 Mesh * VulkanRenderer::makeMesh()
@@ -176,12 +176,12 @@ Sampler2D * VulkanRenderer::makeSampler2D()
 
 std::string VulkanRenderer::getShaderPath()
 {
-	return std::string();
+	return std::string("..\\assets\\Vulkan\\");
 }
 
 std::string VulkanRenderer::getShaderExtension()
 {
-	return std::string();
+	return std::string(".glsl");
 }
 
 int VulkanRenderer::initialize(unsigned int width, unsigned int height)

@@ -153,27 +153,27 @@ int initialiseTestbench()
 	//float4 triNor[3] = { { 0.0f,  0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 0.0f } };
 	//float2 triUV[3] =  { { 0.5f,  -0.99f },{ 1.49f, 1.1f },{ -0.51, 1.1f } };
 
-	//// load Materials.
-	//std::string shaderPath = renderer->getShaderPath();
-	//std::string shaderExtension = renderer->getShaderExtension();
-	//float diffuse[3][4] = {
-	//	0.0,0.0,1.0,1.0,
-	//	0.0,1.0,0.0,1.0,
-	//	1.0,1.0,1.0,1.0 
-	//};
+	// load Materials.
+	std::string shaderPath = renderer->getShaderPath();
+	std::string shaderExtension = renderer->getShaderExtension();
+	float diffuse[3][4] = {
+		0.0,0.0,1.0,1.0,
+		0.0,1.0,0.0,1.0,
+		1.0,1.0,1.0,1.0 
+	};
 
 	for (int i = 0; i < materialDefs.size(); i++)
 	{
 		// set material name from text file?
 		Material* m = renderer->makeMaterial();
-	//	m->setShader(shaderPath + materialDefs[i][0] + shaderExtension, Material::ShaderType::VS);
-	//	m->setShader(shaderPath + materialDefs[i][1] + shaderExtension, Material::ShaderType::PS);
+		m->setShader(shaderPath + materialDefs[i][0] + shaderExtension, Material::ShaderType::VS);
+		m->setShader(shaderPath + materialDefs[i][1] + shaderExtension, Material::ShaderType::PS);
 
-	//	m->addDefine(materialDefs[i][2], Material::ShaderType::VS);
-	//	m->addDefine(materialDefs[i][2], Material::ShaderType::PS);
+		m->addDefine(materialDefs[i][2], Material::ShaderType::VS);
+		m->addDefine(materialDefs[i][2], Material::ShaderType::PS);
 
-	//	std::string err;
-	//	m->compileMaterial(err);
+		std::string err;
+		m->compileMaterial(err);
 
 	//	// add a constant buffer to the material, to tint every triangle using this material
 	//	m->addConstantBuffer(DIFFUSE_TINT_NAME, DIFFUSE_TINT);

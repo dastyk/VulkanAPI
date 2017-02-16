@@ -283,13 +283,7 @@
     <None Include="..\assets\Vulkan\FragmentShader.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\assets\Vulkan\VertexShader.glsl.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\assets\Vulkan\VertexShader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\assets\Vulkan\FragmentShader.frag">
+    <None Include="..\assets\Vulkan\VertexShader.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -263,21 +263,21 @@ bool VulkanMaterial::_compileShader(ShaderType type)
 	// Call glslangvalidator to compile the shader code
 
 	// Extension of shader file for glslang to deduce shader type
-	wstring shaderExtension = L"";
+	wstring glslangStage = L"";
 	if (type == ShaderType::VS)
-		shaderExtension = L"vert";
+		glslangStage = L"vert";
 	else if (type == ShaderType::PS)
-		shaderExtension = L"frag";
+		glslangStage = L"frag";
 
 	// Dump shader code in a temporary file
-	ofstream tempstorage(L"temp." + shaderExtension);
+	ofstream tempstorage(L"temp.glsl");
 	if (!tempstorage)
 	{
 		throw runtime_error("Failed to create temporary shader file!");
 	}
 	tempstorage << finalShader << endl;
 	tempstorage.close();
-	wstring glslangcommand = L"glslangvalidator -V temp." + shaderExtension + L" -o temp.spv";
+	wstring glslangcommand = L"..\\assets\\Vulkan\\glslangvalidator -V -S " + glslangStage + L" temp.glsl -o temp.spv";
 
 	// Create a process that runs glslang
 	// https://msdn.microsoft.com/en-us/library/ms682512(v=vs.85).aspx
@@ -334,7 +334,7 @@ bool VulkanMaterial::_compileShader(ShaderType type)
 	return true;
 }
 
-string&& VulkanMaterial::_expandShaderText(const string& shaderSource, ShaderType type)
+string VulkanMaterial::_expandShaderText(const string& shaderSource, ShaderType type)
 {
 	string result("#version 450\n");
 	for (auto& define : shaderDefines[type])
@@ -343,5 +343,5 @@ string&& VulkanMaterial::_expandShaderText(const string& shaderSource, ShaderTyp
 	}
 	result += shaderSource;
 
-	return move(result);
+	return result;
 }
