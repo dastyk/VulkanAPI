@@ -2,7 +2,7 @@
 #include "VulkanHelpers.h"
 #include "VulkanVertexBuffer.h"
 #include "VulkanConstantBuffer.h"
-
+#include "VulkanMaterial.h"
 VulkanMesh::VulkanMesh()
 {
 }
@@ -16,7 +16,7 @@ const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool poolBu
 {
 	if (_sets.size() == 0)
 	{
-		_sets.resize(2);
+		_sets.resize(1);
 		/*Allocate a descritpor set*/
 		VulkanHelpers::AllocateDescriptorSets(device, poolBuff, 1, &layoutBuff, &_sets[0]);
 
@@ -36,8 +36,20 @@ const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool poolBu
 		
 		WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[0], static_cast<VulkanConstantBuffer*>(txBuffer)->GetLocation(), 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &dbInfo, nullptr));
 
+		//auto cBuffers = static_cast<VulkanMaterial*>(this->technique->getMaterial())->getConstantBuffers();
+		//for (auto b : cBuffers)
+		//{
+		//	dbInfo.buffer = b.second->GetBuffer();
+		//	dbInfo.offset = 0;
+		//	dbInfo.range = VK_WHOLE_SIZE;
+
+		//	WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[0], b.first, 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &dbInfo, nullptr));
+
+		//}
+		
+
 		/* Create a descritpor set for the texture/sampler*/
-		VulkanHelpers::AllocateDescriptorSets(device, poolTex, 1, &layoutTex, &_sets[1]);
+		//VulkanHelpers::AllocateDescriptorSets(device, poolTex, 1, &layoutTex, &_sets[1]);
 
 		VkDescriptorImageInfo imageInfo;
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

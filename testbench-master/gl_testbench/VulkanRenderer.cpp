@@ -575,7 +575,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	/*************Create descriptor pool**************/
 	VkDescriptorPoolSize pSize[] = {
 		{VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 3 * 10000},
-		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 * 10000}
+		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2 * 10000}
 	};
 
 
@@ -614,7 +614,13 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		VK_SHADER_STAGE_VERTEX_BIT,
 		nullptr
 	});
-
+	bindings.push_back({
+		DIFFUSE_TINT,
+		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		1,
+		VK_SHADER_STAGE_FRAGMENT_BIT,
+		nullptr
+	});
 	
 
 	/* Create the descriptor set layout*/

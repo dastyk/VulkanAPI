@@ -20,6 +20,9 @@ public:
 	int compileMaterial(std::string& errString);
 	void addConstantBuffer(std::string name, unsigned int location);
 	void updateConstantBuffer(const void* data, size_t size, unsigned int location);
+	const std::map<unsigned int, VulkanConstantBuffer*>& getConstantBuffers()const {
+		return constantBuffers;
+	};
 	int enable();
 	void disable();
 
