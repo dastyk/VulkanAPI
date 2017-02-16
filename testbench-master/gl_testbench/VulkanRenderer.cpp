@@ -1,4 +1,5 @@
 #include "VulkanRenderer.h"
+#include "VulkanTexture2D.h"
 #include <ConsoleThread.h>
 #include <array>
 #include <SDL_syswm.h>
@@ -159,7 +160,7 @@ RenderState * VulkanRenderer::makeRenderState()
 
 Texture2D * VulkanRenderer::makeTexture2D()
 {
-	return nullptr;
+	return (Texture2D*) new VulkanTexture2D(_vkDevice, _vkPhysicalDevices[0]);
 }
 
 Sampler2D * VulkanRenderer::makeSampler2D()
