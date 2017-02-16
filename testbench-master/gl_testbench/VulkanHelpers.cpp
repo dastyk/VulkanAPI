@@ -198,6 +198,29 @@ VkGraphicsPipelineCreateInfo VulkanHelpers::MakePipelineCreateInfo(uint32_t stag
 	};
 }
 
+VkSamplerCreateInfo VulkanHelpers::MakeSamplerCreateInfo(VkFilter magFilter, VkFilter minFilter, VkSamplerMipmapMode mipmapMode, VkSamplerAddressMode addressModeU, VkSamplerAddressMode addressModeV, VkSamplerAddressMode addressModeW, float mipLodBias, VkBool32 anisotropyEnable, float maxAnisotropy, VkBool32 compareEnable, VkCompareOp compareOp, float minLod, float maxLod, VkBorderColor borderColor, VkBool32 unnormalizedCoordinates, VkSamplerCreateFlags flags, const void * pNext)
+{
+	return{
+		VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+		pNext,
+		flags,
+		magFilter,
+		minFilter,
+		mipmapMode,
+		addressModeU,
+		addressModeV,
+		addressModeW,
+		mipLodBias,
+		anisotropyEnable,
+		maxAnisotropy,
+		compareEnable,
+		compareOp,
+		minLod,
+		maxLod,
+		borderColor,
+		unnormalizedCoordinates
+	};
+}
 
 
 const void VulkanHelpers::CreateInstance(const VkInstanceCreateInfo * pCreateInfo, VkInstance * pInstance, const VkAllocationCallbacks * pAllocator)
@@ -390,6 +413,14 @@ const void VulkanHelpers::CreateGraphicsPipelines(VkDevice device, VkPipelineCac
 	VkResult r = vkCreateGraphicsPipelines(device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
 	if (r != VK_SUCCESS) {
 		throw std::runtime_error("Could not create graphics pipeline");
+	}
+}
+
+const void VulkanHelpers::CreateSampler(VkDevice device, const VkSamplerCreateInfo * pCreateInfo, VkSampler * pSampler, const VkAllocationCallbacks * pAllocator)
+{
+	VkResult r = vkCreateSampler(device, pCreateInfo, pAllocator, pSampler);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Could not create sampler");
 	}
 }
 

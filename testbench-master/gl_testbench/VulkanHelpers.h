@@ -139,6 +139,25 @@ namespace VulkanHelpers
 		VkPipelineCreateFlags                            flags					= 0,
 		const void*                                      pNext					= nullptr);
 
+	VkSamplerCreateInfo MakeSamplerCreateInfo(
+		VkFilter										magFilter,
+		VkFilter										minFilter,
+		VkSamplerMipmapMode								mipmapMode,
+		VkSamplerAddressMode							addressModeU,
+		VkSamplerAddressMode							addressModeV,
+		VkSamplerAddressMode							addressModeW,
+		float											mipLodBias,
+		VkBool32										anisotropyEnable,
+		float											maxAnisotropy,
+		VkBool32										compareEnable,
+		VkCompareOp										compareOp,
+		float											minLod,
+		float											maxLod,
+		VkBorderColor									borderColor,
+		VkBool32										unnormalizedCoordinates,
+		VkSamplerCreateFlags							flags					= 0,
+		const void*										pNext					= nullptr);
+
 
 	/*Creation*/
 	const void CreateInstance(
@@ -245,7 +264,11 @@ namespace VulkanHelpers
 		VkPipeline*                                 pPipelines,
 		const VkAllocationCallbacks*                pAllocator					= nullptr );
 
-
+	const void CreateSampler(
+		VkDevice                                    device,
+		const VkSamplerCreateInfo*                  pCreateInfo,
+		VkSampler*                                  pSampler,
+		const VkAllocationCallbacks*                pAllocator					= nullptr);
 
 
 

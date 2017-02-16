@@ -8,10 +8,10 @@
 
 
 
-VulkanTexture2D::VulkanTexture2D(VkDevice & device, VkPhysicalDevice& physDevice)
+
+
+VulkanTexture2D::VulkanTexture2D(VkDevice & device, VkPhysicalDevice & physDevice, VkCommandBuffer & transferCommandBuffer) : _device(&device), _physDevice(&physDevice), _cmdBuffer(&transferCommandBuffer)
 {
-	_device = &device;
-	_physDevice = &physDevice;
 }
 
 VulkanTexture2D::~VulkanTexture2D()
@@ -65,6 +65,13 @@ int VulkanTexture2D::loadFromFile(std::string filename)
 
 	_createImage(tWidth, tHeight, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _texture, _textureMemory);
 
+	_transitionLayout(staging, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	_transitionLayout(_texture, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+	_copyImage(staging, _texture, tWidth, tHeight);
+
+	_transitionLayout(_texture, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	vkDeviceWaitIdle(*_device);
 	
 
 
@@ -121,4 +128,60 @@ void VulkanTexture2D::_createImage(uint32_t width, uint32_t height, VkFormat for
 		throw std::runtime_error("Failed to allocated memory for image");
 
 	vkBindImageMemory(*_device, image, imageMemory, 0);
+
+}
+
+void VulkanTexture2D::_transitionLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+	VkImageMemoryBarrier barrier = {};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.oldLayout = oldLayout;
+	barrier.newLayout = newLayout;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = image;
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.layerCount = 1;
+	barrier.srcAccessMask = 0;
+	barrier.dstAccessMask = 0;
+	if (oldLayout == VK_IMAGE_LAYOUT_PREINITIALIZED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+		barrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+	}
+	else if (oldLayout == VK_IMAGE_LAYOUT_PREINITIALIZED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+		barrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	}
+	else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	}
+	else {
+		throw std::invalid_argument("unsupported layout transition!");
+	}
+
+	vkCmdPipelineBarrier(*_cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+}
+
+void VulkanTexture2D::_copyImage(VkImage src, VkImage dst, uint32_t width, uint32_t height)
+{
+	VkImageSubresourceLayers subRes = {};
+	subRes.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subRes.baseArrayLayer = 0;
+	subRes.mipLevel = 0;
+	subRes.layerCount = 1;
+
+	VkImageCopy region = {};
+	region.srcSubresource = subRes;
+	region.dstSubresource = subRes;
+	region.srcOffset = { 0,0,0 };
+	region.dstOffset = { 0,0,0 };
+	region.extent.width = width;
+	region.extent.height = height;
+	region.extent.depth = 1;
+	
+	vkCmdCopyImage(*_cmdBuffer, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 }
