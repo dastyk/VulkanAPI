@@ -10,6 +10,7 @@ public:
 	~VulkanTechnique();
 
 	void make(VkPipelineLayout pipelineLayout, VkRenderPass renderPass);
+	VkPipeline getPipeline() { return _pipeline; }
 
 private:
 	VkDevice _device = VK_NULL_HANDLE;
