@@ -1,4 +1,3 @@
-#version 450
 
 layout(set = 0, binding = 0, rgba32f) uniform imageBuffer g_Positions;
 layout(set = 0, binding = 5) uniform PositionConstants

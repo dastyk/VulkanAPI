@@ -194,6 +194,7 @@
     <ClCompile Include="VulkanSampler2D.cpp" />
     <ClCompile Include="VulkanRenderState.cpp" />
     <ClCompile Include="VulkanTexture2D.cpp" />
+    <ClCompile Include="VulkanTechnique.cpp" />
     <ClCompile Include="VulkanVertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -238,15 +239,14 @@
     <ClInclude Include="VulkanSampler2D.h" />
     <ClInclude Include="VulkanRenderState.h" />
     <ClInclude Include="VulkanTexture2D.h" />
+    <ClInclude Include="VulkanTechnique.h" />
     <ClInclude Include="VulkanVertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\GL45\FragmentShader.glsl" />
     <None Include="..\assets\GL45\VertexShader.glsl" />
     <None Include="..\assets\Vulkan\FragmentShader.glsl" />
-    <None Include="..\assets\Vulkan\FragmentShader.frag" />
-    <None Include="..\assets\Vulkan\VertexShader.vert" />
-    <None Include="..\assets\Vulkan\VertexShader.glsl.vert" />
+    <None Include="..\assets\Vulkan\VertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

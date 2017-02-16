@@ -142,10 +142,15 @@
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="VulkanSampler2D.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="VulkanRenderState.cpp">
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="VulkanTexture2D.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanTechnique.cpp">
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
@@ -268,10 +273,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VulkanTexture2D.h">
+      <Filter>Header Files\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="VulkanRenderState.h">
       <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="VulkanSampler2D.h">
+      <Filter>Header Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTechnique.h">
       <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
@@ -285,13 +295,7 @@
     <None Include="..\assets\Vulkan\FragmentShader.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\assets\Vulkan\VertexShader.glsl.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\assets\Vulkan\VertexShader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\assets\Vulkan\FragmentShader.frag">
+    <None Include="..\assets\Vulkan\VertexShader.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -23,7 +23,7 @@ public:
 
 private:
 	bool _compileShader(ShaderType type);
-	std::string&& _expandShaderText(const std::string& shaderSource, ShaderType type);
+	std::string _expandShaderText(const std::string& shaderSource, ShaderType type);
 
 private:
 	// Device that created the shaders

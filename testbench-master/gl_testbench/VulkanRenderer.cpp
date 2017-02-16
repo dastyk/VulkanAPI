@@ -9,7 +9,8 @@
 #undef min
 
 #include "VulkanMaterial.h"
-#include "RenderStateGL.h"
+#include "VulkanRenderState.h"
+#include "VulkanTechnique.h"
 
 #define MB *1024*1024
 
@@ -95,7 +96,7 @@ VulkanRenderer::~VulkanRenderer()
 
 Material * VulkanRenderer::makeMaterial()
 {
-	return new VulkanMaterial(_vkDevice, _pipelineLayout, _renderPass, _createBufferCallback, _updateBufferCallback);
+	return new VulkanMaterial(_vkDevice, _testPipelineLayout, _renderPass, _createBufferCallback, _updateBufferCallback);
 }
 
 Mesh * VulkanRenderer::makeMesh()
@@ -156,12 +157,12 @@ ResourceBinding * VulkanRenderer::makeResourceBinding()
 
 RenderState * VulkanRenderer::makeRenderState()
 {
-	return new RenderStateGL();
+	return new VulkanRenderState();
 }
 
 Technique* VulkanRenderer::makeTechnique(Material* material, RenderState* renderState)
 {
-	return new Technique(material, renderState);
+	return new VulkanTechnique(material, renderState);
 }
 
 Texture2D * VulkanRenderer::makeTexture2D()
@@ -176,12 +177,12 @@ Sampler2D * VulkanRenderer::makeSampler2D()
 
 std::string VulkanRenderer::getShaderPath()
 {
-	return std::string();
+	return std::string("..\\assets\\Vulkan\\");
 }
 
 std::string VulkanRenderer::getShaderExtension()
 {
-	return std::string();
+	return std::string(".glsl");
 }
 
 int VulkanRenderer::initialize(unsigned int width, unsigned int height)

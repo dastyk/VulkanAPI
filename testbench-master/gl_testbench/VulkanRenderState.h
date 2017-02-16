@@ -6,5 +6,9 @@ class VulkanRenderState :
 public:
 	VulkanRenderState();
 	~VulkanRenderState();
+
+	// Overrides
+	void setWireFrame(bool);
+	void set();
 };
 
