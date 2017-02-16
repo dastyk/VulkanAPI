@@ -148,10 +148,10 @@ int initialiseTestbench()
 		yt[a] = 0.8f * sinf(degToRad * (a/4.0) * 2.0);
 	};
 
-	//// triangle geometry:
+	// triangle geometry:
 	float4 triPos[3] = { { 0.0f,  0.05, 0.0f, 1.0f },{ 0.05, -0.05, 0.0f, 1.0f },{ -0.05, -0.05, 0.0f, 1.0f } };
-	//float4 triNor[3] = { { 0.0f,  0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 0.0f } };
-	//float2 triUV[3] =  { { 0.5f,  -0.99f },{ 1.49f, 1.1f },{ -0.51, 1.1f } };
+	float4 triNor[3] = { { 0.0f,  0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f, 0.0f } };
+	float2 triUV[3] =  { { 0.5f,  -0.99f },{ 1.49f, 1.1f },{ -0.51, 1.1f } };
 
 	// load Materials.
 	std::string shaderPath = renderer->getShaderPath();
@@ -191,7 +191,7 @@ int initialiseTestbench()
 	techniques.push_back(renderer->makeTechnique(materials[1], renderer->makeRenderState()));
 
 
-	//// create texture
+	// create texture
 	//Texture2D* fatboy = renderer->makeTexture2D();
 	//fatboy->loadFromFile("../assets/textures/fatboy.png");
 	//fatboy->sampler = renderer->makeSampler2D();
@@ -219,17 +219,14 @@ int initialiseTestbench()
 		//uvs->bind(0, sizeof(triUV), TEXTCOORD);
 		//m->addIAVertexBufferBinding(uvs, 0, numberOfElements, TEXTCOORD);
 
-		//// we can create a constant buffer outside the material, for example as part of the Mesh.
+		// we can create a constant buffer outside the material, for example as part of the Mesh.
 		m->txBuffer = renderer->makeConstantBuffer(std::string(TRANSLATION_NAME), TRANSLATION);
-		//m->txBuffer->setData(nullptr, 0, nullptr, 0);
-		//
-		//if (i == 0) {
-		//	m->technique = techniques[2];
-		//	m->addTexture(fatboy, DIFFUSE_SLOT);
-		//	
-		//}
-		//else 
-		//	m->technique = techniques[ i % 2];
+		if (i == 0) {
+			m->technique = techniques[2];
+			//m->addTexture(fatboy, DIFFUSE_SLOT);
+		}
+		else 
+			m->technique = techniques[ i % 2];
 
 		scene.push_back(m);
 	}
