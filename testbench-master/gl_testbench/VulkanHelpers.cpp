@@ -81,18 +81,7 @@ VkCommandPoolCreateInfo VulkanHelpers::MakeCommandPoolCreateInfo(uint32_t queueF
 	return cmdPoolInfo;
 }
 
-VkCommandBufferAllocateInfo VulkanHelpers::MakeCommandBufferAllocateInfo(VkCommandPool commandPool, VkCommandBufferLevel level, uint32_t commandBufferCount, const void * pNext)
-{
-	VkCommandBufferAllocateInfo cmdBufferAllocInfo =
-	{
-		VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-		pNext,
-		commandPool,
-		level,
-		commandBufferCount
-	};
-	return cmdBufferAllocInfo;
-}
+
 
 VkSubmitInfo VulkanHelpers::MakeSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer * pCommandBuffers, uint32_t waitSemaphoreCount, const VkSemaphore * pWaitSemaphores, const VkPipelineStageFlags * pWaitDstStageMask, uint32_t signalSemaphoreCount, const VkSemaphore * pSignalSemaphores, const void * pNext)
 {
@@ -243,10 +232,18 @@ const void VulkanHelpers::CreateCommandPool(VkDevice device, const VkCommandPool
 	}
 }
 
-const void VulkanHelpers::AllocateCommandBuffers(VkDevice device, const VkCommandBufferAllocateInfo * pAllocateInfo, VkCommandBuffer * pCommandBuffers)
+const void VulkanHelpers::AllocateCommandBuffers(VkDevice device, VkCommandBuffer * pCommandBuffers, VkCommandPool commandPool, VkCommandBufferLevel level, uint32_t commandBufferCount, const void * pNext)
 {
-	VkResult result = vkAllocateCommandBuffers(device, pAllocateInfo, pCommandBuffers);
+	VkCommandBufferAllocateInfo cmdBufferAllocInfo =
+	{
+		VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+		pNext,
+		commandPool,
+		level,
+		commandBufferCount
+	};
 
+	VkResult result = vkAllocateCommandBuffers(device, &cmdBufferAllocInfo, pCommandBuffers);
 	if (result != VK_SUCCESS) {
 		throw std::runtime_error("Failed to allocate command buffers.");
 	}

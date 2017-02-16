@@ -62,9 +62,11 @@ private:
 	std::vector<VkPhysicalDevice> _vkPhysicalDevices;
 	VkDevice _vkDevice;
 	VkQueue _vkMainQueue;
+
 	VkCommandPool _vkCmdPool;
-	VkCommandBuffer _vkInitTransferCmdBuffer;
-	VkCommandBuffer _vkCmdBuffer;
+
+	std::vector<VkCommandBuffer> _cmdBuffers;
+
 	VkDescriptorPool _vkBufferDescriptorPool;
 	VkDescriptorPool _vkTextureDescriptorPool;
 

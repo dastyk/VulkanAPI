@@ -62,12 +62,6 @@ namespace VulkanHelpers
 		VkCommandPoolCreateFlags					flags						= 0,
 		const void*									pNext						= nullptr);
 
-	VkCommandBufferAllocateInfo MakeCommandBufferAllocateInfo(	
-		VkCommandPool								commandPool,
-		VkCommandBufferLevel						level						= VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-		uint32_t									commandBufferCount			= 1,
-		const void*									pNext						=	nullptr);
-
 	VkSubmitInfo MakeSubmitInfo(
 		uint32_t									commandBufferCount,
 		const VkCommandBuffer*						pCommandBuffers,
@@ -167,8 +161,11 @@ namespace VulkanHelpers
 
 	const void AllocateCommandBuffers(
 		VkDevice									device,
-		const VkCommandBufferAllocateInfo*			pAllocateInfo,
-		VkCommandBuffer*							pCommandBuffers);
+		VkCommandBuffer*							pCommandBuffers, 
+		VkCommandPool								commandPool,
+		VkCommandBufferLevel						level						= VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		uint32_t									commandBufferCount			= 1,
+		const void*									pNext						= nullptr);
 
 	const void CreateBuffer(
 		VkDevice									device,
