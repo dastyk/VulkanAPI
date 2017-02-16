@@ -11,6 +11,7 @@
 #include "VulkanMaterial.h"
 #include "VulkanRenderState.h"
 #include "VulkanTechnique.h"
+#include "VulkanSampler2D.h"
 
 #define MB *1024*1024
 
@@ -172,7 +173,7 @@ Texture2D * VulkanRenderer::makeTexture2D()
 
 Sampler2D * VulkanRenderer::makeSampler2D()
 {
-	return nullptr;
+	return new VulkanSampler2D(_vkDevice);
 }
 
 std::string VulkanRenderer::getShaderPath()
