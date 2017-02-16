@@ -142,6 +142,7 @@
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="VulkanSampler2D.cpp">
+    <ClCompile Include="VulkanRenderState.cpp">
       <Filter>Source Files\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="VulkanTexture2D.cpp">
@@ -263,13 +264,11 @@
     <ClInclude Include="ConstantBufferVk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialVk.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VulkanTexture2D.h">
+    <ClInclude Include="VulkanRenderState.h">
       <Filter>Header Files\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="VulkanSampler2D.h">

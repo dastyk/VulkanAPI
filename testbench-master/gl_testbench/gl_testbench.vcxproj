@@ -192,6 +192,7 @@
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VulkanRenderer.cpp" />
     <ClCompile Include="VulkanSampler2D.cpp" />
+    <ClCompile Include="VulkanRenderState.cpp" />
     <ClCompile Include="VulkanTexture2D.cpp" />
     <ClCompile Include="VulkanVertexBuffer.cpp" />
   </ItemGroup>
@@ -200,7 +201,6 @@
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConstantBufferGL.h" />
     <ClInclude Include="ConstantBufferVk.h" />
-    <ClInclude Include="MaterialVk.h" />
     <ClInclude Include="Sampler2D.h" />
     <ClInclude Include="Sampler2DGL.h" />
     <ClInclude Include="Scene.h" />
@@ -236,6 +236,7 @@
     <ClInclude Include="VulkanMesh.h" />
     <ClInclude Include="VulkanRenderer.h" />
     <ClInclude Include="VulkanSampler2D.h" />
+    <ClInclude Include="VulkanRenderState.h" />
     <ClInclude Include="VulkanTexture2D.h" />
     <ClInclude Include="VulkanVertexBuffer.h" />
   </ItemGroup>

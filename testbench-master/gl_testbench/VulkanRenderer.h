@@ -23,7 +23,7 @@ public:
 	ConstantBuffer* makeConstantBuffer(std::string NAME, unsigned int location);
 	ResourceBinding* makeResourceBinding();
 	RenderState* makeRenderState();
-	Technique* makeTechnique() {};
+	Technique* makeTechnique(Material* material, RenderState* renderState);
 	Texture2D* makeTexture2D();
 	Sampler2D* makeSampler2D();
 	std::string getShaderPath();
@@ -62,11 +62,16 @@ private:
 	std::vector<VkPhysicalDevice> _vkPhysicalDevices;
 	VkDevice _vkDevice;
 	VkQueue _vkMainQueue;
+
 	VkCommandPool _vkCmdPool;
-	VkCommandBuffer _vkInitTransferCmdBuffer;
-	VkCommandBuffer _vkCmdBuffer;
-	VkDescriptorPool _vkDescriptorPool;
-	VkDescriptorSetLayout _setLayout;
+
+	std::vector<VkCommandBuffer> _cmdBuffers;
+
+	VkDescriptorPool _vkBufferDescriptorPool;
+	VkDescriptorPool _vkTextureDescriptorPool;
+
+	VkDescriptorSetLayout _bufferSetLayout;
+	VkDescriptorSetLayout _textureSetLayout;
 
 	VkSurfaceKHR _vkSurface;
 	VkFormat _swapchainFormat;

@@ -113,33 +113,33 @@ void renderScene()
 
 int initialiseTestbench()
 {
-	//std::string definePos = "#define POSITION " + std::to_string(POSITION) + "\n";
-	//std::string defineNor = "#define NORMAL " + std::to_string(NORMAL) + "\n";
-	//std::string defineUV = "#define TEXTCOORD " + std::to_string(TEXTCOORD) + "\n";
+	std::string definePos = "#define POSITION " + std::to_string(POSITION) + "\n";
+	std::string defineNor = "#define NORMAL " + std::to_string(NORMAL) + "\n";
+	std::string defineUV = "#define TEXTCOORD " + std::to_string(TEXTCOORD) + "\n";
 
-	//std::string defineTX = "#define TRANSLATION " + std::to_string(TRANSLATION) + "\n";
+	std::string defineTX = "#define TRANSLATION " + std::to_string(TRANSLATION) + "\n";
 
-	//std::string defineTXName = "#define TRANSLATION_NAME " + std::string(TRANSLATION_NAME) + "\n";
-	//
-	//std::string defineDiffCol = "#define DIFFUSE_TINT " + std::to_string(DIFFUSE_TINT) + "\n";
-	//std::string defineDiffColName = "#define DIFFUSE_TINT_NAME " + std::string(DIFFUSE_TINT_NAME) + "\n";
+	std::string defineTXName = "#define TRANSLATION_NAME " + std::string(TRANSLATION_NAME) + "\n";
+	
+	std::string defineDiffCol = "#define DIFFUSE_TINT " + std::to_string(DIFFUSE_TINT) + "\n";
+	std::string defineDiffColName = "#define DIFFUSE_TINT_NAME " + std::string(DIFFUSE_TINT_NAME) + "\n";
 
-	//std::string defineDiffuse = "#define DIFFUSE_SLOT " + std::to_string(DIFFUSE_SLOT) + "\n";
+	std::string defineDiffuse = "#define DIFFUSE_SLOT " + std::to_string(DIFFUSE_SLOT) + "\n";
 
-	//std::vector<std::vector<std::string>> materialDefs = {
-	//	// vertex shader, fragment shader, defines
-	//	// shader extension must be asked to the renderer
-	//	// these strings should be constructed from the IA.h file!!!
+	std::vector<std::vector<std::string>> materialDefs = {
+		// vertex shader, fragment shader, defines
+		// shader extension must be asked to the renderer
+		// these strings should be constructed from the IA.h file!!!
 
-	//	{ "VertexShader", "FragmentShader", definePos + defineNor + defineUV + defineTX + 
-	//	   defineTXName + defineDiffCol + defineDiffColName }, 
+		{ "VertexShader", "FragmentShader", definePos + defineNor + defineUV + defineTX + 
+		   defineTXName + defineDiffCol + defineDiffColName }, 
 
-	//	{ "VertexShader", "FragmentShader", definePos + defineNor + defineUV + defineTX + 
-	//	   defineTXName + defineDiffCol + defineDiffColName }, 
+		{ "VertexShader", "FragmentShader", definePos + defineNor + defineUV + defineTX + 
+		   defineTXName + defineDiffCol + defineDiffColName }, 
 
-	//	{ "VertexShader", "FragmentShader", definePos + defineNor + defineUV + defineTX + 
-	//	   defineTXName + defineDiffCol + defineDiffColName + defineDiffuse	}
-	//};
+		{ "VertexShader", "FragmentShader", definePos + defineNor + defineUV + defineTX + 
+		   defineTXName + defineDiffCol + defineDiffColName + defineDiffuse	}
+	};
 
 	float degToRad = M_PI / 180.0;
 	for (int a = 0; a < 4*360; a++)
@@ -162,10 +162,10 @@ int initialiseTestbench()
 	//	1.0,1.0,1.0,1.0 
 	//};
 
-	//for (int i = 0; i < materialDefs.size(); i++)
-	//{
-	//	// set material name from text file?
-	//	Material* m = renderer->makeMaterial();
+	for (int i = 0; i < materialDefs.size(); i++)
+	{
+		// set material name from text file?
+		Material* m = renderer->makeMaterial();
 	//	m->setShader(shaderPath + materialDefs[i][0] + shaderExtension, Material::ShaderType::VS);
 	//	m->setShader(shaderPath + materialDefs[i][1] + shaderExtension, Material::ShaderType::PS);
 
@@ -181,24 +181,14 @@ int initialiseTestbench()
 	//	// when material is bound, this buffer should be also bound for access.
 	//	m->updateConstantBuffer(diffuse[i], 4 * sizeof(float), DIFFUSE_TINT);
 	//	
-	//	materials.push_back(m);
-	//}
-	//// basic technique
-	//techniques.push_back(new Technique());
-	//techniques.push_back(new Technique());
-	//techniques.push_back(new Technique());
-
-	//techniques[0]->material = materials[0];
-	//techniques[1]->material = materials[1];
-	//techniques[2]->material = materials[2];
-
-	//// one technique with wireframe
-	//techniques[0]->renderState = renderer->makeRenderState();
-	//techniques[0]->renderState->setWireFrame(true);
-
-	//// two techniques with solid
-	//techniques[1]->renderState = renderer->makeRenderState();
-	//techniques[2]->renderState = renderer->makeRenderState();
+		materials.push_back(m);
+	}
+	// one technique with wireframe and two with solid
+	RenderState* rs = renderer->makeRenderState();
+	rs->setWireFrame(true);
+	techniques.push_back(renderer->makeTechnique(materials[0], rs));
+	techniques.push_back(renderer->makeTechnique(materials[1], renderer->makeRenderState()));
+	techniques.push_back(renderer->makeTechnique(materials[1], renderer->makeRenderState()));
 
 
 	//// create texture
