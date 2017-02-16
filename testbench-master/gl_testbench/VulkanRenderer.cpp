@@ -8,7 +8,8 @@
 #undef min
 
 #include "VulkanMaterial.h"
-#include "RenderStateGL.h"
+#include "VulkanRenderState.h"
+#include "VulkanTechnique.h"
 
 #define MB *1024*1024
 
@@ -155,12 +156,12 @@ ResourceBinding * VulkanRenderer::makeResourceBinding()
 
 RenderState * VulkanRenderer::makeRenderState()
 {
-	return new RenderStateGL();
+	return new VulkanRenderState();
 }
 
 Technique* VulkanRenderer::makeTechnique(Material* material, RenderState* renderState)
 {
-	return new Technique(material, renderState);
+	return new VulkanTechnique(material, renderState);
 }
 
 Texture2D * VulkanRenderer::makeTexture2D()
