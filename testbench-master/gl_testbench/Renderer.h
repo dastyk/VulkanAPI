@@ -44,6 +44,7 @@ public:
 	virtual std::string getShaderPath() = 0;
 	virtual std::string getShaderExtension() = 0;
 	virtual ConstantBuffer* makeConstantBuffer(std::string NAME, unsigned int location) = 0;
+	virtual Technique* makeTechnique(Material* material, RenderState* renderState) = 0;
 
 	Renderer() { /*InitializeCriticalSection(&protectHere);*/ };
 	virtual int initialize(unsigned int width = 800, unsigned int height = 600) = 0;

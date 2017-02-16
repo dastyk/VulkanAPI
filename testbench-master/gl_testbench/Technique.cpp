@@ -5,7 +5,7 @@
 
 
 
-Technique::Technique()
+Technique::Technique(Material* material, RenderState* renderState) : material(material), renderState(renderState)
 {
 }
 
