@@ -16,7 +16,7 @@ public:
 	void enable(Renderer* renderer);
 	Material* getMaterial() { return material; }
 
-private:
+protected:
 	Material* material = nullptr;
 	RenderState* renderState = nullptr;
 

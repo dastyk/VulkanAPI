@@ -11,9 +11,9 @@ VulkanRenderState::~VulkanRenderState()
 {
 }
 
-void VulkanRenderState::setWireFrame(bool)
+void VulkanRenderState::setWireFrame(bool wireframe)
 {
-
+	_wireframe = wireframe;
 }
 
 void VulkanRenderState::set()

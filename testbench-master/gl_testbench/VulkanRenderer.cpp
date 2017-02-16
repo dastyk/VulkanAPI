@@ -96,7 +96,7 @@ VulkanRenderer::~VulkanRenderer()
 
 Material * VulkanRenderer::makeMaterial()
 {
-	return new VulkanMaterial(_vkDevice, _testPipelineLayout, _renderPass, _createBufferCallback, _updateBufferCallback);
+	return new VulkanMaterial(_vkDevice, _createBufferCallback, _updateBufferCallback);
 }
 
 Mesh * VulkanRenderer::makeMesh()
@@ -162,7 +162,9 @@ RenderState * VulkanRenderer::makeRenderState()
 
 Technique* VulkanRenderer::makeTechnique(Material* material, RenderState* renderState)
 {
-	return new VulkanTechnique(material, renderState);
+	VulkanTechnique* t = new VulkanTechnique(_vkDevice, material, renderState);
+	t->make(_testPipelineLayout, _renderPass);
+	return t;
 }
 
 Texture2D * VulkanRenderer::makeTexture2D()

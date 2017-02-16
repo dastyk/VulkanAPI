@@ -188,7 +188,7 @@ int initialiseTestbench()
 	rs->setWireFrame(true);
 	techniques.push_back(renderer->makeTechnique(materials[0], rs));
 	techniques.push_back(renderer->makeTechnique(materials[1], renderer->makeRenderState()));
-	techniques.push_back(renderer->makeTechnique(materials[1], renderer->makeRenderState()));
+	techniques.push_back(renderer->makeTechnique(materials[2], renderer->makeRenderState()));
 
 
 	// create texture
