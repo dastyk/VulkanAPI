@@ -175,12 +175,12 @@ int initialiseTestbench()
 		std::string err;
 		m->compileMaterial(err);
 
-	//	// add a constant buffer to the material, to tint every triangle using this material
-	//	m->addConstantBuffer(DIFFUSE_TINT_NAME, DIFFUSE_TINT);
-	//	// no need to update anymore
-	//	// when material is bound, this buffer should be also bound for access.
-	//	m->updateConstantBuffer(diffuse[i], 4 * sizeof(float), DIFFUSE_TINT);
-	//	
+		// add a constant buffer to the material, to tint every triangle using this material
+		m->addConstantBuffer(DIFFUSE_TINT_NAME, DIFFUSE_TINT);
+		// no need to update anymore
+		// when material is bound, this buffer should be also bound for access.
+		m->updateConstantBuffer(diffuse[i], 4 * sizeof(float), DIFFUSE_TINT);
+
 		materials.push_back(m);
 	}
 	// one technique with wireframe and two with solid

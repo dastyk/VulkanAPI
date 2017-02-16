@@ -226,7 +226,7 @@ void VulkanMaterial::addConstantBuffer(std::string name, unsigned int location)
 
 void VulkanMaterial::updateConstantBuffer(const void* data, size_t size, unsigned int location)
 {
-	//constantBuffers[location]->setData(data, size, this, location);
+	constantBuffers[location]->setData(data, size, this, location);
 }
 
 int VulkanMaterial::enable()
