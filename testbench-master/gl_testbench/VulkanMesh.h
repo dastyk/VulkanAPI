@@ -10,10 +10,10 @@ public:
 
 
 
-	const void CreateDescriptor(VkDevice device, VkDescriptorPool pool, VkDescriptorSetLayout layout);
-	VkDescriptorSet getDescriptorSet(void) const { return _set; }
+	const void CreateDescriptor(VkDevice device, VkDescriptorPool poolBuff, VkDescriptorSetLayout layoutBuff, VkDescriptorPool poolTex, VkDescriptorSetLayout layoutTex);
+	const VkDescriptorSet* getDescriptorSet(uint32_t& count) const { count = _sets.size(); return _sets.data(); }
 
 private:
-	VkDescriptorSet _set;
+	std::vector<VkDescriptorSet> _sets;
 };
 

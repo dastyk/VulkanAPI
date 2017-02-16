@@ -581,7 +581,10 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		{VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 3 * 10000},
 		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 * 10000}
 	};
-	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkDescriptorPool, 0, 10000, 2, pSize);
+
+
+	//{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 * 10000}
+	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkBufferDescriptorPool, 0, 10000, 2, pSize);
 
 	std::vector<VkDescriptorSetLayoutBinding> bindings;
 
@@ -616,8 +619,32 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		nullptr
 	});
 
+	
+
 	/* Create the descriptor set layout*/
-	VulkanHelpers::CreateDescriptorSetLayout(_vkDevice, &_setLayout, bindings.size(), bindings.data());
+	VulkanHelpers::CreateDescriptorSetLayout(_vkDevice, &_bufferSetLayout, bindings.size(), bindings.data());
+
+	/* Create a new descriptor pool/set layout for the texture/sampler*/
+	VkDescriptorPoolSize pSize2[] = {
+		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 * 10000}
+	};
+
+
+
+	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkTextureDescriptorPool, 0, 10000, 1, pSize2);
+
+	bindings.clear();
+
+	bindings.push_back({
+		DIFFUSE_SLOT,
+		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+		1,
+		VK_SHADER_STAGE_FRAGMENT_BIT,
+		nullptr
+	});
+
+	/* Create the descriptor set layout*/
+	VulkanHelpers::CreateDescriptorSetLayout(_vkDevice, &_textureSetLayout, bindings.size(), bindings.data()); 
 
 	_createTestPipeline();
 	
@@ -628,8 +655,8 @@ int VulkanRenderer::shutdown()
 {
 	vkDeviceWaitIdle(_vkDevice);
 
-	vkDestroyDescriptorPool(_vkDevice, _vkDescriptorPool, nullptr);
-
+	vkDestroyDescriptorPool(_vkDevice, _vkTextureDescriptorPool, nullptr);
+	vkDestroyDescriptorPool(_vkDevice, _vkBufferDescriptorPool, nullptr);
 	delete _constantBufferStagingAllocator;
 	_constantBufferStagingAllocator = nullptr;
 	delete _constantBufferAllocator;
@@ -701,7 +728,7 @@ void VulkanRenderer::setRenderState(RenderState * ps)
 void VulkanRenderer::submit(Mesh * mesh)
 {
 	auto vMesh = (VulkanMesh*)mesh;
-	vMesh->CreateDescriptor(_vkDevice, _vkDescriptorPool, _setLayout);
+	vMesh->CreateDescriptor(_vkDevice, _vkBufferDescriptorPool, _bufferSetLayout, _vkTextureDescriptorPool, _textureSetLayout);
 	drawList.push_back(vMesh);
 }
 
@@ -753,8 +780,9 @@ void VulkanRenderer::frame()
 
 	for (auto m : drawList)
 	{
-		VkDescriptorSet set = m->getDescriptorSet();
-		vkCmdBindDescriptorSets(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipelineLayout, 0, 1, &set, 0, nullptr);
+		uint32_t descriptorSetCount = 0;
+		auto sets = m->getDescriptorSet(descriptorSetCount);
+		vkCmdBindDescriptorSets(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipelineLayout, 0, descriptorSetCount, sets, 0, nullptr);
 		vkCmdDraw(_vkCmdBuffer, 3, 1, 0, 0);
 	}
 
@@ -1147,11 +1175,13 @@ void VulkanRenderer::_createTestPipeline()
 	colorBlendInfo.blendConstants[3] = 0.0f;
 
 
+	VkDescriptorSetLayout layouts[] = { _bufferSetLayout , _textureSetLayout };
+
 	//Temporary, need descriptor set to work
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 1;
-	pipelineLayoutInfo.pSetLayouts = &_setLayout;
+	pipelineLayoutInfo.setLayoutCount = 2;
+	pipelineLayoutInfo.pSetLayouts = layouts;
 
 	if (vkCreatePipelineLayout(_vkDevice, &pipelineLayoutInfo, nullptr, &_testPipelineLayout) != VK_SUCCESS)
 		throw std::runtime_error("Could not create pipeline layout");
