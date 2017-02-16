@@ -125,7 +125,25 @@ namespace VulkanHelpers
 		const void*									pNext						= nullptr);
 
 
-
+	VkGraphicsPipelineCreateInfo MakePipelineCreateInfo(
+		uint32_t                                         stageCount,
+		const VkPipelineShaderStageCreateInfo*           pStages,
+		const VkPipelineVertexInputStateCreateInfo*      pVertexInputState,
+		const VkPipelineInputAssemblyStateCreateInfo*    pInputAssemblyState,
+		const VkPipelineTessellationStateCreateInfo*     pTessellationState,
+		const VkPipelineViewportStateCreateInfo*         pViewportState,
+		const VkPipelineRasterizationStateCreateInfo*    pRasterizationState,
+		const VkPipelineMultisampleStateCreateInfo*      pMultisampleState,
+		const VkPipelineDepthStencilStateCreateInfo*     pDepthStencilState,
+		const VkPipelineColorBlendStateCreateInfo*       pColorBlendState,
+		const VkPipelineDynamicStateCreateInfo*          pDynamicState,
+		VkPipelineLayout                                 layout,
+		VkRenderPass                                     renderPass,
+		uint32_t                                         subpass				= 0,
+		VkPipeline                                       basePipelineHandle		= VK_NULL_HANDLE,
+		int32_t                                          basePipelineIndex		= 0,
+		VkPipelineCreateFlags                            flags					= 0,
+		const void*                                      pNext					= nullptr);
 
 
 	/*Creation*/
@@ -221,6 +239,17 @@ namespace VulkanHelpers
 		VkBufferViewCreateFlags						flags						= 0,
 		const void*									pNext						= nullptr,	
 		const VkAllocationCallbacks*                pAllocator					= nullptr);
+
+	const void CreateGraphicsPipelines(
+		VkDevice                                    device,
+		VkPipelineCache                             pipelineCache,
+		uint32_t                                    createInfoCount,
+		const VkGraphicsPipelineCreateInfo*         pCreateInfos,
+		VkPipeline*                                 pPipelines,
+		const VkAllocationCallbacks*                pAllocator					= nullptr );
+
+
+
 
 
 	/*Command recording*/

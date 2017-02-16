@@ -1177,33 +1177,27 @@ void VulkanRenderer::_createTestPipeline()
 
 	VkDescriptorSetLayout layouts[] = { _bufferSetLayout , _textureSetLayout };
 
-	//Temporary, need descriptor set to work
-	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
-	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 2;
-	pipelineLayoutInfo.pSetLayouts = layouts;
+	/*Create the pipelinelayout*/
+	VulkanHelpers::CreatePipelineLayout(_vkDevice, &_testPipelineLayout, 2, layouts);
 
-	if (vkCreatePipelineLayout(_vkDevice, &pipelineLayoutInfo, nullptr, &_testPipelineLayout) != VK_SUCCESS)
-		throw std::runtime_error("Could not create pipeline layout");
+	/* Create the graphics pipeline*/
+	auto pipelineInfo = VulkanHelpers::MakePipelineCreateInfo(
+		2,
+		shaderStages,
+		&vertexInput,
+		&inputAssembly,
+		nullptr,
+		&vpCreateInfo,
+		&rastCreateInfo,
+		&msCreateInfo,
+		nullptr,
+		&colorBlendInfo,
+		nullptr,
+		_testPipelineLayout,
+		_renderPass
+	);
+	VulkanHelpers::CreateGraphicsPipelines(_vkDevice, VK_NULL_HANDLE, 1, &pipelineInfo, &_testPipeline);
 
-	VkGraphicsPipelineCreateInfo pipelineInfo = {};
-	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipelineInfo.stageCount = 2;
-	pipelineInfo.pStages = shaderStages;
-	pipelineInfo.pVertexInputState = &vertexInput;
-	pipelineInfo.pInputAssemblyState = &inputAssembly;
-	pipelineInfo.pViewportState = &vpCreateInfo;
-	pipelineInfo.pRasterizationState = &rastCreateInfo;
-	pipelineInfo.pMultisampleState = &msCreateInfo;
-	pipelineInfo.pColorBlendState = &colorBlendInfo;
-	pipelineInfo.layout = _testPipelineLayout;
-	pipelineInfo.renderPass = _renderPass;
-	pipelineInfo.subpass = NULL;
-	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-
-	if (vkCreateGraphicsPipelines(_vkDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_testPipeline) != VK_SUCCESS)
-		throw std::runtime_error("Could not create graphics pipeline");
-	
 }
 
 
