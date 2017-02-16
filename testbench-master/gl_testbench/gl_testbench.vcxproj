@@ -110,6 +110,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +145,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -189,7 +191,9 @@
     <ClCompile Include="VulkanMemAllocator.cpp" />
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VulkanRenderer.cpp" />
+    <ClCompile Include="VulkanSampler2D.cpp" />
     <ClCompile Include="VulkanRenderState.cpp" />
+    <ClCompile Include="VulkanTexture2D.cpp" />
     <ClCompile Include="VulkanTechnique.cpp" />
     <ClCompile Include="VulkanVertexBuffer.cpp" />
   </ItemGroup>
@@ -232,7 +236,9 @@
     <ClInclude Include="VulkanMemAllocator.h" />
     <ClInclude Include="VulkanMesh.h" />
     <ClInclude Include="VulkanRenderer.h" />
+    <ClInclude Include="VulkanSampler2D.h" />
     <ClInclude Include="VulkanRenderState.h" />
+    <ClInclude Include="VulkanTexture2D.h" />
     <ClInclude Include="VulkanTechnique.h" />
     <ClInclude Include="VulkanVertexBuffer.h" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 #include "VulkanRenderer.h"
+#include "VulkanTexture2D.h"
 #include <ConsoleThread.h>
 #include <array>
 #include <SDL_syswm.h>
@@ -70,7 +71,7 @@ VulkanRenderer::VulkanRenderer() : _first(true)
 
 
 
-		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
+		VulkanHelpers::CopyDataBetweenBuffers(_cmdBuffers[1], stagingBuffer.buffer, 0, buffer, 0, size);
 
 
 
@@ -84,7 +85,7 @@ VulkanRenderer::VulkanRenderer() : _first(true)
 		memcpy((char*)pData + stagingBuffer.offset, data, size);
 		vkUnmapMemory(_vkDevice, stagingBuffer.memory);
 
-		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
+		VulkanHelpers::CopyDataBetweenBuffers(_cmdBuffers[1], stagingBuffer.buffer, 0, buffer, 0, size);
 	};
 }
 
@@ -135,7 +136,7 @@ VertexBuffer * VulkanRenderer::makeVertexBuffer()
 		_vertexStagingBuffers.push_back(stagingBuffer);
 	
 
-		VulkanHelpers::CopyDataBetweenBuffers(_vkInitTransferCmdBuffer, stagingBuffer.buffer, 0, buffer, 0, size);
+		VulkanHelpers::CopyDataBetweenBuffers(_cmdBuffers[1], stagingBuffer.buffer, 0, buffer, 0, size);
 
 
 
@@ -166,7 +167,7 @@ Technique* VulkanRenderer::makeTechnique(Material* material, RenderState* render
 
 Texture2D * VulkanRenderer::makeTexture2D()
 {
-	return nullptr;
+	return (Texture2D*) new VulkanTexture2D(_vkDevice, _vkPhysicalDevices[0]);
 }
 
 Sampler2D * VulkanRenderer::makeSampler2D()
@@ -281,12 +282,10 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		0
 	);
 
-	// For validation purposes
-	uint32_t familyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(_vkPhysicalDevices[0], &familyCount, nullptr);
-	VkQueueFamilyProperties* familyProperties = new VkQueueFamilyProperties[familyCount];
-	vkGetPhysicalDeviceQueueFamilyProperties(_vkPhysicalDevices[0], &familyCount, familyProperties);
-	delete[] familyProperties;
+	/*Enumerate the queue family properties*/
+	auto famProps = VulkanHelpers::EnumeratePhysicalDeviceQueueFamilyProperties(_vkPhysicalDevices[0]);
+
+
 
 	VulkanHelpers::CreateLogicDevice(_vkPhysicalDevices[0], deviceCreateInfo, &_vkDevice);
 
@@ -312,22 +311,9 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 
-	/*********Allocate main command buffer************/
-	auto cmdBufferAllocInfo = &VulkanHelpers::MakeCommandBufferAllocateInfo(
-		_vkCmdPool,
-		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-		1
-	);
-	VulkanHelpers::AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkCmdBuffer);
-
-	/*********Allocate Init transfer buffer***********/
-	cmdBufferAllocInfo = &VulkanHelpers::MakeCommandBufferAllocateInfo(
-		_vkCmdPool,
-		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-		1
-	);
-	VulkanHelpers::AllocateCommandBuffers(_vkDevice, cmdBufferAllocInfo, &_vkInitTransferCmdBuffer);
-	
+	/*********Allocate two command buffers************/
+	_cmdBuffers.resize(2);
+	VulkanHelpers::AllocateCommandBuffers(_vkDevice, _cmdBuffers.data(), _vkCmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, _cmdBuffers.size());
 
 
 
@@ -479,7 +465,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		VulkanRenderer* me = (VulkanRenderer*)userData;
 		if (!me->_first)
 		{
-			VulkanHelpers::BeginCommandBuffer(me->_vkInitTransferCmdBuffer);
+			VulkanHelpers::BeginCommandBuffer(me->_cmdBuffers[1]);
 		}
 		if (DebugUtils::GetArg("-b", nullptr, argc, argv))
 		{
@@ -577,7 +563,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	_constantBufferStagingAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, memReq, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	/**********Start recording init buffers****************/
-	VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
+	VulkanHelpers::BeginCommandBuffer(_cmdBuffers[1]);
 
 
 
@@ -742,10 +728,10 @@ void VulkanRenderer::submit(Mesh * mesh)
 void VulkanRenderer::frame()
 {
 	_first = false;
-	VulkanHelpers::EndCommandBuffer(_vkInitTransferCmdBuffer);
+	VulkanHelpers::EndCommandBuffer(_cmdBuffers[1]);
 
 
-	const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_vkInitTransferCmdBuffer);
+	const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_cmdBuffers[1]);
 	VulkanHelpers::QueueSubmit(_vkMainQueue, 1, submitInfo);
 	vkQueueWaitIdle(_vkMainQueue);
 	for (auto& buffer : _vertexStagingBuffers)
@@ -768,7 +754,7 @@ void VulkanRenderer::frame()
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 	beginInfo.pInheritanceInfo = nullptr;
 
-	vkBeginCommandBuffer(_vkCmdBuffer, &beginInfo);
+	vkBeginCommandBuffer(_cmdBuffers[0], &beginInfo);
 
 	array<VkClearValue, 1> clearValues = { { 0.7f, 0.2f, 0.3f} };
 
@@ -781,21 +767,21 @@ void VulkanRenderer::frame()
 	renderPassInfo.clearValueCount = clearValues.size();
 	renderPassInfo.pClearValues = clearValues.data();
 
-	vkCmdBeginRenderPass(_vkCmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(_cmdBuffers[0], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	
-	vkCmdBindPipeline(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipeline);
+	vkCmdBindPipeline(_cmdBuffers[0], VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipeline);
 
 	for (auto m : drawList)
 	{
 		uint32_t descriptorSetCount = 0;
 		auto sets = m->getDescriptorSet(descriptorSetCount);
-		vkCmdBindDescriptorSets(_vkCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipelineLayout, 0, descriptorSetCount, sets, 0, nullptr);
-		vkCmdDraw(_vkCmdBuffer, 3, 1, 0, 0);
+		vkCmdBindDescriptorSets(_cmdBuffers[0], VK_PIPELINE_BIND_POINT_GRAPHICS, _testPipelineLayout, 0, descriptorSetCount, sets, 0, nullptr);
+		vkCmdDraw(_cmdBuffers[0], 3, 1, 0, 0);
 	}
 
-	vkCmdEndRenderPass(_vkCmdBuffer);
+	vkCmdEndRenderPass(_cmdBuffers[0]);
 
-	vkEndCommandBuffer(_vkCmdBuffer);
+	vkEndCommandBuffer(_cmdBuffers[0]);
 
 	const uint32_t waitSemaphoreCount = 1;
 	array<VkSemaphore, waitSemaphoreCount> waitSemaphores = { _swapchainImageAvailable };
@@ -808,7 +794,7 @@ void VulkanRenderer::frame()
 	submit_info.pWaitSemaphores = waitSemaphores.data();
 	submit_info.pWaitDstStageMask = waitStages.data();
 	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = &_vkCmdBuffer;
+	submit_info.pCommandBuffers = &_cmdBuffers[0];
 	submit_info.signalSemaphoreCount = 1;
 	submit_info.pSignalSemaphores = &_renderingComplete;
 
@@ -816,7 +802,7 @@ void VulkanRenderer::frame()
 
 	drawList.clear();
 
-	VulkanHelpers::BeginCommandBuffer(_vkInitTransferCmdBuffer);
+	VulkanHelpers::BeginCommandBuffer(_cmdBuffers[1]);
 
 	// Förslag:
 	// Till en början kan vi dra igång en render pass och skita i descriptors och sånt
@@ -1184,33 +1170,27 @@ void VulkanRenderer::_createTestPipeline()
 
 	VkDescriptorSetLayout layouts[] = { _bufferSetLayout , _textureSetLayout };
 
-	//Temporary, need descriptor set to work
-	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
-	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 2;
-	pipelineLayoutInfo.pSetLayouts = layouts;
+	/*Create the pipelinelayout*/
+	VulkanHelpers::CreatePipelineLayout(_vkDevice, &_testPipelineLayout, 2, layouts);
 
-	if (vkCreatePipelineLayout(_vkDevice, &pipelineLayoutInfo, nullptr, &_testPipelineLayout) != VK_SUCCESS)
-		throw std::runtime_error("Could not create pipeline layout");
+	/* Create the graphics pipeline*/
+	auto pipelineInfo = VulkanHelpers::MakePipelineCreateInfo(
+		2,
+		shaderStages,
+		&vertexInput,
+		&inputAssembly,
+		nullptr,
+		&vpCreateInfo,
+		&rastCreateInfo,
+		&msCreateInfo,
+		nullptr,
+		&colorBlendInfo,
+		nullptr,
+		_testPipelineLayout,
+		_renderPass
+	);
+	VulkanHelpers::CreateGraphicsPipelines(_vkDevice, VK_NULL_HANDLE, 1, &pipelineInfo, &_testPipeline);
 
-	VkGraphicsPipelineCreateInfo pipelineInfo = {};
-	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipelineInfo.stageCount = 2;
-	pipelineInfo.pStages = shaderStages;
-	pipelineInfo.pVertexInputState = &vertexInput;
-	pipelineInfo.pInputAssemblyState = &inputAssembly;
-	pipelineInfo.pViewportState = &vpCreateInfo;
-	pipelineInfo.pRasterizationState = &rastCreateInfo;
-	pipelineInfo.pMultisampleState = &msCreateInfo;
-	pipelineInfo.pColorBlendState = &colorBlendInfo;
-	pipelineInfo.layout = _testPipelineLayout;
-	pipelineInfo.renderPass = _renderPass;
-	pipelineInfo.subpass = NULL;
-	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-
-	if (vkCreateGraphicsPipelines(_vkDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_testPipeline) != VK_SUCCESS)
-		throw std::runtime_error("Could not create graphics pipeline");
-	
 }
 
 
