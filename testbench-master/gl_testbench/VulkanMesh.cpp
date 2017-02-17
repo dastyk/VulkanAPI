@@ -28,26 +28,29 @@ const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool poolBu
 			WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[0], buffer.first, 0, 1, VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, nullptr, nullptr, &view));
 
 		}
+
 		/*Create a write descriptor set for the constant buffer*/
 		VkDescriptorBufferInfo dbInfo;
 		dbInfo.buffer = static_cast<VulkanConstantBuffer*>(txBuffer)->GetBuffer();
 		dbInfo.offset = 0;
-		dbInfo.range = VK_WHOLE_SIZE;
-		
+		dbInfo.range = static_cast<VulkanConstantBuffer*>(txBuffer)->GetSize();
+
 		WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[0], static_cast<VulkanConstantBuffer*>(txBuffer)->GetLocation(), 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &dbInfo, nullptr));
-
-		//auto cBuffers = static_cast<VulkanMaterial*>(this->technique->getMaterial())->getConstantBuffers();
-		//for (auto b : cBuffers)
-		//{
-		//	dbInfo.buffer = b.second->GetBuffer();
-		//	dbInfo.offset = 0;
-		//	dbInfo.range = VK_WHOLE_SIZE;
-
-		//	WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[0], b.first, 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &dbInfo, nullptr));
-
-		//}
 		
+		auto cBuffers = static_cast<VulkanMaterial*>(this->technique->getMaterial())->getConstantBuffers();
+		std::vector<VkDescriptorBufferInfo> dbIV;
+		dbIV.reserve(cBuffers.size());
+		for (auto b : cBuffers)
+		{
+			dbIV.push_back({
+				b.second->GetBuffer(),
+				0,
+				b.second->GetSize()
+			});
 
+			WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[0], b.first, 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &dbIV[dbIV.size()-1], nullptr));
+		}
+		
 		/* Create a descritpor set for the texture/sampler*/
 		//VulkanHelpers::AllocateDescriptorSets(device, poolTex, 1, &layoutTex, &_sets[1]);
 

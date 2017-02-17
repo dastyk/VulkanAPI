@@ -1,7 +1,16 @@
 
 layout(location = 0) out vec4 color;
 
+layout(set = 0, binding = 6) uniform Tint
+{
+	vec4 g_Tint;
+};
+
+
 void main()
 {
-	color = vec4(0.1f, 0.2f, 0.7f, 1.0f);
+	vec4 col = vec4(1.0, 1.0, 0.0, 1.0);
+
+
+	color = col * vec4(g_Tint.rgb, 1.0);
 }

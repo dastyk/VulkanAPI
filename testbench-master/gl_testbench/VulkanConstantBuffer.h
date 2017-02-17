@@ -18,6 +18,9 @@ public:
 	void bind(Material*);
 	uint32_t GetLocation()const;
 	VkBuffer GetBuffer()const;
+	VkDeviceSize GetSize()const {
+		return _size;
+	}
 private:
 	std::string _name;
 	uint32_t _location;

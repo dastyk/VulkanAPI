@@ -52,16 +52,18 @@ VulkanRenderer::VulkanRenderer() : _first(true)
 {
 	_createBufferCallback = [this](const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer) {
 
+
 		auto info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
 		VulkanHelpers::CreateBuffer(_vkDevice, info, &buffer);
-
+		VkMemoryRequirements pM;
+		vkGetBufferMemoryRequirements(_vkDevice, buffer, &pM);
 		_constantBufferAllocator->AllocateBufferMemory(size, buffer);
 
 		info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
 		VulkanHelpers::CreateBuffer(_vkDevice, info, &stagingBuffer.buffer);
-
+		vkGetBufferMemoryRequirements(_vkDevice, stagingBuffer.buffer, &pM);
 		_constantBufferStagingAllocator->AllocateBufferMemory(size, stagingBuffer);
 
 		/*Copy the data to staging*/
@@ -112,7 +114,8 @@ VertexBuffer * VulkanRenderer::makeVertexBuffer()
 		const auto info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT);
 
 		VulkanHelpers::CreateBuffer(_vkDevice, info, &buffer);
-
+		VkMemoryRequirements pM;
+		vkGetBufferMemoryRequirements(_vkDevice, buffer, &pM);
 		_vertexBufferAllocator->AllocateBufferMemory(size, buffer);
 
 
@@ -129,6 +132,7 @@ VertexBuffer * VulkanRenderer::makeVertexBuffer()
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			&stagingBuffer.buffer, &stagingBuffer.memory);
 
+		vkGetBufferMemoryRequirements(_vkDevice, stagingBuffer.buffer, &pM);
 		/*Copy the data to staging*/
 		void* pData;
 		VulkanHelpers::MapMemory(_vkDevice, stagingBuffer.memory, &pData);
