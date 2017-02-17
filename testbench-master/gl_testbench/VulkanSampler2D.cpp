@@ -65,3 +65,11 @@ void VulkanSampler2D::setWrap(WRAPPING s, WRAPPING t)
 		break;
 	}
 }
+
+const void VulkanSampler2D::Make()
+{
+	VulkanHelpers::CreateSampler(_device, &_createInfo, &_sampler);
+
+
+	return void();
+}

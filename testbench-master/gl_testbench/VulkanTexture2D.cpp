@@ -71,7 +71,7 @@ int VulkanTexture2D::loadFromFile(std::string filename)
 	_copyImage(staging, _texture, tWidth, tHeight);
 
 	_transitionLayout(_texture, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	vkDeviceWaitIdle(*_device);
+	
 	
 
 
@@ -80,6 +80,11 @@ int VulkanTexture2D::loadFromFile(std::string filename)
 
 void VulkanTexture2D::bind(unsigned int slot)
 {
+}
+#include "VulkanSampler2D.h"
+VkSampler VulkanTexture2D::GetSampler() const
+{
+	return ((VulkanSampler2D*)sampler)->GetSampler();
 }
 
 void VulkanTexture2D::_createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage & image, VkDeviceMemory & imageMemory)

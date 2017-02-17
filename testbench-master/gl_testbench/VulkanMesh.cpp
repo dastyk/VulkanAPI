@@ -3,6 +3,8 @@
 #include "VulkanVertexBuffer.h"
 #include "VulkanConstantBuffer.h"
 #include "VulkanMaterial.h"
+#include "VulkanTexture2D.h"
+
 VulkanMesh::VulkanMesh()
 {
 }
@@ -54,12 +56,28 @@ const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool poolBu
 		/* Create a descritpor set for the texture/sampler*/
 		//VulkanHelpers::AllocateDescriptorSets(device, poolTex, 1, &layoutTex, &_sets[1]);
 
-		VkDescriptorImageInfo imageInfo;
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		//imageInfo.imageView = textureImageView;
-		//imageInfo.sampler = textureSampler;
+		
+				std::vector<VkDescriptorImageInfo> diI;
+		for (auto t : textures)
+		{
+			diI.push_back({
+				VK_NULL_HANDLE,
+				VK_NULL_HANDLE,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+			});
+			//WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[1], DIFFUSE_SLOT, 0, 1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, &diI[diI.size()-1], nullptr, nullptr));
+			
+			diI.push_back({
+				((VulkanTexture2D*)t.second)->GetSampler(),
+				VK_NULL_HANDLE,
+				VK_IMAGE_LAYOUT_UNDEFINED
+			});
 
-		//WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[1], DIFFUSE_SLOT, 0, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &imageInfo, nullptr, nullptr));
+			//WriteDS.push_back(VulkanHelpers::MakeWriteDescriptorSet(_sets[1], DIFFUSE_SLOT + 1, 0, 1, VK_DESCRIPTOR_TYPE_SAMPLER, &diI[diI.size()-1], nullptr, nullptr));
+		}
+
+
+
 
 
 		/*Update the descriptor set with the binding data*/

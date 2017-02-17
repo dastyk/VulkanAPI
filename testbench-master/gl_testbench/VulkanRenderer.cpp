@@ -632,7 +632,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	/* Create a new descriptor pool/set layout for the texture/sampler*/
 	VkDescriptorPoolSize pSize2[] = {
-		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 * 10000}
+		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1 * 10000},
+		{ VK_DESCRIPTOR_TYPE_SAMPLER , 1*10000}
 	};
 
 
@@ -643,12 +644,18 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	bindings.push_back({
 		DIFFUSE_SLOT,
-		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+		VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
 		1,
 		VK_SHADER_STAGE_FRAGMENT_BIT,
 		nullptr
 	});
-
+	bindings.push_back({
+		DIFFUSE_SLOT + 1,
+		VK_DESCRIPTOR_TYPE_SAMPLER,
+		1,
+		VK_SHADER_STAGE_FRAGMENT_BIT,
+		nullptr
+	});
 	/* Create the descriptor set layout*/
 	VulkanHelpers::CreateDescriptorSetLayout(_vkDevice, &_textureSetLayout, bindings.size(), bindings.data()); 
 

@@ -9,6 +9,9 @@ public:
 	virtual void setMagFilter(FILTER filter);
 	virtual void setMinFilter(FILTER filter);
 	virtual void setWrap(WRAPPING s, WRAPPING t);
+
+	VkSampler GetSampler()const { return _sampler; }
+	const void Make();
 private:
 
 	VkSampler _sampler;

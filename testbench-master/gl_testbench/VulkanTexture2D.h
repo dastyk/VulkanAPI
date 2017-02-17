@@ -17,9 +17,10 @@ public:
 	// slot can have different interpretation depending on the API.
 	virtual void bind(unsigned int slot);
 
+	VkSampler GetSampler()const;
+private:
 	// if no sampler is set here, a default sampler should be used.
 	Sampler2D* sampler = nullptr;
-private:
 	VkDevice* _device;
 	VkPhysicalDevice* _physDevice;
 	VkCommandBuffer* _cmdBuffer;
