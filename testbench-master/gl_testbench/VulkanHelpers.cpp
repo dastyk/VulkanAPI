@@ -81,18 +81,7 @@ VkCommandPoolCreateInfo VulkanHelpers::MakeCommandPoolCreateInfo(uint32_t queueF
 	return cmdPoolInfo;
 }
 
-VkCommandBufferAllocateInfo VulkanHelpers::MakeCommandBufferAllocateInfo(VkCommandPool commandPool, VkCommandBufferLevel level, uint32_t commandBufferCount, const void * pNext)
-{
-	VkCommandBufferAllocateInfo cmdBufferAllocInfo =
-	{
-		VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-		pNext,
-		commandPool,
-		level,
-		commandBufferCount
-	};
-	return cmdBufferAllocInfo;
-}
+
 
 VkSubmitInfo VulkanHelpers::MakeSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer * pCommandBuffers, uint32_t waitSemaphoreCount, const VkSemaphore * pWaitSemaphores, const VkPipelineStageFlags * pWaitDstStageMask, uint32_t signalSemaphoreCount, const VkSemaphore * pSignalSemaphores, const void * pNext)
 {
@@ -184,6 +173,54 @@ VkWriteDescriptorSet VulkanHelpers::MakeWriteDescriptorSet(VkDescriptorSet dstSe
 	return info;
 }
 
+VkGraphicsPipelineCreateInfo VulkanHelpers::MakePipelineCreateInfo(uint32_t stageCount, const VkPipelineShaderStageCreateInfo * pStages, const VkPipelineVertexInputStateCreateInfo * pVertexInputState, const VkPipelineInputAssemblyStateCreateInfo * pInputAssemblyState, const VkPipelineTessellationStateCreateInfo * pTessellationState, const VkPipelineViewportStateCreateInfo * pViewportState, const VkPipelineRasterizationStateCreateInfo * pRasterizationState, const VkPipelineMultisampleStateCreateInfo * pMultisampleState, const VkPipelineDepthStencilStateCreateInfo * pDepthStencilState, const VkPipelineColorBlendStateCreateInfo * pColorBlendState, const VkPipelineDynamicStateCreateInfo * pDynamicState, VkPipelineLayout layout, VkRenderPass renderPass, uint32_t subpass, VkPipeline basePipelineHandle, int32_t basePipelineIndex, VkPipelineCreateFlags flags, const void * pNext)
+{
+	return{
+		VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+		pNext,
+		flags,
+		stageCount,
+		pStages,
+		pVertexInputState,
+		pInputAssemblyState,
+		pTessellationState,
+		pViewportState,
+		pRasterizationState,
+		pMultisampleState,
+		pDepthStencilState,
+		pColorBlendState,
+		pDynamicState,
+		layout,
+		renderPass,
+		subpass,
+		basePipelineHandle,
+		basePipelineIndex
+	};
+}
+
+VkSamplerCreateInfo VulkanHelpers::MakeSamplerCreateInfo(VkFilter magFilter, VkFilter minFilter, VkSamplerMipmapMode mipmapMode, VkSamplerAddressMode addressModeU, VkSamplerAddressMode addressModeV, VkSamplerAddressMode addressModeW, float mipLodBias, VkBool32 anisotropyEnable, float maxAnisotropy, VkBool32 compareEnable, VkCompareOp compareOp, float minLod, float maxLod, VkBorderColor borderColor, VkBool32 unnormalizedCoordinates, VkSamplerCreateFlags flags, const void * pNext)
+{
+	return{
+		VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+		pNext,
+		flags,
+		magFilter,
+		minFilter,
+		mipmapMode,
+		addressModeU,
+		addressModeV,
+		addressModeW,
+		mipLodBias,
+		anisotropyEnable,
+		maxAnisotropy,
+		compareEnable,
+		compareOp,
+		minLod,
+		maxLod,
+		borderColor,
+		unnormalizedCoordinates
+	};
+}
 
 
 const void VulkanHelpers::CreateInstance(const VkInstanceCreateInfo * pCreateInfo, VkInstance * pInstance, const VkAllocationCallbacks * pAllocator)
@@ -218,10 +255,18 @@ const void VulkanHelpers::CreateCommandPool(VkDevice device, const VkCommandPool
 	}
 }
 
-const void VulkanHelpers::AllocateCommandBuffers(VkDevice device, const VkCommandBufferAllocateInfo * pAllocateInfo, VkCommandBuffer * pCommandBuffers)
+const void VulkanHelpers::AllocateCommandBuffers(VkDevice device, VkCommandBuffer * pCommandBuffers, VkCommandPool commandPool, VkCommandBufferLevel level, uint32_t commandBufferCount, const void * pNext)
 {
-	VkResult result = vkAllocateCommandBuffers(device, pAllocateInfo, pCommandBuffers);
+	VkCommandBufferAllocateInfo cmdBufferAllocInfo =
+	{
+		VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+		pNext,
+		commandPool,
+		level,
+		commandBufferCount
+	};
 
+	VkResult result = vkAllocateCommandBuffers(device, &cmdBufferAllocInfo, pCommandBuffers);
 	if (result != VK_SUCCESS) {
 		throw std::runtime_error("Failed to allocate command buffers.");
 	}
@@ -361,6 +406,22 @@ const void VulkanHelpers::CreateBufferView(VkDevice device, VkBuffer buffer, VkB
 		throw std::runtime_error("Failed to create buffer view");
 	}
 
+}
+
+const void VulkanHelpers::CreateGraphicsPipelines(VkDevice device, VkPipelineCache pipelineCache, uint32_t createInfoCount, const VkGraphicsPipelineCreateInfo * pCreateInfos, VkPipeline * pPipelines, const VkAllocationCallbacks * pAllocator)
+{
+	VkResult r = vkCreateGraphicsPipelines(device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Could not create graphics pipeline");
+	}
+}
+
+const void VulkanHelpers::CreateSampler(VkDevice device, const VkSamplerCreateInfo * pCreateInfo, VkSampler * pSampler, const VkAllocationCallbacks * pAllocator)
+{
+	VkResult r = vkCreateSampler(device, pCreateInfo, pAllocator, pSampler);
+	if (r != VK_SUCCESS) {
+		throw std::runtime_error("Could not create sampler");
+	}
 }
 
 const void VulkanHelpers::BeginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo * pInheritanceInfo, const void* pNext)

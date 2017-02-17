@@ -110,6 +110,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +145,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -189,7 +191,10 @@
     <ClCompile Include="VulkanMemAllocator.cpp" />
     <ClCompile Include="VulkanMesh.cpp" />
     <ClCompile Include="VulkanRenderer.cpp" />
+    <ClCompile Include="VulkanSampler2D.cpp" />
+    <ClCompile Include="VulkanRenderState.cpp" />
     <ClCompile Include="VulkanTexture2D.cpp" />
+    <ClCompile Include="VulkanTechnique.cpp" />
     <ClCompile Include="VulkanVertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -197,7 +202,6 @@
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConstantBufferGL.h" />
     <ClInclude Include="ConstantBufferVk.h" />
-    <ClInclude Include="MaterialVk.h" />
     <ClInclude Include="Sampler2D.h" />
     <ClInclude Include="Sampler2DGL.h" />
     <ClInclude Include="Scene.h" />
@@ -232,16 +236,17 @@
     <ClInclude Include="VulkanMemAllocator.h" />
     <ClInclude Include="VulkanMesh.h" />
     <ClInclude Include="VulkanRenderer.h" />
+    <ClInclude Include="VulkanSampler2D.h" />
+    <ClInclude Include="VulkanRenderState.h" />
     <ClInclude Include="VulkanTexture2D.h" />
+    <ClInclude Include="VulkanTechnique.h" />
     <ClInclude Include="VulkanVertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\GL45\FragmentShader.glsl" />
     <None Include="..\assets\GL45\VertexShader.glsl" />
     <None Include="..\assets\Vulkan\FragmentShader.glsl" />
-    <None Include="..\assets\Vulkan\FragmentShader.frag" />
-    <None Include="..\assets\Vulkan\VertexShader.vert" />
-    <None Include="..\assets\Vulkan\VertexShader.glsl.vert" />
+    <None Include="..\assets\Vulkan\VertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

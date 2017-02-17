@@ -62,12 +62,6 @@ namespace VulkanHelpers
 		VkCommandPoolCreateFlags					flags						= 0,
 		const void*									pNext						= nullptr);
 
-	VkCommandBufferAllocateInfo MakeCommandBufferAllocateInfo(	
-		VkCommandPool								commandPool,
-		VkCommandBufferLevel						level						= VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-		uint32_t									commandBufferCount			= 1,
-		const void*									pNext						=	nullptr);
-
 	VkSubmitInfo MakeSubmitInfo(
 		uint32_t									commandBufferCount,
 		const VkCommandBuffer*						pCommandBuffers,
@@ -125,7 +119,44 @@ namespace VulkanHelpers
 		const void*									pNext						= nullptr);
 
 
+	VkGraphicsPipelineCreateInfo MakePipelineCreateInfo(
+		uint32_t                                         stageCount,
+		const VkPipelineShaderStageCreateInfo*           pStages,
+		const VkPipelineVertexInputStateCreateInfo*      pVertexInputState,
+		const VkPipelineInputAssemblyStateCreateInfo*    pInputAssemblyState,
+		const VkPipelineTessellationStateCreateInfo*     pTessellationState,
+		const VkPipelineViewportStateCreateInfo*         pViewportState,
+		const VkPipelineRasterizationStateCreateInfo*    pRasterizationState,
+		const VkPipelineMultisampleStateCreateInfo*      pMultisampleState,
+		const VkPipelineDepthStencilStateCreateInfo*     pDepthStencilState,
+		const VkPipelineColorBlendStateCreateInfo*       pColorBlendState,
+		const VkPipelineDynamicStateCreateInfo*          pDynamicState,
+		VkPipelineLayout                                 layout,
+		VkRenderPass                                     renderPass,
+		uint32_t                                         subpass				= 0,
+		VkPipeline                                       basePipelineHandle		= VK_NULL_HANDLE,
+		int32_t                                          basePipelineIndex		= 0,
+		VkPipelineCreateFlags                            flags					= 0,
+		const void*                                      pNext					= nullptr);
 
+	VkSamplerCreateInfo MakeSamplerCreateInfo(
+		VkFilter										magFilter,
+		VkFilter										minFilter,
+		VkSamplerMipmapMode								mipmapMode,
+		VkSamplerAddressMode							addressModeU,
+		VkSamplerAddressMode							addressModeV,
+		VkSamplerAddressMode							addressModeW,
+		float											mipLodBias,
+		VkBool32										anisotropyEnable,
+		float											maxAnisotropy,
+		VkBool32										compareEnable,
+		VkCompareOp										compareOp,
+		float											minLod,
+		float											maxLod,
+		VkBorderColor									borderColor,
+		VkBool32										unnormalizedCoordinates,
+		VkSamplerCreateFlags							flags					= 0,
+		const void*										pNext					= nullptr);
 
 
 	/*Creation*/
@@ -149,8 +180,11 @@ namespace VulkanHelpers
 
 	const void AllocateCommandBuffers(
 		VkDevice									device,
-		const VkCommandBufferAllocateInfo*			pAllocateInfo,
-		VkCommandBuffer*							pCommandBuffers);
+		VkCommandBuffer*							pCommandBuffers, 
+		VkCommandPool								commandPool,
+		VkCommandBufferLevel						level						= VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		uint32_t									commandBufferCount			= 1,
+		const void*									pNext						= nullptr);
 
 	const void CreateBuffer(
 		VkDevice									device,
@@ -221,6 +255,21 @@ namespace VulkanHelpers
 		VkBufferViewCreateFlags						flags						= 0,
 		const void*									pNext						= nullptr,	
 		const VkAllocationCallbacks*                pAllocator					= nullptr);
+
+	const void CreateGraphicsPipelines(
+		VkDevice                                    device,
+		VkPipelineCache                             pipelineCache,
+		uint32_t                                    createInfoCount,
+		const VkGraphicsPipelineCreateInfo*         pCreateInfos,
+		VkPipeline*                                 pPipelines,
+		const VkAllocationCallbacks*                pAllocator					= nullptr );
+
+	const void CreateSampler(
+		VkDevice                                    device,
+		const VkSamplerCreateInfo*                  pCreateInfo,
+		VkSampler*                                  pSampler,
+		const VkAllocationCallbacks*                pAllocator					= nullptr);
+
 
 
 	/*Command recording*/

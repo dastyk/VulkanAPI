@@ -71,6 +71,11 @@ RenderState* OpenGLRenderer::makeRenderState() {
 	return (RenderState*)newRS;
 }
 
+Technique* OpenGLRenderer::makeTechnique(Material* material, RenderState* renderState)
+{
+	return new Technique(material, renderState);
+}
+
 int OpenGLRenderer::initialize(unsigned int width, unsigned int height) {
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -141,7 +146,7 @@ void OpenGLRenderer::frame()
 			numberElements = element.second.numElements;
 		}
 
-		mesh->txBuffer->bind(mesh->technique->material);
+		mesh->txBuffer->bind(mesh->technique->getMaterial());
 
 		// everything is bound!
 		// always 0 because we are just generating gl_VertexId
