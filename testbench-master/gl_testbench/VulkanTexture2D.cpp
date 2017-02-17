@@ -16,6 +16,9 @@ VulkanTexture2D::VulkanTexture2D(VkDevice & device, VkPhysicalDevice & physDevic
 
 VulkanTexture2D::~VulkanTexture2D()
 {
+	vkDestroyImageView(*_device, _imageView, nullptr);
+	vkDestroyImage(*_device, _texture, nullptr);
+	vkFreeMemory(*_device, _textureMemory, nullptr);
 }
 
 int VulkanTexture2D::loadFromFile(std::string filename)
@@ -72,7 +75,22 @@ int VulkanTexture2D::loadFromFile(std::string filename)
 
 	_transitionLayout(_texture, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	
+	//Fix the resource leaks from the staging image some other time
 	
+	VkImageViewCreateInfo viewInfo = {};
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image = _texture;
+	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	viewInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	viewInfo.subresourceRange.baseMipLevel = 0;
+	viewInfo.subresourceRange.baseArrayLayer = 0;
+	viewInfo.subresourceRange.layerCount = 1;
+	viewInfo.subresourceRange.levelCount = 1;
+
+	vkCreateImageView(*_device, &viewInfo, nullptr, &_imageView);
+
+
 
 
 	return 0;
@@ -80,6 +98,11 @@ int VulkanTexture2D::loadFromFile(std::string filename)
 
 void VulkanTexture2D::bind(unsigned int slot)
 {
+}
+
+VkImageView & VulkanTexture2D::GetImageView()
+{
+	return _imageView;
 }
 #include "VulkanSampler2D.h"
 VkSampler VulkanTexture2D::GetSampler() const
