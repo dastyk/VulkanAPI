@@ -17,6 +17,8 @@ public:
 	// slot can have different interpretation depending on the API.
 	virtual void bind(unsigned int slot);
 
+	VkImageView& GetImageView();
+
 	// if no sampler is set here, a default sampler should be used.
 	Sampler2D* sampler = nullptr;
 private:
@@ -27,6 +29,7 @@ private:
 
 	VkImage _texture;
 	VkDeviceMemory _textureMemory;
+	VkImageView _imageView;
 
 	void _createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	void _transitionLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
