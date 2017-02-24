@@ -4,6 +4,7 @@
 #include "VulkanConstantBuffer.h"
 #include "VulkanMaterial.h"
 #include "VulkanTexture2D.h"
+#include "VulkanSampler2D.h"
 
 VulkanMesh::VulkanMesh()
 {
@@ -18,8 +19,16 @@ const void VulkanMesh::CreateDescriptor(VkDevice device, VkDescriptorPool poolBu
 {
 	if (_sets.size() == 0)
 	{
-		if(textures.size() > 0)
+
+
+		if (textures.size() > 0)
+		{
+			for (auto& t : textures)
+			{
+				static_cast<VulkanSampler2D*>(t.second->sampler)->Make();
+			}
 			_sets.resize(2);
+		}
 		else
 			_sets.resize(1);
 		/*Allocate a descritpor set*/

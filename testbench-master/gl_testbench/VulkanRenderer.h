@@ -49,7 +49,7 @@ private:
 	void _createTestPipeline();
 
 private:
-	bool _first;
+	float _clearColor[4];
 	SDL_Window* window;
 
 	VkPipelineLayout _testPipelineLayout = VK_NULL_HANDLE;

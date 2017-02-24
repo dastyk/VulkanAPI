@@ -48,7 +48,7 @@ void DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT
 
 using namespace std;
 
-VulkanRenderer::VulkanRenderer() : _first(true)
+VulkanRenderer::VulkanRenderer()
 {
 	_createBufferCallback = [this](const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer) {
 
@@ -310,10 +310,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 	/*********Allocate two command buffers************/
-	_cmdBuffers.resize(2);
-	VulkanHelpers::AllocateCommandBuffers(_vkDevice, _cmdBuffers.data(), _vkCmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, _cmdBuffers.size());
-
-
+	_cmdBuffers.resize(3);
+	VulkanHelpers::AllocateCommandBuffers(_vkDevice, _cmdBuffers.data(), _vkCmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
 
 	/**************** Set up window surface *******************/
 	SDL_SysWMinfo wndInfo;
@@ -461,10 +459,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 		this,
 		[](void * userData, int argc, char ** argv) {
 		VulkanRenderer* me = (VulkanRenderer*)userData;
-		if (!me->_first)
-		{
-			VulkanHelpers::BeginCommandBuffer(me->_cmdBuffers[1]);
-		}
+
 		if (DebugUtils::GetArg("-b", nullptr, argc, argv))
 		{
 			
@@ -499,7 +494,6 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 		}
-		me->_first = true;
 
 	},
 		[](void * userData, int argc, char ** argv) {
@@ -711,8 +705,13 @@ int VulkanRenderer::shutdown()
 	return 0;
 }
 
-void VulkanRenderer::setClearColor(float, float, float, float)
+void VulkanRenderer::setClearColor(float r, float g, float b, float a)
 {
+	_clearColor[0] = r;
+	_clearColor[1] = g;
+	_clearColor[2] = b;
+	_clearColor[3] = a;
+
 }
 
 void VulkanRenderer::clearBuffer(unsigned int)
@@ -736,41 +735,39 @@ void VulkanRenderer::submit(Mesh * mesh)
 
 void VulkanRenderer::frame()
 {
-	_first = false;
+
 	VulkanHelpers::EndCommandBuffer(_cmdBuffers[1]);
 
 
 	const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_cmdBuffers[1]);
+	vkQueueWaitIdle(_vkMainQueue);
 	VulkanHelpers::QueueSubmit(_vkMainQueue, 1, submitInfo);
 	vkQueueWaitIdle(_vkMainQueue);
 
 	// Note: this is a really bad way of synchronizing frames, but for the sake
 	// of getting things running it'll suffice.
-	vkQueueWaitIdle(_vkMainQueue);
 
 	if (vkAcquireNextImageKHR(_vkDevice, _vkSwapChain, UINT64_MAX, _swapchainImageAvailable, VK_NULL_HANDLE, &_swapchainImageIndex) != VK_SUCCESS)
 		throw runtime_error("Failed to acquire swapchain error or suboptimal");
 
-	VkCommandBufferBeginInfo beginInfo = {};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.pNext = nullptr;
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	beginInfo.pInheritanceInfo = nullptr;
 
-	vkBeginCommandBuffer(_cmdBuffers[0], &beginInfo);
+	VulkanHelpers::BeginCommandBuffer(_cmdBuffers[0], 0);
 
-	array<VkClearValue, 1> clearValues = { { 0.7f, 0.2f, 0.3f} };
+	array<VkClearValue, 1> clearValues = { _clearColor[0], _clearColor[1],_clearColor[2],_clearColor[3] };
 
 	VkRenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.pNext = nullptr;
 	renderPassInfo.renderPass = _renderPass;
 	renderPassInfo.framebuffer = _framebuffers[_swapchainImageIndex];
-	renderPassInfo.renderArea = { {0, 0}, _swapchainExtent };
+	renderPassInfo.renderArea = { { 0, 0 }, _swapchainExtent };
 	renderPassInfo.clearValueCount = clearValues.size();
 	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(_cmdBuffers[0], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	drawList.push_back(drawList[0]);
+	drawList.erase(drawList.begin());
 
 	for (auto m : drawList)
 	{
@@ -800,6 +797,9 @@ void VulkanRenderer::frame()
 	vkCmdEndRenderPass(_cmdBuffers[0]);
 
 	vkEndCommandBuffer(_cmdBuffers[0]);
+
+
+
 
 	const uint32_t waitSemaphoreCount = 1;
 	array<VkSemaphore, waitSemaphoreCount> waitSemaphores = { _swapchainImageAvailable };

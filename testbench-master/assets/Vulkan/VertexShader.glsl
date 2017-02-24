@@ -25,9 +25,11 @@ void main()
 {
 #ifdef POSITION
 	gl_Position = vec4(g_Positions[gl_VertexIndex]) + g_Translation;
-#endif
 	gl_Position.z += 1.0f; // Fransisco uses -0.1 for translation, which in OpenGL means slightly before middle (range -1 to 1), but in Vulkan NDC z is 0 to 1.
 	gl_Position.z *= 0.5f;
+	gl_Position.y *=-1.0f;
+#endif
+	
 #ifdef TEXTCOORD
 	outTex = g_TexCoords[gl_VertexIndex];
 #endif

@@ -91,8 +91,6 @@ int VulkanTexture2D::loadFromFile(std::string filename)
 
 	vkCreateImageView(*_device, &viewInfo, nullptr, &_imageView);
 
-	static_cast<VulkanSampler2D*>(sampler)->Make();
-
 
 	return 0;
 }

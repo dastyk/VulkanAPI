@@ -68,8 +68,8 @@ void updateScene()
 	//float scale = 359.0 / scene.size();
 	float scale = 1.0;
 	// fatboy slim is a special case. outside the loop
-//	translation[0] = xt[(0+shift) % (4*360)];
-	//translation[1] = yt[(0+shift) % (4*360)];
+	translation[0] = xt[(0+shift) % (4*360)];
+	translation[1] = yt[(0+shift) % (4*360)];
 	translation[2] = -0.1;
 
 	Mesh* m0 = scene[0];
