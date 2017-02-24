@@ -12,7 +12,7 @@ class Texture2DGL :
 {
 public:
 	Texture2DGL();
-	virtual ~Texture2DGL();
+	~Texture2DGL();
 
 	int loadFromFile(std::string filename);
 	void bind(unsigned int slot);

@@ -1,7 +1,6 @@
 #include "OpenGLRenderer.h"
-#include "VulkanRenderer.h"
 #include "Renderer.h"
-
+#include "VulkanRenderer.h"
 
 Renderer* Renderer::makeRenderer(BACKEND option)
 {
@@ -9,15 +8,10 @@ Renderer* Renderer::makeRenderer(BACKEND option)
 		return new OpenGLRenderer();
 	else if (option == BACKEND::VULKAN)
 		return new VulkanRenderer();
-
-
-	throw std::runtime_error("Invalid Backend");
-
-	return nullptr;
 }
 
-/*
-Technique* Renderer::createTechnique() {
+	
+	/*
 	int newId = 0;
 	while (techniques.count(newId) != 0)
 		newId++;

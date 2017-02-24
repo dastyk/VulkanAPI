@@ -60,6 +60,24 @@ Material* OpenGLRenderer::makeMaterial() {
 	return new MaterialGL(); 
 }
 
+/* example of subclassing technique 
+class GLTechnique : public Technique {
+public:
+	GLTechnique(Material* m, RenderState* r) : Technique(m, r) {
+
+	}
+	~GLTechnique() {
+		fprintf(stderr, "subclass destroyed");
+	}
+};
+*/
+
+Technique* OpenGLRenderer::makeTechnique(Material* m, RenderState* r) {
+	// Technique* t = new GLTechnique(m, r);
+	Technique* t = new Technique(m, r);
+	return t;
+}
+
 ResourceBinding* OpenGLRenderer::makeResourceBinding() { 
 	return new ResourceBindingGL(); 
 }
@@ -69,11 +87,6 @@ RenderState* OpenGLRenderer::makeRenderState() {
 	newRS->setGlobalWireFrame(&this->globalWireframeMode);
 	newRS->setWireFrame(false);
 	return (RenderState*)newRS;
-}
-
-Technique* OpenGLRenderer::makeTechnique(Material* material, RenderState* renderState)
-{
-	return new Technique(material, renderState);
 }
 
 int OpenGLRenderer::initialize(unsigned int width, unsigned int height) {

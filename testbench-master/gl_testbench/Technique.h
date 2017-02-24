@@ -9,12 +9,14 @@ class Renderer;
 class Technique
 {
 public:
-	Technique(Material* material, RenderState* renderState);
+	Technique(Material* m, RenderState* r) : material(m), renderState(r) {};
 	virtual ~Technique();
-	//void setBindings(std::vector<ResourceBinding*>* rb);
 
-	void enable(Renderer* renderer);
-	Material* getMaterial() { return material; }
+	Material* getMaterial() { return material; };
+	RenderState* getRenderState() { return renderState; };
+
+	//void setBindings(std::vector<ResourceBinding*>* rb);
+	virtual void enable(Renderer* renderer);
 
 protected:
 	Material* material = nullptr;

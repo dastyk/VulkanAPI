@@ -2,7 +2,6 @@
 
 #include "Renderer.h"
 
-
 #include <SDL.h>
 #include <GL/glew.h>
 //#include <SDL_opengl.h>
@@ -26,7 +25,7 @@ public:
 	ConstantBuffer* makeConstantBuffer(std::string NAME, unsigned int location);
 	ResourceBinding* makeResourceBinding();
 	RenderState* makeRenderState();
-	Technique* makeTechnique(Material* material, RenderState* renderState);
+	Technique* makeTechnique(Material* m, RenderState* r);
 	Texture2D* makeTexture2D();
 	Sampler2D* makeSampler2D();
 	std::string getShaderPath();

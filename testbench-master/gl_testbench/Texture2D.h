@@ -7,7 +7,7 @@ class Texture2D
 {
 public:
 	Texture2D();
-	~Texture2D();
+	virtual ~Texture2D();
 
 	// returns 0 if texture was loaded.
 	virtual int loadFromFile(std::string filename) = 0;

@@ -7,8 +7,7 @@
 #include "Mesh.h"
 #include "Texture2D.h"
 #include <math.h>
-#include <ConsoleThread.h>
-
+#include <CommandConsole\Include\ConsoleThread.h>
 using namespace std;
 Renderer* renderer;
 
@@ -19,6 +18,8 @@ Renderer* renderer;
 vector<Mesh*> scene;
 vector<Material*> materials;
 vector<Technique*> techniques;
+vector<Texture2D*> textures;
+vector<Sampler2D*> samplers;
 
 // forward decls
 void updateScene();
@@ -71,10 +72,8 @@ void updateScene()
 	translation[1] = yt[(0+shift) % (4*360)];
 	translation[2] = -0.1;
 
-	//scene[0]->txBuffer->setData( translation, sizeof(translation), 
-	//		scene[0]->technique->material, TRANSLATION);
-	scene[0]->txBuffer->setData(translation, sizeof(translation),
-		nullptr, TRANSLATION);
+	Mesh* m0 = scene[0];
+	m0->txBuffer->setData( translation, sizeof(translation), m0->technique->getMaterial(), TRANSLATION);
 	translation[2] = 0.0;
 
 
@@ -84,16 +83,8 @@ void updateScene()
 		translation[1] = yt[(i+shift) % (4*360)];
 
 		// updates the buffer data (whenever the implementation decides...)
-		//scene[i]->txBuffer->setData(
-		//	translation, 
-		//	sizeof(translation), 
-		//	scene[i]->technique->material,
-		//	TRANSLATION);
-		scene[i]->txBuffer->setData(
-			translation,
-			sizeof(translation),
-			nullptr,
-			TRANSLATION);
+		Mesh* mn = scene[i];
+		mn->txBuffer->setData( translation, sizeof(translation), mn->technique->getMaterial(), TRANSLATION);
 	}
 	shift++;
 	return;
@@ -102,7 +93,7 @@ void updateScene()
 
 void renderScene()
 {
-	//renderer->clearBuffer(CLEAR_BUFFER_FLAGS::COLOR | CLEAR_BUFFER_FLAGS::DEPTH);
+	renderer->clearBuffer(CLEAR_BUFFER_FLAGS::COLOR | CLEAR_BUFFER_FLAGS::DEPTH);
 	for (auto m : scene)
 	{
 		renderer->submit(m);
@@ -180,22 +171,28 @@ int initialiseTestbench()
 		// no need to update anymore
 		// when material is bound, this buffer should be also bound for access.
 		m->updateConstantBuffer(diffuse[i], 4 * sizeof(float), DIFFUSE_TINT);
-
+		
 		materials.push_back(m);
 	}
-	// one technique with wireframe and two with solid
-	RenderState* rs = renderer->makeRenderState();
-	rs->setWireFrame(true);
-	techniques.push_back(renderer->makeTechnique(materials[0], rs));
+
+	// one technique with wireframe
+	RenderState* renderState1 = renderer->makeRenderState();
+	renderState1->setWireFrame(true);
+
+	// basic technique
+	techniques.push_back(renderer->makeTechnique(materials[0], renderState1));
 	techniques.push_back(renderer->makeTechnique(materials[1], renderer->makeRenderState()));
 	techniques.push_back(renderer->makeTechnique(materials[2], renderer->makeRenderState()));
 
-
 	// create texture
 	Texture2D* fatboy = renderer->makeTexture2D();
-//	fatboy->loadFromFile("../assets/textures/fatboy.png");
-	//fatboy->sampler = renderer->makeSampler2D();
-	//fatboy->sampler->setWrap(WRAPPING::REPEAT, WRAPPING::REPEAT);
+	fatboy->loadFromFile("../assets/textures/fatboy.png");
+	Sampler2D* sampler = renderer->makeSampler2D();
+	sampler->setWrap(WRAPPING::REPEAT, WRAPPING::REPEAT);
+	fatboy->sampler = sampler;
+
+	textures.push_back(fatboy);
+	samplers.push_back(sampler);
 
 	// Create a mesh array with 3 basic vertex buffers.
 	for (int i = 0; i < 2000; i++) {
@@ -209,21 +206,23 @@ int initialiseTestbench()
 		pos->bind(0, sizeof(triPos), POSITION);
 		m->addIAVertexBufferBinding(pos, 0, numberOfElements, POSITION);
 
-		//VertexBuffer* nor = renderer->makeVertexBuffer();
-		//nor->setData(triNor, sizeof(triNor), VertexBuffer::STATIC);
-		//nor->bind(0, sizeof(triNor), NORMAL);
-		//m->addIAVertexBufferBinding(nor, 0, numberOfElements, NORMAL);
+		VertexBuffer* nor = renderer->makeVertexBuffer();
+		nor->setData(triNor, sizeof(triNor), VertexBuffer::STATIC);
+		nor->bind(0, sizeof(triNor), NORMAL);
+		m->addIAVertexBufferBinding(nor, 0, numberOfElements, NORMAL);
 
-		//VertexBuffer* uvs = renderer->makeVertexBuffer();
-		//uvs->setData(triUV, sizeof(triUV), VertexBuffer::STATIC);
-		//uvs->bind(0, sizeof(triUV), TEXTCOORD);
-		//m->addIAVertexBufferBinding(uvs, 0, numberOfElements, TEXTCOORD);
+		VertexBuffer* uvs = renderer->makeVertexBuffer();
+		uvs->setData(triUV, sizeof(triUV), VertexBuffer::STATIC);
+		uvs->bind(0, sizeof(triUV), TEXTCOORD);
+		m->addIAVertexBufferBinding(uvs, 0, numberOfElements, TEXTCOORD);
 
 		// we can create a constant buffer outside the material, for example as part of the Mesh.
 		m->txBuffer = renderer->makeConstantBuffer(std::string(TRANSLATION_NAME), TRANSLATION);
+		
 		if (i == 0) {
 			m->technique = techniques[2];
-			//m->addTexture(fatboy, DIFFUSE_SLOT);
+			m->addTexture(textures[0], DIFFUSE_SLOT);
+			
 		}
 		else 
 			m->technique = techniques[ i % 2];
@@ -248,17 +247,26 @@ void shutdown() {
 	{
 		for (auto g : m->geometryBuffers)
 		{
-			if (g.second.buffer != nullptr)
-				delete g.second.buffer;
+			delete g.second.buffer;
 		}
 		delete(m);
 	}
+	
+	for (auto s : samplers)
+	{
+		delete s;
+	}
+
+	for (auto t : textures)
+	{
+		delete t;
+	}
+
 	renderer->shutdown();
 };
 
 int main(int argc, char *argv[])
 {
-
 	DebugUtils::DebugConsole::Command_Structure def =
 	{
 		nullptr,
@@ -288,19 +296,18 @@ int main(int argc, char *argv[])
 	};
 
 	DebugUtils::ConsoleThread::AddCommand(&exitCommand);
-	renderer = Renderer::makeRenderer(Renderer::BACKEND::VULKAN);
-	renderer->initialize();
-	renderer->setClearColor(0.5, 0.1, 0.1, 1.0);
-	initialiseTestbench();
 
 
 	DebugUtils::ConsoleThread::ShowConsole();
 
 
+	renderer = Renderer::makeRenderer(Renderer::BACKEND::VULKAN);
+	renderer->initialize();
+	renderer->setClearColor(0.5, 0.1, 0.1, 1.0);
+	initialiseTestbench();
 	run();
 	shutdown();
 
 	DebugUtils::ConsoleThread::Shutdown();
-
 	return 0;
 };

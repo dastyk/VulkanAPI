@@ -6,7 +6,7 @@ class Sampler2DGL :
 {
 public:
 	Sampler2DGL();
-	virtual ~Sampler2DGL();
+	~Sampler2DGL();
 	void setMagFilter(FILTER filter);
 	void setMinFilter(FILTER filter);
 	void setWrap(WRAPPING s, WRAPPING t);
