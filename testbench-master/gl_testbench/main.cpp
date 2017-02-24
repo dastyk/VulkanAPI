@@ -67,8 +67,8 @@ void updateScene()
 	//float scale = 359.0 / scene.size();
 	float scale = 1.0;
 	// fatboy slim is a special case. outside the loop
-	translation[0] = xt[(0+shift) % (4*360)];
-	translation[1] = yt[(0+shift) % (4*360)];
+//	translation[0] = xt[(0+shift) % (4*360)];
+	//translation[1] = yt[(0+shift) % (4*360)];
 	translation[2] = -0.1;
 
 	//scene[0]->txBuffer->setData( translation, sizeof(translation), 
@@ -125,6 +125,7 @@ int initialiseTestbench()
 	std::string defineDiffColName = "#define DIFFUSE_TINT_NAME " + std::string(DIFFUSE_TINT_NAME) + "\n";
 
 	std::string defineDiffuse = "#define DIFFUSE_SLOT " + std::to_string(DIFFUSE_SLOT) + "\n";
+
 
 	std::vector<std::vector<std::string>> materialDefs = {
 		// vertex shader, fragment shader, defines
@@ -193,12 +194,12 @@ int initialiseTestbench()
 
 	// create texture
 	Texture2D* fatboy = renderer->makeTexture2D();
-//	fatboy->loadFromFile("../assets/textures/fatboy.png");
-	//fatboy->sampler = renderer->makeSampler2D();
-	//fatboy->sampler->setWrap(WRAPPING::REPEAT, WRAPPING::REPEAT);
-
+	
+	fatboy->sampler = renderer->makeSampler2D();
+	fatboy->sampler->setWrap(WRAPPING::REPEAT, WRAPPING::REPEAT);
+	fatboy->loadFromFile("../assets/textures/fatboy.png");
 	// Create a mesh array with 3 basic vertex buffers.
-	for (int i = 0; i < 2000; i++) {
+	for (int i = 0; i < 100; i++) {
 
 		Mesh* m = renderer->makeMesh();
 
@@ -209,21 +210,21 @@ int initialiseTestbench()
 		pos->bind(0, sizeof(triPos), POSITION);
 		m->addIAVertexBufferBinding(pos, 0, numberOfElements, POSITION);
 
-		//VertexBuffer* nor = renderer->makeVertexBuffer();
-		//nor->setData(triNor, sizeof(triNor), VertexBuffer::STATIC);
-		//nor->bind(0, sizeof(triNor), NORMAL);
-		//m->addIAVertexBufferBinding(nor, 0, numberOfElements, NORMAL);
+		VertexBuffer* nor = renderer->makeVertexBuffer();
+		nor->setData(triNor, sizeof(triNor), VertexBuffer::STATIC);
+		nor->bind(0, sizeof(triNor), NORMAL);
+		m->addIAVertexBufferBinding(nor, 0, numberOfElements, NORMAL);
 
-		//VertexBuffer* uvs = renderer->makeVertexBuffer();
-		//uvs->setData(triUV, sizeof(triUV), VertexBuffer::STATIC);
-		//uvs->bind(0, sizeof(triUV), TEXTCOORD);
-		//m->addIAVertexBufferBinding(uvs, 0, numberOfElements, TEXTCOORD);
+		VertexBuffer* uvs = renderer->makeVertexBuffer();
+		uvs->setData(triUV, sizeof(triUV), VertexBuffer::STATIC);
+		uvs->bind(0, sizeof(triUV), TEXTCOORD);
+		m->addIAVertexBufferBinding(uvs, 0, numberOfElements, TEXTCOORD);
 
 		// we can create a constant buffer outside the material, for example as part of the Mesh.
 		m->txBuffer = renderer->makeConstantBuffer(std::string(TRANSLATION_NAME), TRANSLATION);
-		if (i == 0) {
+		if (i == 99) {
 			m->technique = techniques[2];
-			//m->addTexture(fatboy, DIFFUSE_SLOT);
+			m->addTexture(fatboy, DIFFUSE_SLOT);
 		}
 		else 
 			m->technique = techniques[ i % 2];
