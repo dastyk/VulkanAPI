@@ -19,9 +19,10 @@ public:
 
 	VkImageView& GetImageView();
 
-	// if no sampler is set here, a default sampler should be used.
-	Sampler2D* sampler = nullptr;
+	VkSampler GetSampler()const;
 private:
+	// if no sampler is set here, a default sampler should be used.
+	
 	VkDevice* _device;
 	VkPhysicalDevice* _physDevice;
 	VkCommandBuffer* _cmdBuffer;

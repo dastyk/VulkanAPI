@@ -1,4 +1,5 @@
 #include "VulkanTexture2D.h"
+#include "VulkanSampler2D.h"
 #include <vulkan\vulkan.h>
 #ifndef STB_IMAGE_IMPLEMENTATION
 //#define STB_IMAGE_IMPLEMENTATION
@@ -90,6 +91,7 @@ int VulkanTexture2D::loadFromFile(std::string filename)
 
 	vkCreateImageView(*_device, &viewInfo, nullptr, &_imageView);
 
+	static_cast<VulkanSampler2D*>(sampler)->Make();
 
 
 	return 0;
@@ -102,6 +104,11 @@ void VulkanTexture2D::bind(unsigned int slot)
 VkImageView & VulkanTexture2D::GetImageView()
 {
 	return _imageView;
+}
+#include "VulkanSampler2D.h"
+VkSampler VulkanTexture2D::GetSampler() const
+{
+	return ((VulkanSampler2D*)sampler)->GetSampler();
 }
 
 void VulkanTexture2D::_createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage & image, VkDeviceMemory & imageMemory)

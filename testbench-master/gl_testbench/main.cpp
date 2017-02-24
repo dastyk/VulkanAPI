@@ -68,8 +68,8 @@ void updateScene()
 	//float scale = 359.0 / scene.size();
 	float scale = 1.0;
 	// fatboy slim is a special case. outside the loop
-	translation[0] = xt[(0+shift) % (4*360)];
-	translation[1] = yt[(0+shift) % (4*360)];
+//	translation[0] = xt[(0+shift) % (4*360)];
+	//translation[1] = yt[(0+shift) % (4*360)];
 	translation[2] = -0.1;
 
 	Mesh* m0 = scene[0];
@@ -116,6 +116,7 @@ int initialiseTestbench()
 	std::string defineDiffColName = "#define DIFFUSE_TINT_NAME " + std::string(DIFFUSE_TINT_NAME) + "\n";
 
 	std::string defineDiffuse = "#define DIFFUSE_SLOT " + std::to_string(DIFFUSE_SLOT) + "\n";
+
 
 	std::vector<std::vector<std::string>> materialDefs = {
 		// vertex shader, fragment shader, defines

@@ -204,6 +204,7 @@ string VulkanMaterial::_expandShaderText(const string& shaderSource, ShaderType 
 	for (auto& define : shaderDefines[type])
 	{
 		result += define;
+		printf("%s\n", define.c_str());
 	}
 	result += shaderSource;
 

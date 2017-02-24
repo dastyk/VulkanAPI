@@ -87,8 +87,7 @@ private:
 	VulkanMemAllocator* _vertexBufferAllocator;
 	VulkanMemAllocator* _constantBufferAllocator;
 	VulkanMemAllocator* _constantBufferStagingAllocator;
-
-	std::vector<StagingBuffer> _vertexStagingBuffers;
+	VulkanMemAllocator* _vertexStagingBufferAllocator;
 
 	std::vector<VulkanMesh*> drawList;
 

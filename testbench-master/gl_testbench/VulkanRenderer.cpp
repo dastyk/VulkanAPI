@@ -109,37 +109,28 @@ Mesh * VulkanRenderer::makeMesh()
 
 VertexBuffer * VulkanRenderer::makeVertexBuffer()
 {
-	VulkanVertexBuffer* vBuffer = new VulkanVertexBuffer([this](const void* data, size_t size, VkBuffer& buffer, VkBufferView& view) {
+	VulkanVertexBuffer* vBuffer = new VulkanVertexBuffer([this](const void* data, size_t size, VkBuffer& buffer, StagingBuffer& stagingBuffer) {
 
-		const auto info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT);
+		auto info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
 		VulkanHelpers::CreateBuffer(_vkDevice, info, &buffer);
 		VkMemoryRequirements pM;
 		vkGetBufferMemoryRequirements(_vkDevice, buffer, &pM);
 		_vertexBufferAllocator->AllocateBufferMemory(size, buffer);
 
+		info = &VulkanHelpers::MakeBufferCreateInfo(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-		/*Create a view for the buffer*/
-		VulkanHelpers::CreateBufferView(_vkDevice, buffer, &view, VK_FORMAT_R32G32B32A32_SFLOAT);
-
-		/*Create the staging buffer*/
-		StagingBuffer stagingBuffer;
-		VulkanHelpers::CreateBuffer(
-			_vkPhysicalDevices[0],
-			_vkDevice,
-			size,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			&stagingBuffer.buffer, &stagingBuffer.memory);
+		VulkanHelpers::CreateBuffer(_vkDevice, info, &stagingBuffer.buffer);
+		vkGetBufferMemoryRequirements(_vkDevice, stagingBuffer.buffer, &pM);
+		_vertexStagingBufferAllocator->AllocateBufferMemory(size, stagingBuffer);
 
 		vkGetBufferMemoryRequirements(_vkDevice, stagingBuffer.buffer, &pM);
 		/*Copy the data to staging*/
 		void* pData;
 		VulkanHelpers::MapMemory(_vkDevice, stagingBuffer.memory, &pData);
-		memcpy(pData, data, size);
+		memcpy((char*)pData + stagingBuffer.offset, data, size);
 		vkUnmapMemory(_vkDevice, stagingBuffer.memory);
-		_vertexStagingBuffers.push_back(stagingBuffer);
-	
+
 
 		VulkanHelpers::CopyDataBetweenBuffers(_cmdBuffers[1], stagingBuffer.buffer, 0, buffer, 0, size);
 
@@ -527,7 +518,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	VkBuffer buff;
 	auto bInfo = &VulkanHelpers::MakeBufferCreateInfo(
 		256 MB,
-		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT);
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
 
 	VulkanHelpers::CreateBuffer(_vkDevice, bInfo, &buff);
@@ -539,6 +530,15 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	vkDestroyBuffer(_vkDevice, buff, nullptr);
 	// Create the allocator
 	_vertexBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, memReq, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	bInfo = &VulkanHelpers::MakeBufferCreateInfo(
+		256 MB,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
+
+	VulkanHelpers::CreateBuffer(_vkDevice, bInfo, &buff);
+	vkGetBufferMemoryRequirements(_vkDevice, buff, &memReq);
+	vkDestroyBuffer(_vkDevice, buff, nullptr);
+	_vertexStagingBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, memReq, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 
 	bInfo = &VulkanHelpers::MakeBufferCreateInfo(
@@ -552,8 +552,6 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	// Get memory requirments
 	vkGetBufferMemoryRequirements(_vkDevice, buff, &memReq);
 	vkDestroyBuffer(_vkDevice, buff, nullptr);
-
-
 	_constantBufferAllocator = new VulkanMemAllocator(_vkPhysicalDevices[0], _vkDevice, memReq, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	
 	bInfo = &VulkanHelpers::MakeBufferCreateInfo(
@@ -578,7 +576,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	/*************Create descriptor pool**************/
 	VkDescriptorPoolSize pSize[] = {
-		{VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 3 * 10000},
+		{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 3 * 10000},
 		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2 * 10000}
 	};
 
@@ -591,21 +589,21 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	/*Create descriptor layoutbinding for each vertex buffer*/
 	bindings.push_back({
 		POSITION,
-		VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
+		VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		1,
 		VK_SHADER_STAGE_VERTEX_BIT,
 		nullptr
 	});
 	bindings.push_back({
 		NORMAL,
-		VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
+		VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		1,
 		VK_SHADER_STAGE_VERTEX_BIT,
 		nullptr
 	});
 	bindings.push_back({
 		TEXTCOORD,
-		VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
+		VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 		1,
 		VK_SHADER_STAGE_VERTEX_BIT,
 		nullptr
@@ -632,23 +630,30 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	/* Create a new descriptor pool/set layout for the texture/sampler*/
 	VkDescriptorPoolSize pSize2[] = {
-		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 * 10000}
+		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1 * 10000},
+		{ VK_DESCRIPTOR_TYPE_SAMPLER , 1*10000}
 	};
 
 
 
-	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkTextureDescriptorPool, 0, 10000, 1, pSize2);
+	VulkanHelpers::CreateDescriptorPool(_vkDevice, &_vkTextureDescriptorPool, 0, 10000, 2, pSize2);
 
 	bindings.clear();
 
 	bindings.push_back({
 		DIFFUSE_SLOT,
-		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+		VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
 		1,
 		VK_SHADER_STAGE_FRAGMENT_BIT,
 		nullptr
 	});
-
+	bindings.push_back({
+		DIFFUSE_SLOT + 1,
+		VK_DESCRIPTOR_TYPE_SAMPLER,
+		1,
+		VK_SHADER_STAGE_FRAGMENT_BIT,
+		nullptr
+	});
 	/* Create the descriptor set layout*/
 	VulkanHelpers::CreateDescriptorSetLayout(_vkDevice, &_textureSetLayout, bindings.size(), bindings.data()); 
 
@@ -738,12 +743,6 @@ void VulkanRenderer::frame()
 	const auto submitInfo = &VulkanHelpers::MakeSubmitInfo(1, &_cmdBuffers[1]);
 	VulkanHelpers::QueueSubmit(_vkMainQueue, 1, submitInfo);
 	vkQueueWaitIdle(_vkMainQueue);
-	for (auto& buffer : _vertexStagingBuffers)
-	{
-		vkFreeMemory(_vkDevice, buffer.memory, nullptr);
-		vkDestroyBuffer(_vkDevice, buffer.buffer, nullptr);
-	}
-	_vertexStagingBuffers.clear();
 
 	// Note: this is a really bad way of synchronizing frames, but for the sake
 	// of getting things running it'll suffice.
