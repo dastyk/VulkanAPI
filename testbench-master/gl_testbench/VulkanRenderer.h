@@ -81,7 +81,9 @@ private:
 	VkSemaphore _renderingComplete = VK_NULL_HANDLE;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	std::vector<VkFramebuffer> _framebuffers;
+#ifdef _DEBUG
 	VkDebugReportCallbackEXT _vkDebugCallback;
+#endif
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 
 	VulkanMemAllocator* _vertexBufferAllocator;

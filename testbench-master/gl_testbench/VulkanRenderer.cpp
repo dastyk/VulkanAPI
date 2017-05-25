@@ -14,7 +14,7 @@
 #include "VulkanSampler2D.h"
 
 #define MB *1024*1024
-
+#ifdef _DEBUG
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	VkDebugReportFlagsEXT flags,
 	VkDebugReportObjectTypeEXT objType,
@@ -45,7 +45,7 @@ void DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT
 		func(instance, callback, pAllocator);
 	}
 }
-
+#endif
 using namespace std;
 
 VulkanRenderer::VulkanRenderer()
@@ -213,19 +213,25 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	/******** Create the instance***********/
 	const std::vector<const char*> validationLayers = {
+#ifdef _DEBUG
 		"VK_LAYER_LUNARG_core_validation"
+#endif
 	};
 
-	const auto vkAppInfo = &VulkanHelpers::MakeApplicationInfo(
+	const auto vkAppInfo = VulkanHelpers::MakeApplicationInfo(
 		"Vulkan Renderer",
 		VK_MAKE_VERSION(1, 0, 0),
 		"Frengine",
 		VK_MAKE_VERSION(1, 0, 0)
 	);
-	std::array<const char*, 3> extensions = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME};
+	std::vector<const char*> extensions = { "VK_KHR_surface", "VK_KHR_win32_surface"
+#ifdef _DEBUG
+		, VK_EXT_DEBUG_REPORT_EXTENSION_NAME
+#endif
+	};
 	const auto vkInstCreateInfo = VulkanHelpers::MakeInstanceCreateInfo(
 		0,
-		vkAppInfo,
+		&vkAppInfo,
 		validationLayers.size(),
 		validationLayers.data(),
 		nullptr,
@@ -237,6 +243,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	VulkanHelpers::CreateInstance(&vkInstCreateInfo, &_vkInstance);
 
 
+#ifdef _DEBUG
 	/*Create debug callback*/
 	VkDebugReportCallbackCreateInfoEXT createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
@@ -247,6 +254,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 	if (CreateDebugReportCallbackEXT(_vkInstance, &createInfo, nullptr, &_vkDebugCallback) != VK_SUCCESS) {
 		throw std::runtime_error("failed to set up debug callback!");
 	}
+#endif
 
 
 
@@ -266,11 +274,11 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 	requiredFeatures.multiDrawIndirect = supportedFeatures.multiDrawIndirect;
 
-	const auto deviceQueueCreateInfo = &VulkanHelpers::MakeDeviceQueueCreateInfo(0, 1);
+	const auto deviceQueueCreateInfo = VulkanHelpers::MakeDeviceQueueCreateInfo(0, 1);
 	std::array<const char*, 1> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-	const auto deviceCreateInfo = &VulkanHelpers::MakeDeviceCreateInfo(
+	const auto deviceCreateInfo = VulkanHelpers::MakeDeviceCreateInfo(
 		1,
-		deviceQueueCreateInfo,
+		&deviceQueueCreateInfo,
 		0,
 		nullptr,
 		nullptr,
@@ -285,7 +293,7 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 
-	VulkanHelpers::CreateLogicDevice(_vkPhysicalDevices[0], deviceCreateInfo, &_vkDevice);
+	VulkanHelpers::CreateLogicDevice(_vkPhysicalDevices[0], &deviceCreateInfo, &_vkDevice);
 
 
 
@@ -302,8 +310,8 @@ int VulkanRenderer::initialize(unsigned int width, unsigned int height)
 
 
 	/***********Create command pool******************/
-	const auto cmdPoolInfo = &VulkanHelpers::MakeCommandPoolCreateInfo(0, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-	VulkanHelpers::CreateCommandPool(_vkDevice, cmdPoolInfo, &_vkCmdPool);
+	auto cmdPoolInfo = VulkanHelpers::MakeCommandPoolCreateInfo(0, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, nullptr);
+	VulkanHelpers::CreateCommandPool(_vkDevice, &cmdPoolInfo, &_vkCmdPool);
 
 
 
@@ -699,7 +707,9 @@ int VulkanRenderer::shutdown()
 	vkDestroyCommandPool(_vkDevice, _vkCmdPool, nullptr);
 	vkDestroyDevice(_vkDevice, nullptr);
 	vkDestroySurfaceKHR(_vkInstance, _vkSurface, nullptr);
+#ifdef _DEBUG
 	DestroyDebugReportCallbackEXT(_vkInstance, _vkDebugCallback, nullptr);
+#endif
 	vkDestroyInstance(_vkInstance, nullptr);
 	SDL_Quit();
 	return 0;
